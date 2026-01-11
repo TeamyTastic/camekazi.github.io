@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ewan's Tools</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --text: #1f2937;
+            --text-muted: #6b7280;
+            --bg: #f9fafb;
+            --card-bg: #ffffff;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-muted);
+        }
+
+        .recent {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .recent h2 {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .recent ul {
+            list-style: none;
+        }
+
+        .recent li {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 0.25rem 0;
+        }
+
+        .recent .date {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        section {
+            margin-bottom: 2rem;
+        }
+
+        section h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .tools {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .tool {
+            display: flex;
+            gap: 0.75rem;
+            align-items: baseline;
+        }
+
+        .tool a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .tool a:hover {
+            text-decoration: underline;
+        }
+
+        .tool .desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .tool .tag {
+            font-size: 0.7rem;
+            background: var(--border);
+            color: var(--text-muted);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+        }
+
+        footer {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--primary);
+        }
+
+        @media (max-width: 600px) {
+            .tool {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+
+            .recent li {
+                flex-direction: column;
+                gap: 0.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Ewan's Tools</h1>
+        <p>HTML/JavaScript tools and apps, mostly built with AI assistance</p>
+    </header>
+
+    <div class="recent">
+        <h2>Recently Added</h2>
+        <ul>
+            <li>
+                <a href="https://camekazi.github.io/recipe-timer/guideflow.html">GuideFlow</a>
+                <span class="date">Jan 2026</span>
+            </li>
+            <li>
+                <a href="https://camekazi.github.io/cableloop/">CableLoop</a>
+                <span class="date">Jan 2026</span>
+            </li>
+        </ul>
+    </div>
+
+    <section>
+        <h2>Productivity & Guides</h2>
+        <div class="tools">
+            <div class="tool">
+                <a href="https://camekazi.github.io/recipe-timer/guideflow.html">GuideFlow</a>
+                <span class="desc">Transform any URL or photo into a step-by-step visual guide using Claude Vision</span>
+            </div>
+            <div class="tool">
+                <a href="https://camekazi.github.io/recipe-timer/">Recipe Timer</a>
+                <span class="desc">Visual cooking timer with step tracking and elapsed time</span>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Health & Fitness</h2>
+        <div class="tools">
+            <div class="tool">
+                <a href="https://camekazi.github.io/ewans-exercises/">Ewan's Exercises</a>
+                <span class="desc">Strength training workout tracker PWA with structured programs</span>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Sustainability</h2>
+        <div class="tools">
+            <div class="tool">
+                <a href="https://camekazi.github.io/cableloop/">CableLoop</a>
+                <span class="desc">Cable recycling finder and community exchange platform</span>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>AI & Development</h2>
+        <div class="tools">
+            <div class="tool">
+                <a href="https://github.com/Camekazi/ReadingCompanion">ReadingCompanion</a>
+                <span class="desc">iOS app with Claude for passage explanations and spoiler-free character queries</span>
+                <span class="tag">iOS</span>
+            </div>
+            <div class="tool">
+                <a href="https://github.com/Camekazi">Claude Code Learning System</a>
+                <span class="desc">Personal skill library with 68+ skills, commands, agents, and compounding learning hooks</span>
+                <span class="tag">CLI</span>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>Built with Claude Code &middot; <a href="https://github.com/Camekazi">GitHub</a></p>
+    </footer>
+</body>
+</html>
