@@ -205,12 +205,11 @@
     </header>
 
     <nav style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; font-size: 0.85rem;">
-        <a href="#research" style="padding: 0.35rem 0.75rem; background: var(--primary); color: white; border-radius: 4px; text-decoration: none;">Research</a>
+        <a href="#learning-system" style="padding: 0.35rem 0.75rem; background: var(--primary); color: white; border-radius: 4px; text-decoration: none;">Learning System</a>
+        <a href="#research" style="padding: 0.35rem 0.75rem; background: var(--border); color: var(--text); border-radius: 4px; text-decoration: none;">Research</a>
         <a href="#leadership" style="padding: 0.35rem 0.75rem; background: var(--border); color: var(--text); border-radius: 4px; text-decoration: none;">Leadership</a>
         <a href="#ai-dev" style="padding: 0.35rem 0.75rem; background: var(--border); color: var(--text); border-radius: 4px; text-decoration: none;">AI & Dev</a>
         <a href="#insights" style="padding: 0.35rem 0.75rem; background: var(--border); color: var(--text); border-radius: 4px; text-decoration: none;">Insights</a>
-        <a href="#productivity" style="padding: 0.35rem 0.75rem; background: var(--border); color: var(--text); border-radius: 4px; text-decoration: none;">Productivity</a>
-        <a href="#lifestyle" style="padding: 0.35rem 0.75rem; background: var(--border); color: var(--text); border-radius: 4px; text-decoration: none;">Lifestyle</a>
         <a href="#home" style="padding: 0.35rem 0.75rem; background: var(--border); color: var(--text); border-radius: 4px; text-decoration: none;">Home</a>
     </nav>
 
@@ -230,7 +229,7 @@
                 <span class="date">Jan 2026</span>
             </li>
             <li>
-                <a href="#agent-improvement">Agent Self-Improvement System</a>
+                <a href="#learning-system">Claude Code Learning System</a>
                 <span class="date">Jan 2026</span>
             </li>
             <li>
@@ -243,6 +242,35 @@
             </li>
         </ul>
     </div>
+
+    <section id="learning-system">
+        <h2>Claude Code Learning System</h2>
+        <div class="tools">
+            <div class="tool featured">
+                <a href="https://github.com/Camekazi/.claude">Compounding Learning System</a>
+                <span class="desc">Built on one question: <em>"Did the system learn, or did I just get through today?"</em></span>
+                <span class="tag tag-cli">CLI</span>
+            </div>
+            <div class="tool featured" id="agent-improvement">
+                <a href="https://github.com/Camekazi/.claude">Agent Self-Improvement</a>
+                <span class="desc">AI agents that propose and track their own improvements — writes proposals to staging, humans approve via review workflow</span>
+                <span class="tag tag-skill">Claude Code</span>
+            </div>
+        </div>
+        <div class="learning-system-details" style="margin-top: 1rem; padding: 1rem; background: var(--bg); border-radius: 6px; font-size: 0.9rem;">
+            <p style="margin-bottom: 0.75rem;"><strong>Philosophy:</strong> Every interaction should make future interactions better. Capture what worked AND failed, grep when needed, delete what's stale.</p>
+            <p style="margin-bottom: 0.75rem;"><strong>How it works:</strong></p>
+            <ul style="margin-left: 1.25rem; color: var(--text-muted);">
+                <li><strong>Friction detection</strong> — <code>/hookify</code> analyzes conversations for corrections and frustration, then proposes prevention rules automatically</li>
+                <li><strong>Pattern promotion</strong> — Observations that recur 3+ times get promoted to rules, skills, or agents</li>
+                <li><strong>Agent self-improvement</strong> — Domain agents propose their own improvements based on session patterns; humans approve via <code>/review-improvements</code></li>
+                <li><strong>Coached-thinker mode</strong> — Nudges toward action over analysis paralysis; asks "What's the smallest step?" not "Have you considered..."</li>
+                <li><strong>Domain agents</strong> — Immunity to Change coaching (Kegan), systems thinking (Meadows), organizational sensemaking (Cynefin + Estuarine)</li>
+                <li><strong>68+ skills</strong> — JTBD, ONA network analysis, Wardley Maps, financial modeling, stakeholder analysis, and more</li>
+            </ul>
+            <p style="margin-top: 0.75rem; color: var(--text-muted);">Two files. Simple format. Grep to search. Built for individuals and teams who want to systematize expertise instead of rediscovering it.</p>
+        </div>
+    </section>
 
     <section id="research">
         <h2>Business Intelligence & Research</h2>
@@ -317,29 +345,6 @@
                 <span class="desc">Query Google NotebookLM from Claude Code — citation-backed research answers grounded exclusively in your uploaded documents</span>
                 <span class="tag tag-skill">Claude Code Skill</span>
             </div>
-            <div class="tool featured" id="agent-improvement">
-                <a href="https://github.com/Camekazi/.claude">Agent Self-Improvement System</a>
-                <span class="desc">AI agents that propose and track their own improvements — writes proposals to staging, humans approve via review workflow</span>
-                <span class="tag tag-skill">Claude Code</span>
-            </div>
-            <div class="tool featured">
-                <a href="https://github.com/Camekazi/.claude">Claude Code Learning System</a>
-                <span class="desc">A compounding learning system built on one question: <em>"Did the system learn, or did I just get through today?"</em></span>
-                <span class="tag tag-cli">CLI</span>
-            </div>
-        </div>
-        <div class="learning-system-details" style="margin-top: 1rem; padding: 1rem; background: var(--bg); border-radius: 6px; font-size: 0.9rem;">
-            <p style="margin-bottom: 0.75rem;"><strong>Philosophy:</strong> Every interaction should make future interactions better. Capture what worked AND failed, grep when needed, delete what's stale.</p>
-            <p style="margin-bottom: 0.75rem;"><strong>How it works:</strong></p>
-            <ul style="margin-left: 1.25rem; color: var(--text-muted);">
-                <li><strong>Friction detection</strong> — <code>/hookify</code> analyzes conversations for corrections and frustration, then proposes prevention rules automatically</li>
-                <li><strong>Pattern promotion</strong> — Observations that recur 3+ times get promoted to rules, skills, or agents</li>
-                <li><strong>Agent self-improvement</strong> — Domain agents propose their own improvements based on session patterns; humans approve via <code>/review-improvements</code></li>
-                <li><strong>Coached-thinker mode</strong> — Nudges toward action over analysis paralysis; asks "What's the smallest step?" not "Have you considered..."</li>
-                <li><strong>Domain agents</strong> — Immunity to Change coaching (Kegan), systems thinking (Meadows), organizational sensemaking (Cynefin + Estuarine)</li>
-                <li><strong>68+ skills</strong> — JTBD, ONA network analysis, Wardley Maps, financial modeling, stakeholder analysis, and more</li>
-            </ul>
-            <p style="margin-top: 0.75rem; color: var(--text-muted);">Two files. Simple format. Grep to search. Built for individuals and teams who want to systematize expertise instead of rediscovering it.</p>
         </div>
     </section>
 
