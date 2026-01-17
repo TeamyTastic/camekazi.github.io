@@ -369,6 +369,9 @@
             <li class="insight"><strong>After 3 failed fixes, disable and move on</strong> — Know when to stop debugging. Revisit with fresh context later.</li>
             <li class="insight"><strong>Inject domain context into prompts</strong> — "DO NOT suggest X for these items" prevents obvious mistakes. LLMs need explicit exclusions.</li>
             <li class="insight"><strong>Check native before customizing</strong> — Query the changelog first. The feature you're building might already exist.</li>
+            <li class="insight"><strong>Features are prompts, tools are primitives</strong> — Define outcomes in natural language. Tools provide capability, not behavior. <code>read_file</code> not <code>analyze_document</code>.</li>
+            <li class="insight"><strong>Agent-user parity</strong> — Whatever the user can do, the agent can do. Whatever the user can see, the agent can see. No hidden state.</li>
+            <li class="insight"><strong>Don't LLM what regex can do</strong> — Use deterministic handling for structured inputs. Save the LLM for genuinely ambiguous cases.</li>
         </ol>
     </section>
 
