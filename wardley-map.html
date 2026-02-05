@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wardley Map - Coffee Shop Business Model</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #2C3E50;
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .subtitle {
+            color: #7F8C8D;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .map-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 24px;
+            overflow-x: auto;
+        }
+
+        svg {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .axis-label {
+            font-size: 12px;
+            fill: #2C3E50;
+            font-weight: 500;
+        }
+
+        .stage-label {
+            font-size: 11px;
+            fill: #5D6D7E;
+        }
+
+        .component-label {
+            font-size: 10px;
+            fill: #2C3E50;
+            pointer-events: none;
+        }
+
+        .dependency-line {
+            stroke: #BDC3C7;
+            stroke-width: 1.5;
+            stroke-dasharray: 4,3;
+            fill: none;
+        }
+
+        .grid-line {
+            stroke: #ECF0F1;
+            stroke-width: 1;
+        }
+
+        .axis-line {
+            stroke: #2C3E50;
+            stroke-width: 2;
+        }
+
+        .component-node {
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .component-node:hover {
+            transform: scale(1.15);
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #ECF0F1;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #5D6D7E;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.user-facing { background: #D35400; }
+        .legend-dot.custom { background: #8E44AD; }
+        .legend-dot.infrastructure { background: #5D6D7E; }
+        .legend-dot.commodity { background: #34495E; }
+        .legend-dot.evolving {
+            background: #8E44AD;
+            border: 2px solid #E74C3C;
+        }
+
+        .annotation {
+            font-size: 10px;
+            fill: #7F8C8D;
+            font-style: italic;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: #2C3E50;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 100;
+            max-width: 200px;
+        }
+
+        .tooltip.visible {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 1.25rem; }
+            .subtitle { font-size: 0.8rem; }
+            .map-container { padding: 16px; }
+            .legend { flex-direction: column; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Coffee Shop Business Model</h1>
+        <p class="subtitle">Wardley Map · Strategic Analysis</p>
+
+        <div class="map-container">
+            <svg id="wardley-map" viewBox="0 0 900 550" preserveAspectRatio="xMidYMid meet">
+                <!-- Definitions for markers -->
+                <defs>
+                    <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                        <polygon points="0 0, 6 3, 0 6" fill="#BDC3C7"/>
+                    </marker>
+                </defs>
+
+                <!-- Background grid -->
+                <g class="grid">
+                    <!-- Vertical grid lines (evolution stages) -->
+                    <line class="grid-line" x1="100" y1="50" x2="100" y2="450"/>
+                    <line class="grid-line" x1="300" y1="50" x2="300" y2="450"/>
+                    <line class="grid-line" x1="500" y1="50" x2="500" y2="450"/>
+                    <line class="grid-line" x1="700" y1="50" x2="700" y2="450"/>
+                    <line class="grid-line" x1="850" y1="50" x2="850" y2="450"/>
+
+                    <!-- Horizontal grid lines -->
+                    <line class="grid-line" x1="100" y1="150" x2="850" y2="150"/>
+                    <line class="grid-line" x1="100" y1="250" x2="850" y2="250"/>
+                    <line class="grid-line" x1="100" y1="350" x2="850" y2="350"/>
+                </g>
+
+                <!-- Axes -->
+                <g class="axes">
+                    <line class="axis-line" x1="100" y1="450" x2="850" y2="450"/>
+                    <line class="axis-line" x1="100" y1="50" x2="100" y2="450"/>
+
+                    <!-- Axis labels -->
+                    <text class="axis-label" x="475" y="495" text-anchor="middle">Evolution →</text>
+                    <text class="axis-label" x="40" y="250" text-anchor="middle" transform="rotate(-90, 40, 250)">Visibility ↑</text>
+
+                    <!-- Stage labels -->
+                    <text class="stage-label" x="175" y="475" text-anchor="middle">Genesis</text>
+                    <text class="stage-label" x="350" y="475" text-anchor="middle">Custom</text>
+                    <text class="stage-label" x="550" y="475" text-anchor="middle">Product</text>
+                    <text class="stage-label" x="775" y="475" text-anchor="middle">Commodity</text>
+
+                    <!-- Visibility labels -->
+                    <text class="stage-label" x="85" y="75" text-anchor="end">High</text>
+                    <text class="stage-label" x="85" y="440" text-anchor="end">Low</text>
+                </g>
+
+                <!-- Dependencies will be rendered by JS -->
+                <g id="dependencies"></g>
+
+                <!-- Components will be rendered by JS -->
+                <g id="components"></g>
+
+                <!-- Annotations -->
+                <g class="annotations">
+                    <text class="annotation" x="280" y="390">Opportunity: Standardize barista training</text>
+                    <text class="annotation" x="480" y="380">Evolution: Mobile ordering → commodity</text>
+                </g>
+            </svg>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-dot user-facing"></div>
+                    <span>User-Facing</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot custom"></div>
+                    <span>Custom/Differentiator</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot infrastructure"></div>
+                    <span>Infrastructure</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot commodity"></div>
+                    <span>Commodity</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot evolving"></div>
+                    <span>Actively Evolving</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        // Map dimensions
+        const MAP = {
+            left: 100,
+            right: 850,
+            top: 50,
+            bottom: 450,
+            get width() { return this.right - this.left; },
+            get height() { return this.bottom - this.top; }
+        };
+
+        // Colors
+        const COLORS = {
+            userFacing: '#D35400',
+            custom: '#8E44AD',
+            infrastructure: '#5D6D7E',
+            commodity: '#34495E',
+            evolving: '#E74C3C'
+        };
+
+        // Components: name, visibility (0-1), evolution (0-1), type, evolving
+        const components = [
+            { name: "Customer", visibility: 0.95, evolution: 0.77, type: "userFacing", evolving: false },
+            { name: "Cup of Coffee", visibility: 0.88, evolution: 0.70, type: "userFacing", evolving: false },
+            { name: "Comfortable Seating", visibility: 0.82, evolution: 0.58, type: "userFacing", evolving: false },
+            { name: "WiFi", visibility: 0.78, evolution: 0.92, type: "commodity", evolving: false },
+            { name: "Mobile Ordering", visibility: 0.72, evolution: 0.62, type: "custom", evolving: true },
+            { name: "Barista Skills", visibility: 0.68, evolution: 0.38, type: "custom", evolving: true },
+            { name: "Brand Experience", visibility: 0.75, evolution: 0.48, type: "custom", evolving: false },
+            { name: "Coffee Beans", visibility: 0.55, evolution: 0.55, type: "infrastructure", evolving: false },
+            { name: "Brewing Equipment", visibility: 0.52, evolution: 0.70, type: "infrastructure", evolving: false },
+            { name: "Milk & Syrups", visibility: 0.50, evolution: 0.82, type: "infrastructure", evolving: false },
+            { name: "POS System", visibility: 0.45, evolution: 0.88, type: "commodity", evolving: false },
+            { name: "Location/Rent", visibility: 0.48, evolution: 0.52, type: "infrastructure", evolving: false },
+            { name: "Supplier Network", visibility: 0.40, evolution: 0.45, type: "infrastructure", evolving: false },
+            { name: "Inventory Mgmt", visibility: 0.38, evolution: 0.65, type: "infrastructure", evolving: false },
+            { name: "Electricity", visibility: 0.25, evolution: 0.95, type: "commodity", evolving: false },
+            { name: "Water Supply", visibility: 0.22, evolution: 0.96, type: "commodity", evolving: false }
+        ];
+
+        // Dependencies: [from, to]
+        const dependencies = [
+            ["Customer", "Cup of Coffee"],
+            ["Customer", "Comfortable Seating"],
+            ["Customer", "WiFi"],
+            ["Customer", "Mobile Ordering"],
+            ["Cup of Coffee", "Barista Skills"],
+            ["Cup of Coffee", "Coffee Beans"],
+            ["Cup of Coffee", "Brewing Equipment"],
+            ["Cup of Coffee", "Milk & Syrups"],
+            ["Barista Skills", "Brewing Equipment"],
+            ["Brewing Equipment", "Electricity"],
+            ["Brewing Equipment", "Water Supply"],
+            ["Coffee Beans", "Supplier Network"],
+            ["Milk & Syrups", "Supplier Network"],
+            ["Mobile Ordering", "POS System"],
+            ["POS System", "Electricity"],
+            ["Comfortable Seating", "Location/Rent"],
+            ["Brand Experience", "Barista Skills"],
+            ["Brand Experience", "Mobile Ordering"],
+            ["Inventory Mgmt", "Supplier Network"]
+        ];
+
+        // Helper functions
+        function mapX(evolution) {
+            return MAP.left + (evolution * MAP.width);
+        }
+
+        function mapY(visibility) {
+            return MAP.bottom - (visibility * MAP.height);
+        }
+
+        function getComponentPos(name) {
+            const comp = components.find(c => c.name === name);
+            if (comp) {
+                return { x: mapX(comp.evolution), y: mapY(comp.visibility) };
+            }
+            return null;
+        }
+
+        function getColor(type) {
+            return COLORS[type] || COLORS.infrastructure;
+        }
+
+        // Render dependencies
+        function renderDependencies() {
+            const group = document.getElementById('dependencies');
+
+            dependencies.forEach(([from, to]) => {
+                const fromPos = getComponentPos(from);
+                const toPos = getComponentPos(to);
+
+                if (fromPos && toPos) {
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('class', 'dependency-line');
+                    line.setAttribute('x1', fromPos.x);
+                    line.setAttribute('y1', fromPos.y);
+                    line.setAttribute('x2', toPos.x);
+                    line.setAttribute('y2', toPos.y);
+                    group.appendChild(line);
+                }
+            });
+        }
+
+        // Render components
+        function renderComponents() {
+            const group = document.getElementById('components');
+            const tooltip = document.getElementById('tooltip');
+
+            components.forEach(comp => {
+                const x = mapX(comp.evolution);
+                const y = mapY(comp.visibility);
+                const color = getColor(comp.type);
+
+                // Create group for component
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.setAttribute('class', 'component-node');
+                g.setAttribute('data-name', comp.name);
+                g.setAttribute('transform', `translate(${x}, ${y})`);
+
+                // Circle
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('r', '10');
+                circle.setAttribute('fill', color);
+                circle.setAttribute('stroke', comp.evolving ? COLORS.evolving : 'white');
+                circle.setAttribute('stroke-width', comp.evolving ? '3' : '2');
+                g.appendChild(circle);
+
+                // Label - position based on visibility
+                const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                label.setAttribute('class', 'component-label');
+                label.setAttribute('text-anchor', 'middle');
+                label.setAttribute('y', comp.visibility > 0.9 ? 22 : -14);
+                label.textContent = comp.name;
+                g.appendChild(label);
+
+                // Tooltip interaction
+                g.addEventListener('mouseenter', (e) => {
+                    const stage = getEvolutionStage(comp.evolution);
+                    tooltip.innerHTML = `<strong>${comp.name}</strong><br>
+                        Evolution: ${stage}<br>
+                        Visibility: ${(comp.visibility * 100).toFixed(0)}%
+                        ${comp.evolving ? '<br><em>Actively evolving</em>' : ''}`;
+                    tooltip.classList.add('visible');
+                });
+
+                g.addEventListener('mousemove', (e) => {
+                    tooltip.style.left = (e.pageX + 12) + 'px';
+                    tooltip.style.top = (e.pageY + 12) + 'px';
+                });
+
+                g.addEventListener('mouseleave', () => {
+                    tooltip.classList.remove('visible');
+                });
+
+                group.appendChild(g);
+            });
+        }
+
+        function getEvolutionStage(evolution) {
+            if (evolution < 0.25) return 'Genesis';
+            if (evolution < 0.5) return 'Custom Built';
+            if (evolution < 0.75) return 'Product';
+            return 'Commodity';
+        }
+
+        // Initialize
+        renderDependencies();
+        renderComponents();
+    </script>
+</body>
+</html>
