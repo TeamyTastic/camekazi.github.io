@@ -32,6 +32,7 @@
             --serve: #F59E0B;
             --change: #059669;
             --warning: #F59E0B;
+            --ai: #0891B2;
         }
 
         * {
@@ -516,6 +517,128 @@
             margin-bottom: 8px;
         }
 
+        /* AI Tab styling */
+        .nav-btn.ai-tab {
+            border-color: var(--ai);
+            color: var(--ai);
+        }
+
+        .nav-btn.ai-tab.active {
+            background: var(--ai);
+            border-color: var(--ai);
+            color: white;
+        }
+
+        /* Role cards grid */
+        .roles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .role-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.2s;
+            box-shadow: 0px 4px 12px rgba(49, 95, 99, 0.08);
+        }
+
+        .role-card:hover {
+            border-color: var(--ai);
+            transform: translateY(-2px);
+        }
+
+        .role-icon { font-size: 1.5rem; margin-bottom: 8px; }
+        .role-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 4px; }
+        .role-desc { font-size: 0.75rem; color: var(--text-muted); }
+
+        .role-badge {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        .role-badge.human { background: rgba(245, 158, 11, 0.2); color: var(--serve); }
+        .role-badge.ai { background: rgba(8, 145, 178, 0.2); color: var(--ai); }
+        .role-badge.either { background: rgba(23, 10, 240, 0.2); color: var(--primary); }
+
+        /* Warning sticker */
+        .warning-sticker {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            box-shadow: 0px 4px 12px rgba(49, 95, 99, 0.08);
+        }
+
+        .warning-icon { font-size: 1.5rem; flex-shrink: 0; }
+        .warning-content h4 { font-weight: 600; margin-bottom: 4px; }
+        .warning-content p { font-size: 0.9rem; margin-bottom: 8px; }
+        .warning-antidote { color: var(--change); font-size: 0.85rem; font-weight: 500; }
+
+        /* Even/Over table */
+        .even-over-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .even-over-table th {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .even-over-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .even-over-table .even { color: var(--change); font-weight: 600; }
+        .even-over-table .over { color: var(--text-muted); }
+        .even-over-table .bites { color: var(--warning); font-size: 0.85rem; }
+
+        /* AI alert box */
+        .ai-alert {
+            background: linear-gradient(135deg, rgba(8, 145, 178, 0.08), rgba(23, 10, 240, 0.05));
+            border: 2px solid var(--ai);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .ai-alert-title {
+            color: var(--ai);
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Trickster card */
+        .trickster-card {
+            background: linear-gradient(135deg, var(--primary-light), #f0e6ff);
+            border: 2px solid #9b59b6;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
         /* Footer */
         footer {
             text-align: center;
@@ -563,11 +686,13 @@
 
     <nav>
         <button class="nav-btn active" data-section="diagnosis">Diagnosis</button>
+        <button class="nav-btn" data-section="value">Value</button>
         <button class="nav-btn" data-section="strategy">Strategy</button>
         <button class="nav-btn" data-section="tactics">Tactics</button>
-        <button class="nav-btn" data-section="experiment">Experiment Design</button>
+        <button class="nav-btn ai-tab" data-section="ai-collab">+ AI Collab</button>
+        <button class="nav-btn" data-section="experiment">Experiment</button>
         <button class="nav-btn" data-section="pilot">8-Week Cycle</button>
-        <button class="nav-btn" data-section="ai-research">AI + Mob</button>
+        <button class="nav-btn" data-section="inspiration">Inspiration</button>
     </nav>
 
     <div class="container">
@@ -720,6 +845,43 @@
             <div class="quote-block" style="margin-top: 20px; border-left-color: var(--change);">
                 <p class="quote-text">"You can't directly change what people believe (Midnight) or what strategy says (Sunlight). You can only change how work actually gets done (Twilight). Change the rituals, and the beliefs follow."</p>
                 <p class="quote-source">The Ready - Depthfinding</p>
+            </div>
+        </section>
+
+        <!-- VALUE - WHY MOB PROGRAMMING -->
+        <section id="value">
+            <h2>Why Mob Programming?</h2>
+
+            <h3>The Business Case (5 Whys)</h3>
+            <div class="card" style="border-left: 4px solid var(--primary);">
+                <p style="color: var(--text); margin: 0; font-size: 0.95rem;">
+                    <strong>Mob programming with AI</strong> → shared understanding + faster output<br>
+                    → <em>breaks silos in product teams</em><br>
+                    → <em>team can maintain MORE apps (4 → 8+)</em><br>
+                    → <em>more experiments in play = more chances to win</em><br>
+                    → <strong>revenue diversification in competitive marketplaces</strong>
+                </p>
+            </div>
+
+            <h3>What Mob Programming Actually Solves</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                <div class="card" style="border-left: 3px solid var(--run);">
+                    <h4 style="color: var(--run); margin-bottom: 8px;">🔴 Knowledge Silos</h4>
+                    <p style="font-size: 0.9rem; color: var(--text-muted);">One person per app = brittle operating system. Bus factor of 1. Context switching hell when context drifts.</p>
+                </div>
+                <div class="card" style="border-left: 3px solid var(--serve);">
+                    <h4 style="color: var(--serve); margin-bottom: 8px;">🟡 Invisible Serve Work</h4>
+                    <p style="font-size: 0.9rem; color: var(--text-muted);">Integration, standards, team coherence—absorbed by heroes. Unmeasured, unrewarded, until it stops.</p>
+                </div>
+                <div class="card" style="border-left: 3px solid var(--change);">
+                    <h4 style="color: var(--change); margin-bottom: 8px;">🟢 Learning at Speed</h4>
+                    <p style="font-size: 0.9rem; color: var(--text-muted);">Ecosystem changes daily. Can't learn fast enough alone. Collective brain closes concept-to-cash faster.</p>
+                </div>
+            </div>
+
+            <div class="quote-block" style="margin-top: 24px; border-left-color: var(--primary);">
+                <p class="quote-text">"Not just for the new shiny stuff. High value for legacy maintenance and bug fixes where context has drifted."</p>
+                <p class="quote-source">Key reframe</p>
             </div>
         </section>
 
@@ -1119,9 +1281,150 @@
             </div>
         </section>
 
-        <!-- AI + MOB RESEARCH -->
-        <section id="ai-research">
-            <h2>AI + Mob: The Research</h2>
+        <!-- AI COLLABORATION -->
+        <section id="ai-collab">
+            <h2>AI-Collaborative Mobbing</h2>
+
+            <div class="ai-alert">
+                <div class="ai-alert-title">🤖 New Pattern: Humans + AI</div>
+                <p>When AI joins the mob, the dynamics shift. You're now "co-working on prompt engineering" — with AI as a participant, not just a tool.</p>
+            </div>
+
+            <h3>The 5 Roles</h3>
+            <p>Any of these can be human OR AI. Assign explicitly before starting.</p>
+
+            <div class="roles-grid">
+                <div class="role-card">
+                    <div class="role-icon">🎮</div>
+                    <div class="role-name">Driver</div>
+                    <div class="role-desc">Presses buttons, types prompts</div>
+                    <span class="role-badge human">Human</span>
+                </div>
+                <div class="role-card">
+                    <div class="role-icon">🎯</div>
+                    <div class="role-name">Facilitator</div>
+                    <div class="role-desc">Process, time, "are we stuck?"</div>
+                    <span class="role-badge either">Either</span>
+                </div>
+                <div class="role-card">
+                    <div class="role-icon">🧠</div>
+                    <div class="role-name">SME</div>
+                    <div class="role-desc">Business context AI lacks</div>
+                    <span class="role-badge human">Human</span>
+                </div>
+                <div class="role-card">
+                    <div class="role-icon">🔴</div>
+                    <div class="role-name">Red Team</div>
+                    <div class="role-desc">Critique output, poke holes</div>
+                    <span class="role-badge ai">AI excels</span>
+                </div>
+                <div class="role-card">
+                    <div class="role-icon">🎪</div>
+                    <div class="role-name">Outcome Keeper</div>
+                    <div class="role-desc">Stay on mission, prevent tangents</div>
+                    <span class="role-badge either">Either</span>
+                </div>
+            </div>
+
+            <h3>Ground Rules</h3>
+            <ul class="checklist">
+                <li>
+                    <span class="check-box" onclick="toggleCheck(this)"></span>
+                    <span><strong>Get on the pitch:</strong> Both people contribute, no sideline spectators</span>
+                </li>
+                <li>
+                    <span class="check-box" onclick="toggleCheck(this)"></span>
+                    <span><strong>Deliberateness over impulsiveness:</strong> "Read it twice before we hit the button"</span>
+                </li>
+                <li>
+                    <span class="check-box" onclick="toggleCheck(this)"></span>
+                    <span><strong>Chatham House rules:</strong> What stays here, stays here (recontract before sharing)</span>
+                </li>
+                <li>
+                    <span class="check-box" onclick="toggleCheck(this)"></span>
+                    <span><strong>Playful/experimental:</strong> Not too rigid — we're still learning</span>
+                </li>
+            </ul>
+
+            <h3>Warning Stickers</h3>
+            <p>Name your own risks before starting:</p>
+
+            <div class="warning-sticker">
+                <span class="warning-icon">⚠️</span>
+                <div class="warning-content">
+                    <h4>Systems Thinker</h4>
+                    <p>Sees all angles, which can lead to analysis paralysis.</p>
+                    <span class="warning-antidote">Antidote: Force action. Set a timer.</span>
+                </div>
+            </div>
+
+            <div class="warning-sticker">
+                <span class="warning-icon">⚠️</span>
+                <div class="warning-content">
+                    <h4>Engineer/Builder</h4>
+                    <p>Impatient, wants to build not plan. (The "Rimmer revision plan" risk.)</p>
+                    <span class="warning-antidote">Antidote: Slow down. Check twice.</span>
+                </div>
+            </div>
+
+            <h3>When to Use: Even/Over</h3>
+            <p>AI mob programming is biased toward:</p>
+
+            <table class="even-over-table">
+                <thead>
+                    <tr>
+                        <th>Even</th>
+                        <th>Over</th>
+                        <th>When It Bites</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="even">Shared understanding</td>
+                        <td class="over">Individual speed</td>
+                        <td class="bites">When deadline trumps learning</td>
+                    </tr>
+                    <tr>
+                        <td class="even">Exploration</td>
+                        <td class="over">Execution</td>
+                        <td class="bites">When you already know the answer</td>
+                    </tr>
+                    <tr>
+                        <td class="even">Deliberateness</td>
+                        <td class="over">Velocity</td>
+                        <td class="bites">When "good enough" beats perfect</td>
+                    </tr>
+                    <tr>
+                        <td class="even">Multiple perspectives</td>
+                        <td class="over">Single ownership</td>
+                        <td class="bites">When too many cooks slow the kitchen</td>
+                    </tr>
+                    <tr>
+                        <td class="even">Context rebuilding</td>
+                        <td class="over">Fresh starts</td>
+                        <td class="bites">When legacy context isn't worth preserving</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>🎭 Trickster Move</h3>
+            <div class="trickster-card">
+                <p style="color: var(--text); margin: 0; font-size: 1rem;">
+                    <strong>Instead of asking:</strong> "Should we mob this?"<br><br>
+                    <strong>Change the ritual:</strong> "The mob slot is blocked. Cancel if no one has a stuck problem to bring."<br><br>
+                    <em style="color: #9b59b6;">Changes opt-in to opt-out. The default is now collaboration.</em>
+                </p>
+            </div>
+
+            <div class="quote-block" style="margin-top: 20px; border-left-color: var(--ai);">
+                <p class="quote-text">"It'd be lovely to have another AI watching us using AI."</p>
+                <p class="quote-source">Meta-supervision insight</p>
+            </div>
+        </section>
+
+        <!-- INSPIRATION - RESEARCH -->
+        <section id="inspiration">
+            <h2>Inspiration: The Research</h2>
 
             <div class="quote-block">
                 <p class="quote-text">"The mob becomes the human-in-the-loop layer for AI-assisted development."</p>
@@ -1134,33 +1437,33 @@
             <div class="card">
                 <div class="card-title">📊 AIDev Dataset (2025)</div>
                 <p><strong>Scale:</strong> 456K PRs, 61K repos, 47K developers</p>
-                <p>First large-scale empirical data on autonomous coding agents (Copilot, Claude Code, Devin, Cursor) in practice. Provides real-world evidence of how AI is changing software development.</p>
+                <p>First large-scale empirical data on autonomous coding agents (Copilot, Claude Code, Devin, Cursor) in practice.</p>
                 <p style="font-size: 0.85rem; color: var(--primary);"><a href="https://arxiv.org/abs/2507.15003" target="_blank">arxiv.org/abs/2507.15003</a></p>
             </div>
 
             <div class="card">
                 <div class="card-title">⚠️ AI Hasn't Fixed Teamwork (2023-2025 Longitudinal)</div>
-                <p><strong>Finding:</strong> Core collaboration challenges of distributed software development teamwork <em>remained largely unresolved</em> under AI + remote pressure.</p>
-                <p style="margin-top: 12px;"><strong>Implication:</strong> AI tools haven't solved coordination. Mob + LS might address what AI can't.</p>
+                <p><strong>Finding:</strong> Core collaboration challenges <em>remained largely unresolved</em> under AI + remote pressure.</p>
+                <p style="margin-top: 12px;"><strong>Implication:</strong> AI tools haven't solved coordination. Mob might address what AI can't.</p>
                 <p style="font-size: 0.85rem; color: var(--primary);"><a href="https://arxiv.org/html/2509.10956v1" target="_blank">arxiv.org/html/2509.10956v1</a></p>
             </div>
 
             <div class="card">
                 <div class="card-title">👥 Human-Human vs Human-AI Pair Programming</div>
                 <p><strong>Sample:</strong> 234 students, 2 academic years</p>
-                <p><strong>Finding:</strong> Human-human pair programming fostered <em>highest perceptions of collaboration and social presence</em>, surpassing both AI-assisted and individual conditions.</p>
-                <p style="margin-top: 12px;"><strong>Implication:</strong> AI doesn't replace social sensemaking. The <strong>2+ humans rule</strong> makes sense—AI is tool, not teammate.</p>
+                <p><strong>Finding:</strong> Human-human fostered <em>highest collaboration and social presence</em>.</p>
+                <p style="margin-top: 12px;"><strong>Implication:</strong> The <strong>2+ humans rule</strong> makes sense—AI is tool, not teammate.</p>
                 <p style="font-size: 0.85rem; color: var(--primary);"><a href="https://stemeducationjournal.springeropen.com/articles/10.1186/s40594-025-00537-3" target="_blank">STEM Education Journal</a></p>
             </div>
 
             <div class="card" style="border-left: 4px solid var(--run);">
                 <div class="card-title">🔴 The Review Problem (Autopilot Study 2026)</div>
-                <p><strong>Finding:</strong> 80% of AI-co-authored PRs from non-owners merged <em>without explicit review</em>.</p>
-                <p style="margin-top: 12px;"><strong>Implication:</strong> AI accelerates individual work but may <strong>erode peer review culture</strong>. Mob programming is a structural counter to this drift.</p>
+                <p><strong>Finding:</strong> 80% of AI-co-authored PRs merged <em>without explicit review</em>.</p>
+                <p style="margin-top: 12px;"><strong>Implication:</strong> AI may <strong>erode peer review culture</strong>. Mob is a structural counter.</p>
                 <p style="font-size: 0.85rem; color: var(--primary);"><a href="https://arxiv.org/html/2601.13754" target="_blank">arxiv.org/html/2601.13754</a></p>
             </div>
 
-            <h3>The HULA Pattern (Atlassian's Gold Standard)</h3>
+            <h3>The HULA Pattern (Atlassian)</h3>
 
             <div class="hero-alert" style="border-color: var(--change); background: linear-gradient(135deg, rgba(5, 150, 105, 0.08), rgba(198, 212, 255, 0.2));">
                 <div class="hero-alert-title" style="color: var(--change);">🤖 Human-in-Loop Agents Framework</div>
@@ -1170,84 +1473,9 @@
                     <li><strong>AI Coding Agent</strong> → generates code</li>
                     <li><strong>Human Agent</strong> → reviews, approves, redirects</li>
                 </ul>
-                <p><strong>Result:</strong> 900 PRs merged via this framework at Atlassian.</p>
-                <p style="margin-top: 12px;"><strong>Key insight:</strong> The "Human Agent" could be <em>the mob</em>, not an individual.</p>
+                <p><strong>Result:</strong> 900 PRs merged. <strong>Key insight:</strong> The "Human Agent" could be <em>the mob</em>.</p>
                 <p style="font-size: 0.85rem; color: var(--change); margin-top: 12px;"><a href="https://www.atlassian.com/blog/atlassian-engineering/hula-blog-autodev-paper-human-in-the-loop-software-development-agents" target="_blank">Atlassian Engineering Blog</a></p>
             </div>
-
-            <h3>Synthesis: What This Means for Mob</h3>
-
-            <table class="friction-table">
-                <thead>
-                    <tr>
-                        <th style="width: 30%;">Challenge</th>
-                        <th style="width: 35%;">Research Says</th>
-                        <th style="width: 35%;">Design Implication</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>"How do we use AI in mob?"</td>
-                        <td style="color: var(--text-muted);">Social presence still requires humans</td>
-                        <td><strong>2+ humans rule</strong> — AI is tool, not teammate</td>
-                    </tr>
-                    <tr>
-                        <td>"Won't AI replace the mob?"</td>
-                        <td style="color: var(--text-muted);">Collaboration problems unresolved</td>
-                        <td>Mob solves what AI can't: sensemaking, knowledge transfer</td>
-                    </tr>
-                    <tr>
-                        <td>"What's the gold standard?"</td>
-                        <td style="color: var(--text-muted);">HULA (Human-in-Loop Agents)</td>
-                        <td><strong>Mob AS the human-in-loop layer</strong></td>
-                    </tr>
-                    <tr>
-                        <td>"What about code review?"</td>
-                        <td style="color: var(--text-muted);">80% of AI PRs unreviewed</td>
-                        <td>Mob = built-in review; counters AI review erosion</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <h3>The New Mental Model</h3>
-
-            <div class="rsc-grid" style="grid-template-columns: 1fr 1fr;">
-                <div class="card" style="border-top: 4px solid var(--run);">
-                    <div class="card-title">❌ Without Mob</div>
-                    <p style="font-size: 0.9rem;">Individual + AI → individual PR → (maybe) review → silent bugs</p>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">80% unreviewed. Knowledge silos. Review culture erodes.</p>
-                </div>
-                <div class="card" style="border-top: 4px solid var(--change);">
-                    <div class="card-title">✅ With Mob</div>
-                    <p style="font-size: 0.9rem;">Mob + AI → live review → ship</p>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">Real-time review. Knowledge spread. Social sensemaking preserved.</p>
-                </div>
-            </div>
-
-            <div class="quote-block" style="margin-top: 30px; border-left-color: var(--change);">
-                <p class="quote-text">"AI makes task-work easier. Mob makes coordination-work easier. Together, they compound."</p>
-            </div>
-
-            <h3>What The Mob Provides (That AI Can't)</h3>
-
-            <ul class="checklist">
-                <li>
-                    <span style="font-size: 1.2rem; margin-right: 8px;">👁️</span>
-                    <span><strong>Real-time review:</strong> Counters the 80% unreviewed problem</span>
-                </li>
-                <li>
-                    <span style="font-size: 1.2rem; margin-right: 8px;">🧠</span>
-                    <span><strong>Social sensemaking:</strong> Making meaning together (Weick)</span>
-                </li>
-                <li>
-                    <span style="font-size: 1.2rem; margin-right: 8px;">📚</span>
-                    <span><strong>Knowledge distribution:</strong> Counters AI-accelerated silo risk</span>
-                </li>
-                <li>
-                    <span style="font-size: 1.2rem; margin-right: 8px;">⚖️</span>
-                    <span><strong>Friction arbitrage:</strong> AI speeds individual work; mob speeds coordination</span>
-                </li>
-            </ul>
 
             <h3>Industry Evidence</h3>
 
@@ -1261,33 +1489,22 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>Google</td>
-                            <td>25-30%</td>
-                            <td>~10%</td>
-                        </tr>
-                        <tr>
-                            <td>Microsoft</td>
-                            <td>~33%</td>
-                            <td>30-50% (engaged users)</td>
-                        </tr>
-                        <tr>
-                            <td>GitHub (internal)</td>
-                            <td>-</td>
-                            <td>55% fewer bugs</td>
-                        </tr>
+                        <tr><td>Google</td><td>25-30%</td><td>~10%</td></tr>
+                        <tr><td>Microsoft</td><td>~33%</td><td>30-50% (engaged)</td></tr>
+                        <tr><td>GitHub</td><td>-</td><td>55% fewer bugs</td></tr>
                     </tbody>
                 </table>
             </div>
 
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 20px;"><strong>Sources:</strong> <a href="https://arxiv.org/abs/2507.15003" target="_blank">AIDev Dataset</a> • <a href="https://arxiv.org/html/2509.10956v1" target="_blank">AI Collaboration Longitudinal</a> • <a href="https://arxiv.org/html/2601.13754" target="_blank">Autopilot Study</a> • <a href="https://stemeducationjournal.springeropen.com/articles/10.1186/s40594-025-00537-3" target="_blank">Pair Programming Comparative</a> • <a href="https://www.atlassian.com/blog/atlassian-engineering/hula-blog-autodev-paper-human-in-the-loop-software-development-agents" target="_blank">Atlassian HULA</a> • <a href="https://github.blog/news-insights/product-news/from-pair-to-peer-programmer-our-vision-for-agentic-workflows-in-github-copilot/" target="_blank">GitHub Copilot Vision</a></p>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 20px;"><strong>More sources:</strong> <a href="https://arxiv.org/html/2503.18238v2" target="_blank">Collaborating with AI Agents</a> • <a href="https://github.blog/news-insights/product-news/from-pair-to-peer-programmer-our-vision-for-agentic-workflows-in-github-copilot/" target="_blank">GitHub Copilot Vision</a> • <a href="https://www.permit.io/blog/human-in-the-loop-for-ai-agents-best-practices-frameworks-use-cases-and-demo" target="_blank">HITL Best Practices</a></p>
         </section>
     </div>
 
     <div class="progress-ring" id="progressRing">0%</div>
 
     <footer>
-        <p>Based on Claydon's Run/Serve/Change framework + The Ready's experiment design</p>
+        <p>Based on Claydon's Run/Serve/Change + The Ready + Paul Cutting sessions (2026)</p>
+        <p style="margin-top: 8px; font-size: 0.75rem;">Updated: 2026-02-05</p>
     </footer>
 
     <script>
