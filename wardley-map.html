@@ -386,14 +386,9 @@
                 label.textContent = comp.name;
                 g.appendChild(label);
 
-                // Tooltip interaction
+                // Tooltip interaction - Desktop (hover)
                 g.addEventListener('mouseenter', (e) => {
-                    const stage = getEvolutionStage(comp.evolution);
-                    tooltip.innerHTML = `<strong>${comp.name}</strong><br>
-                        Evolution: ${stage}<br>
-                        Visibility: ${(comp.visibility * 100).toFixed(0)}%
-                        ${comp.evolving ? '<br><em>Actively evolving</em>' : ''}`;
-                    tooltip.classList.add('visible');
+                    showTooltip(comp, e.pageX, e.pageY);
                 });
 
                 g.addEventListener('mousemove', (e) => {
@@ -405,6 +400,15 @@
                     tooltip.classList.remove('visible');
                 });
 
+                // Touch support - Mobile (tap)
+                g.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    showTooltip(comp, touch.pageX, touch.pageY);
+                    // Auto-hide after 3 seconds
+                    setTimeout(() => tooltip.classList.remove('visible'), 3000);
+                }, { passive: false });
+
                 group.appendChild(g);
             });
         }
@@ -414,6 +418,18 @@
             if (evolution < 0.5) return 'Custom Built';
             if (evolution < 0.75) return 'Product';
             return 'Commodity';
+        }
+
+        function showTooltip(comp, pageX, pageY) {
+            const tooltip = document.getElementById('tooltip');
+            const stage = getEvolutionStage(comp.evolution);
+            tooltip.innerHTML = `<strong>${comp.name}</strong><br>
+                Stage: ${stage}<br>
+                Visibility: ${Math.round(comp.visibility * 100)}%
+                ${comp.evolving ? '<br><em>Actively evolving</em>' : ''}`;
+            tooltip.style.left = (pageX + 12) + 'px';
+            tooltip.style.top = (pageY + 12) + 'px';
+            tooltip.classList.add('visible');
         }
 
         // Initialize
