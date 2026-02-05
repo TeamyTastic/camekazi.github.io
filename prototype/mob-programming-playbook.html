@@ -677,8 +677,10 @@
             box-shadow: 0 4px 20px rgba(23, 10, 240, 0.15);
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
 </head>
 <body>
+    <script>mermaid.initialize({startOnLoad: true, theme: 'default'});</script>
     <header>
         <h1>Mob Programming Playbook</h1>
         <p class="subtitle">Friction Arbitrage for Engineering Teams</p>
@@ -1431,6 +1433,208 @@
                 <p class="quote-text">"It'd be lovely to have another AI watching us using AI."</p>
                 <p class="quote-source">Meta-supervision insight</p>
             </div>
+
+            <h3>The Mob + AI Flow</h3>
+            <p>How mob programming with AI tends to unfold — and what needs to be true at each step.</p>
+
+            <div class="mermaid" style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+flowchart TB
+    subgraph Context["🎯 Context"]
+        direction LR
+        M1[("Mob identifies<br/>stuck problem")]
+        style M1 fill:#e8f0fe,stroke:#4285f4
+    end
+
+    subgraph Understanding["🧠 Understanding"]
+        direction LR
+        N1["Navigator explains<br/>intent & constraints"]
+        A1[["AI surfaces<br/>relevant context"]]
+        M2[("Mob builds<br/>shared mental model")]
+        style N1 fill:#e8f0fe,stroke:#4285f4
+        style A1 fill:#e6f4ea,stroke:#34a853
+        style M2 fill:#fef7e0,stroke:#f9ab00
+    end
+
+    subgraph Implementation["⌨️ Implementation"]
+        direction LR
+        N2["Navigator directs<br/>approach"]
+        A2[["AI generates<br/>code options"]]
+        D1["Driver types<br/>or accepts"]
+        M3[("Mob validates<br/>in real-time")]
+        style N2 fill:#e8f0fe,stroke:#4285f4
+        style A2 fill:#e6f4ea,stroke:#34a853
+        style D1 fill:#e8f0fe,stroke:#4285f4
+        style M3 fill:#fef7e0,stroke:#f9ab00
+    end
+
+    subgraph Review["🔍 Review"]
+        direction LR
+        A3[["AI runs tests<br/>& linters"]]
+        M4[("Mob reviews<br/>together")]
+        N3["Navigator decides<br/>iterate or done"]
+        style A3 fill:#e6f4ea,stroke:#34a853
+        style M4 fill:#fef7e0,stroke:#f9ab00
+        style N3 fill:#e8f0fe,stroke:#4285f4
+    end
+
+    subgraph Integration["🚀 Integration"]
+        direction LR
+        D2["Driver commits<br/>(mob-authored)"]
+        style D2 fill:#e8f0fe,stroke:#4285f4
+    end
+
+    M1 --> N1
+    N1 --> A1
+    A1 --> M2
+    M2 --> N2
+    N2 --> A2
+    A2 --> D1
+    D1 --> M3
+    M3 --> A3
+    A3 --> M4
+    M4 --> N3
+    N3 -->|"Iterate"| N2
+    N3 -->|"Done"| D2
+            </div>
+
+            <div style="display: flex; gap: 20px; margin-bottom: 30px; flex-wrap: wrap;">
+                <span style="display: flex; align-items: center; gap: 8px;"><span style="width: 16px; height: 16px; background: #e8f0fe; border: 2px solid #4285f4; border-radius: 4px;"></span> Individual roles</span>
+                <span style="display: flex; align-items: center; gap: 8px;"><span style="width: 16px; height: 16px; background: #e6f4ea; border: 2px solid #34a853; border-radius: 4px;"></span> AI agent</span>
+                <span style="display: flex; align-items: center; gap: 8px;"><span style="width: 16px; height: 16px; background: #fef7e0; border: 2px solid #f9ab00; border-radius: 4px;"></span> Whole mob</span>
+            </div>
+
+            <h3>What Needs to Be True</h3>
+            <p>Diagnostic checklist for each phase of the flow:</p>
+
+            <div class="phase-card open">
+                <div class="phase-header" onclick="togglePhase(this)">
+                    <span class="phase-number">🎯</span>
+                    <span class="phase-title">Context: Identifying the Problem</span>
+                    <span class="phase-chevron">▼</span>
+                </div>
+                <div class="phase-content">
+                    <ul class="checklist">
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Problem is genuinely stuck (not routine work)</span></li>
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Mob agrees it's worth the overhead</span></li>
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Someone can articulate <em>why</em> it's stuck</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="phase-card">
+                <div class="phase-header" onclick="togglePhase(this)">
+                    <span class="phase-number">🧠</span>
+                    <span class="phase-title">Understanding: Building Shared Context</span>
+                    <span class="phase-chevron">▼</span>
+                </div>
+                <div class="phase-content">
+                    <ul class="checklist">
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Navigator has clarity on the <em>goal</em>, not just the task</span></li>
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Constraints are nameable</span></li>
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Mob can ask "dumb questions" safely</span></li>
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>AI has codebase access</span></li>
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Mob can evaluate if AI context is <em>relevant</em> (not just accept it)</span></li>
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Everyone sees the same screen</span></li>
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Time allocated to <em>actually</em> understand, not just nod</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="phase-card">
+                <div class="phase-header" onclick="togglePhase(this)">
+                    <span class="phase-number">⌨️</span>
+                    <span class="phase-title">Implementation: Building Together</span>
+                    <span class="phase-chevron">▼</span>
+                </div>
+                <div class="phase-content">
+                    <ul class="checklist">
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Navigator has a hypothesis (can be wrong)</span></li>
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Driver can translate direction → action</span></li>
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Mob can challenge the approach</span></li>
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>AI options are reviewable chunks (not walls of code)</span></li>
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Mob can compare/evaluate, not just accept first suggestion</span></li>
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Driver understands what they're typing</span></li>
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Mechanism exists for "wait, stop"</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="phase-card">
+                <div class="phase-header" onclick="togglePhase(this)">
+                    <span class="phase-number">🔍</span>
+                    <span class="phase-title">Review: Validating Together</span>
+                    <span class="phase-chevron">▼</span>
+                </div>
+                <div class="phase-content">
+                    <ul class="checklist">
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Tests exist</span></li>
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Feedback is fast (&lt;30 sec)</span></li>
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Failures visible to everyone, not just driver</span></li>
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Time to actually look (not just rubber-stamp)</span></li>
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Diverse perspectives engaged</span></li>
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>"LGTM" is interrogated</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="phase-card">
+                <div class="phase-header" onclick="togglePhase(this)">
+                    <span class="phase-number">🚀</span>
+                    <span class="phase-title">Integration: Shipping It</span>
+                    <span class="phase-chevron">▼</span>
+                </div>
+                <div class="phase-content">
+                    <ul class="checklist">
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Clear definition of "done"</span></li>
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Navigator isn't a bottleneck</span></li>
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Mob can override if consensus disagrees</span></li>
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Commit message captures shared understanding</span></li>
+                        <li><span class="check-box" onclick="toggleCheck(this)"></span><span>Mob gets credit (not just driver's name)</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Failure Mode Detection</h3>
+            <p>If you observe these symptoms, check the corresponding condition:</p>
+
+            <table class="even-over-table" style="margin-top: 16px;">
+                <thead>
+                    <tr>
+                        <th>Symptom</th>
+                        <th>Likely Cause</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="even">"Why are we all here for this?"</td>
+                        <td class="over">Problem isn't genuinely stuck</td>
+                    </tr>
+                    <tr>
+                        <td class="even">AI generates irrelevant options, mob spins</td>
+                        <td class="over">Navigator can't articulate constraints</td>
+                    </tr>
+                    <tr>
+                        <td class="even">Silent passengers, learning doesn't transfer</td>
+                        <td class="over">Mob can't voice confusion safely</td>
+                    </tr>
+                    <tr>
+                        <td class="even">"Vibe coding" — nobody understands what shipped</td>
+                        <td class="over">Driver just accepts AI suggestions</td>
+                    </tr>
+                    <tr>
+                        <td class="even">Runaway implementation, rework later</td>
+                        <td class="over">No mechanism for "wait, stop"</td>
+                    </tr>
+                    <tr>
+                        <td class="even">False confidence, bugs in prod</td>
+                        <td class="over">Tests don't exist or are slow</td>
+                    </tr>
+                    <tr>
+                        <td class="even">Others disengage, becomes "navigator + helpers"</td>
+                        <td class="over">Navigator is bottleneck</td>
+                    </tr>
+                </tbody>
+            </table>
         </section>
 
         <!-- INSPIRATION - RESEARCH -->
