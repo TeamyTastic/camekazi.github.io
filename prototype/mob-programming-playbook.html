@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mob Programming Playbook</title>
+    <style>
+        :root {
+            /* Adaptavist Brand Colors */
+            --primary: #170AF0;
+            --primary-dark: #0B0573;
+            --primary-light: #C6D4FF;
+            --secondary: #FFCB00;
+            --secondary-hover: #f5cd33;
+            --accent-orange: #FF6633;
+
+            /* Backgrounds */
+            --bg: #FFFFFF;
+            --bg-gradient: linear-gradient(180deg, #C6D4FF 0%, #FFFFFF 100%);
+            --surface: #FFFFFF;
+            --surface-hover: #ECF1FF;
+            --surface-dark: #0B0573;
+            --border: #E5E7EB;
+
+            /* Text */
+            --text: #1F2937;
+            --text-muted: #6B7280;
+            --text-on-dark: #FFFFFF;
+
+            /* Status Colors */
+            --run: #DC2626;
+            --serve: #F59E0B;
+            --change: #059669;
+            --warning: #F59E0B;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header - Adaptavist Style */
+        header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            background: var(--bg-gradient);
+            margin-bottom: 0;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--primary-dark);
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* Navigation - Pill Style */
+        nav {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-btn {
+            background: var(--surface);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 12px 24px;
+            border-radius: 28px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            min-height: 44px;
+        }
+
+        .nav-btn:hover {
+            background: var(--surface-hover);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: var(--text-on-dark);
+        }
+
+        /* Sections */
+        section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            font-size: 1.75rem;
+            margin-bottom: 20px;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+
+        h3 {
+            font-size: 1rem;
+            margin: 28px 0 12px;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: var(--text-muted);
+        }
+
+        /* Cards - Adaptavist Style */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0px 10px 20px 0px rgba(49, 95, 99, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0px 10px 30px 0px rgba(49, 95, 99, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        /* Run/Serve/Change Visual */
+        .rsc-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        @media (max-width: 600px) {
+            .rsc-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .rsc-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .rsc-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .rsc-card.run {
+            border-color: var(--run);
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.2);
+        }
+
+        .rsc-card.serve {
+            border-color: var(--serve);
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.2);
+        }
+
+        .rsc-card.change {
+            border-color: var(--change);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.2);
+        }
+
+        .rsc-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+
+        .rsc-label {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+
+        .rsc-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .rsc-status {
+            margin-top: 12px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .rsc-card.run .rsc-status {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--run);
+        }
+
+        .rsc-card.serve .rsc-status {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--serve);
+        }
+
+        .rsc-card.change .rsc-status {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--change);
+        }
+
+        /* Imbalance Visual */
+        .imbalance-bar {
+            display: flex;
+            height: 40px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .imbalance-segment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: width 0.5s ease;
+        }
+
+        .imbalance-segment.run { background: var(--run); width: 70%; }
+        .imbalance-segment.serve { background: var(--serve); width: 15%; }
+        .imbalance-segment.change { background: var(--change); width: 15%; }
+
+        /* Friction Table */
+        .friction-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .friction-table th,
+        .friction-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .friction-table th {
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .friction-table td {
+            font-size: 0.95rem;
+        }
+
+        .friction-icon {
+            font-size: 1.2rem;
+        }
+
+        /* Phase Cards */
+        .phase-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .phase-header {
+            padding: 16px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 60px;
+        }
+
+        .phase-header:hover {
+            background: var(--surface-hover);
+        }
+
+        .phase-number {
+            background: var(--primary);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-right: 12px;
+        }
+
+        .phase-title {
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .phase-chevron {
+            transition: transform 0.2s;
+        }
+
+        .phase-card.open .phase-chevron {
+            transform: rotate(180deg);
+        }
+
+        .phase-content {
+            display: none;
+            padding: 0 20px 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .phase-card.open .phase-content {
+            display: block;
+        }
+
+        /* Checklist */
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+
+        .check-box {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .check-box:hover {
+            border-color: var(--primary);
+        }
+
+        .check-box.checked {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .check-box.checked::after {
+            content: '✓';
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Trojan Mice */
+        .trojan-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0px 4px 12px rgba(49, 95, 99, 0.08);
+        }
+
+        .trojan-card:hover {
+            transform: translateX(8px);
+            border-left-color: var(--secondary);
+            box-shadow: 0px 6px 16px rgba(49, 95, 99, 0.12);
+        }
+
+        .trojan-pain {
+            color: var(--primary-dark);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .trojan-reframe {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Quote Block */
+        .quote-block {
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            margin: 20px 0;
+            background: var(--primary-light);
+            border-radius: 0 12px 12px 0;
+        }
+
+        .quote-text {
+            font-size: 1.1rem;
+            color: var(--primary-dark);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .quote-source {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Hero Pattern */
+        .hero-alert {
+            background: linear-gradient(135deg, rgba(255, 203, 0, 0.15), rgba(23, 10, 240, 0.05));
+            border: 2px solid var(--secondary);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .hero-alert-title {
+            color: var(--primary-dark);
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+            margin: 20px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 24px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 4px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 2px solid var(--bg);
+        }
+
+        .timeline-week {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-on-dark);
+            font-size: 0.85rem;
+            background: var(--primary-dark);
+            margin-top: 60px;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Progress indicator */
+        .progress-ring {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: var(--surface);
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--primary);
+            box-shadow: 0 4px 20px rgba(23, 10, 240, 0.15);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Mob Programming Playbook</h1>
+        <p class="subtitle">Friction Arbitrage for Engineering Teams</p>
+    </header>
+
+    <nav>
+        <button class="nav-btn active" data-section="diagnosis">Diagnosis</button>
+        <button class="nav-btn" data-section="strategy">Strategy</button>
+        <button class="nav-btn" data-section="tactics">Tactics</button>
+        <button class="nav-btn" data-section="experiment">Experiment Design</button>
+        <button class="nav-btn" data-section="pilot">8-Week Cycle</button>
+        <button class="nav-btn" data-section="ai-research">AI + Mob</button>
+    </nav>
+
+    <div class="container">
+        <!-- DIAGNOSIS -->
+        <section id="diagnosis" class="active">
+            <h2>The Structural Problem</h2>
+
+            <div class="quote-block">
+                <p class="quote-text">"You can't persuade your way past structural friction."</p>
+                <p class="quote-source">Core insight</p>
+            </div>
+
+            <p>Before trying to convince anyone, understand what makes collaboration structurally hard.</p>
+
+            <h3>Run / Serve / Change</h3>
+            <p>Every organization has three types of work. Most fail to balance them.</p>
+
+            <div class="rsc-grid">
+                <div class="rsc-card run" onclick="showDetail('run')">
+                    <div class="rsc-icon">⚡</div>
+                    <div class="rsc-label">RUN</div>
+                    <div class="rsc-desc">Delivering today's value. Tickets, shipping, metrics.</div>
+                    <div class="rsc-status">FRAGMENTED</div>
+                </div>
+                <div class="rsc-card serve" onclick="showDetail('serve')">
+                    <div class="rsc-icon">🤝</div>
+                    <div class="rsc-label">SERVE</div>
+                    <div class="rsc-desc">Enabling others to Run. Integration, standards, coordination.</div>
+                    <div class="rsc-status">INVISIBLE</div>
+                </div>
+                <div class="rsc-card change" onclick="showDetail('change')">
+                    <div class="rsc-icon">🚀</div>
+                    <div class="rsc-label">CHANGE</div>
+                    <div class="rsc-desc">Creating tomorrow's capacity. Experiments, learning.</div>
+                    <div class="rsc-status">STALLED</div>
+                </div>
+            </div>
+
+            <h3>Current Imbalance</h3>
+            <div class="imbalance-bar">
+                <div class="imbalance-segment run">RUN 70%</div>
+                <div class="imbalance-segment serve">15%</div>
+                <div class="imbalance-segment change">15%</div>
+            </div>
+
+            <h3>Why Traditional Dev Wins</h3>
+            <p>The current way of working isn't broken—it's <em>optimized</em>. Each behavior persists because the system rewards it.</p>
+
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <table class="friction-table" style="margin: 0;">
+                    <thead>
+                        <tr>
+                            <th style="width: 22%;">Default Behavior</th>
+                            <th style="width: 6%; text-align: center;">Trad</th>
+                            <th style="width: 6%; text-align: center;">Mob</th>
+                            <th style="width: 28%;">Cost of Changing</th>
+                            <th style="width: 38%;">Why The System Rewards It</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Work alone</strong></td>
+                            <td class="friction-icon" style="text-align: center;">✅</td>
+                            <td class="friction-icon" style="text-align: center;">❌</td>
+                            <td style="color: var(--text-muted); font-size: 0.85rem;">Coordinate calendars, agree who's joining, negotiate time</td>
+                            <td style="color: var(--text-muted); font-size: 0.85rem;">Individual completion is visible and measurable. Coordination isn't.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Stay stuck quietly</strong></td>
+                            <td class="friction-icon" style="text-align: center;">✅</td>
+                            <td class="friction-icon" style="text-align: center;">❌</td>
+                            <td style="color: var(--text-muted); font-size: 0.85rem;">Ask for help publicly, admit confusion, be seen struggling</td>
+                            <td style="color: var(--text-muted); font-size: 0.85rem;">The system punishes visible incompetence. Silence is safe.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hoard knowledge</strong></td>
+                            <td class="friction-icon" style="text-align: center;">✅</td>
+                            <td class="friction-icon" style="text-align: center;">❌</td>
+                            <td style="color: var(--text-muted); font-size: 0.85rem;">Share everything, give away your competitive advantage</td>
+                            <td style="color: var(--text-muted); font-size: 0.85rem;">Specialized knowledge is job security. Sharing dilutes your value.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Async by default</strong></td>
+                            <td class="friction-icon" style="text-align: center;">✅</td>
+                            <td class="friction-icon" style="text-align: center;">❌</td>
+                            <td style="color: var(--text-muted); font-size: 0.85rem;">Find overlapping time, defend calendar, synchronize</td>
+                            <td style="color: var(--text-muted); font-size: 0.85rem;">Async is friction-free. Synchronous time must be negotiated.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hide your work</strong></td>
+                            <td class="friction-icon" style="text-align: center;">✅</td>
+                            <td class="friction-icon" style="text-align: center;">❌</td>
+                            <td style="color: var(--text-muted); font-size: 0.85rem;">Work publicly, risk judgment, be vulnerable</td>
+                            <td style="color: var(--text-muted); font-size: 0.85rem;">Working publicly means being judged publicly. Safety comes from hiding.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="quote-block" style="margin-top: 20px; border-left-color: var(--warning);">
+                <p class="quote-text">"People don't resist change because they're stubborn. They resist because the current way is genuinely easier—and you haven't changed that equation yet."</p>
+            </div>
+
+            <h3>Depth Map: Where The Real Problem Lives</h3>
+            <p>Organizations are like oceans. What you see on the surface rarely explains what's happening below. Use this depth map to diagnose where the resistance actually lives.</p>
+
+            <div class="card" style="background: linear-gradient(180deg, #1a3a5c 0%, #0d1f33 50%, #050a10 100%); border: none; padding: 0; overflow: hidden;">
+                <!-- Sky -->
+                <div style="background: linear-gradient(180deg, #2d5a87 0%, #1a3a5c 100%); padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                        <span style="font-size: 1.5rem;">☀️</span>
+                        <span style="font-weight: 700; color: #7dd3fc; text-transform: uppercase; letter-spacing: 1px;">Sky</span>
+                        <span style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-left: auto;">EXTERNAL WHY • READ-ONLY</span>
+                    </div>
+                    <p style="margin: 0; color: rgba(255,255,255,0.8); font-size: 0.9rem;">AI is reshaping software delivery. Competitors are shipping faster. Atlassian ecosystem slowing. Monday pivot didn't deliver expected returns. External financial pressure creating scrutiny. BU needs to break even. No successful new app has hit £250k ARR in years.</p>
+                </div>
+
+                <!-- Sunlight Zone -->
+                <div style="background: linear-gradient(180deg, #1a3a5c 0%, #133152 100%); padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                        <span style="font-size: 1.5rem;">🌊</span>
+                        <span style="font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 1px;">Sunlight Zone</span>
+                        <span style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-left: auto;">SURFACE WHAT • READ-ONLY</span>
+                    </div>
+                    <p style="margin: 0; color: rgba(255,255,255,0.8); font-size: 0.9rem;">"We're the innovation hub!" "Act like startups!" "Ship 12 apps in 12 months!" Strategy decks say experiment and collaborate—but metrics still reward individual ticket completion.</p>
+                </div>
+
+                <!-- Twilight Zone - EDITABLE -->
+                <div style="background: linear-gradient(180deg, #133152 0%, #0d1f33 100%); padding: 16px 20px; border: 2px solid var(--change); border-radius: 0; margin: 0;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                        <span style="font-size: 1.5rem;">🌑</span>
+                        <span style="font-weight: 700; color: var(--change); text-transform: uppercase; letter-spacing: 1px;">Twilight Zone</span>
+                        <span style="font-size: 0.75rem; color: var(--change); margin-left: auto; font-weight: 600;">⚡ OPERATIONAL HOW • EDITABLE</span>
+                    </div>
+                    <p style="margin: 0; color: rgba(255,255,255,0.9); font-size: 0.9rem;"><strong>Jira assigns one person per ticket. No experiment grammar—no hypothesis, no exit criteria, no named owner. Handover means inheriting someone else's code with no ritual. Mobbing requires coordinating five calendars.</strong></p>
+                    <p style="margin: 8px 0 0 0; color: var(--change); font-size: 0.85rem;">← This is the ONLY zone you can actually change</p>
+                </div>
+
+                <!-- Midnight Zone -->
+                <div style="background: linear-gradient(180deg, #0d1f33 0%, #050a10 100%); padding: 16px 20px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                        <span style="font-size: 1.5rem;">🌌</span>
+                        <span style="font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 1px;">Midnight Zone</span>
+                        <span style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-left: auto;">INTERNAL WHY • READ-ONLY</span>
+                    </div>
+                    <p style="margin: 0; color: rgba(255,255,255,0.7); font-size: 0.9rem;">"We had redundancies last year. Am I next if this experiment fails?" "If I take someone else's app, I'm accountable for their mistakes." "They want AI-first but my skills are being made obsolete." "The innovation hub sounds vulnerable—I'd rather be on a stable product."</p>
+                </div>
+            </div>
+
+            <div class="quote-block" style="margin-top: 20px; border-left-color: var(--change);">
+                <p class="quote-text">"You can't directly change what people believe (Midnight) or what strategy says (Sunlight). You can only change how work actually gets done (Twilight). Change the rituals, and the beliefs follow."</p>
+                <p class="quote-source">The Ready - Depthfinding</p>
+            </div>
+        </section>
+
+        <!-- STRATEGY -->
+        <section id="strategy">
+            <h2>Friction Arbitrage</h2>
+
+            <div class="quote-block">
+                <p class="quote-text">"Make traditional development incrementally harder. Make mobbing incrementally easier. Wait."</p>
+            </div>
+
+            <p>You're not changing minds. You're changing the cost-benefit landscape. Then you step back and watch what people choose.</p>
+
+            <div class="phase-card open">
+                <div class="phase-header" onclick="togglePhase(this)">
+                    <span class="phase-number">1</span>
+                    <span class="phase-title">Reduce Friction for Mobbing</span>
+                    <span class="phase-chevron">▼</span>
+                </div>
+                <div class="phase-content">
+                    <p>Don't change how all development happens. Just make it stupid easy to mob when someone wants to.</p>
+                    <ul class="checklist">
+                        <li>
+                            <span class="check-box" onclick="toggleCheck(this)"></span>
+                            <span><strong>Standing mob slot:</strong> Block Tue/Thu 10-12 as "mob-available time"</span>
+                        </li>
+                        <li>
+                            <span class="check-box" onclick="toggleCheck(this)"></span>
+                            <span><strong>Default mob space:</strong> One room permanently configured</span>
+                        </li>
+                        <li>
+                            <span class="check-box" onclick="toggleCheck(this)"></span>
+                            <span><strong>Remote mob kit:</strong> Pre-configured Zoom + VS Code Live Share</span>
+                        </li>
+                        <li>
+                            <span class="check-box" onclick="toggleCheck(this)"></span>
+                            <span><strong>Role cards:</strong> Navigator / Driver / Observer printed</span>
+                        </li>
+                        <li>
+                            <span class="check-box" onclick="toggleCheck(this)"></span>
+                            <span><strong>Rotation timer:</strong> Makes switching a ritual, not negotiation</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="phase-card">
+                <div class="phase-header" onclick="togglePhase(this)">
+                    <span class="phase-number">2</span>
+                    <span class="phase-title">Make Solo Work Costs Visible</span>
+                    <span class="phase-chevron">▼</span>
+                </div>
+                <div class="phase-content">
+                    <p>You're not blocking solo work—you're making its hidden costs visible.</p>
+                    <ul class="checklist">
+                        <li>
+                            <span class="check-box" onclick="toggleCheck(this)"></span>
+                            <span><strong>Stuck protocol:</strong> "Blocked >90 min? Drop it in #mob-room"</span>
+                        </li>
+                        <li>
+                            <span class="check-box" onclick="toggleCheck(this)"></span>
+                            <span><strong>Track PR turnaround:</strong> Time from open to merge</span>
+                        </li>
+                        <li>
+                            <span class="check-box" onclick="toggleCheck(this)"></span>
+                            <span><strong>Bus factor matrix:</strong> Component × Who understands it</span>
+                        </li>
+                        <li>
+                            <span class="check-box" onclick="toggleCheck(this)"></span>
+                            <span><strong>Shift standup:</strong> "What moved forward?" not "What did you do?"</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="phase-card">
+                <div class="phase-header" onclick="togglePhase(this)">
+                    <span class="phase-number">3</span>
+                    <span class="phase-title">Generate Comparison Data</span>
+                    <span class="phase-chevron">▼</span>
+                </div>
+                <div class="phase-content">
+                    <p>Present without editorializing: "Here's what we're seeing..."</p>
+                    <ul class="checklist">
+                        <li>
+                            <span class="check-box" onclick="toggleCheck(this)"></span>
+                            <span><strong>Cycle time:</strong> Idea → Production (include all rework)</span>
+                        </li>
+                        <li>
+                            <span class="check-box" onclick="toggleCheck(this)"></span>
+                            <span><strong>Knowledge spread:</strong> Survey understanding after 4 weeks</span>
+                        </li>
+                        <li>
+                            <span class="check-box" onclick="toggleCheck(this)"></span>
+                            <span><strong>Stuck-work metric:</strong> Time between stuck and unstuck</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- TACTICS -->
+        <section id="tactics">
+            <h2>The Trojan Mice Approach</h2>
+
+            <p><strong>Trojan Mice:</strong> Small, seemingly innocuous changes that slip past organizational antibodies and create bigger shifts over time. Don't call it "adopting mob programming"—that triggers immune responses.</p>
+
+            <div class="trojan-card" onclick="this.classList.toggle('expanded')">
+                <div class="trojan-pain">"We keep finding bugs in production"</div>
+                <div class="trojan-reframe">"Want to try mobbing on the risky stuff? Built-in review."</div>
+            </div>
+
+            <div class="trojan-card">
+                <div class="trojan-pain">"PRs sit for days waiting for review"</div>
+                <div class="trojan-reframe">"What if we just... didn't have PRs for this? Mob it?"</div>
+            </div>
+
+            <div class="trojan-card">
+                <div class="trojan-pain">"Only one person understands the auth system"</div>
+                <div class="trojan-reframe">"Let's mob a feature in auth so everyone learns it."</div>
+            </div>
+
+            <div class="trojan-card">
+                <div class="trojan-pain">"This integration is gnarly"</div>
+                <div class="trojan-reframe">"Sounds like a good mob candidate—share the pain."</div>
+            </div>
+
+            <div class="quote-block" style="margin-top: 30px;">
+                <p class="quote-text">"You're not asking permission to change development culture. You're proposing a tactical solution to a specific problem."</p>
+            </div>
+
+            <h3>Key Moves</h3>
+
+            <div class="card">
+                <div class="card-title">🎯 Tactical Move: Don't Ask Permission</div>
+                <p>Don't say "implement mob programming." Say you're "reserving some collaboration time" and set it up.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🛡️ Risk Removal: Shoulder It Yourself</div>
+                <p>Put your name on the experiment. Track and share metrics yourself. Tell your manager you're trying this—ask for 2 weeks.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🎯 Target Selection: High-Value Stuck Work</div>
+                <p>Don't mob on easy tasks (looks wasteful). Mob on: "We've been stuck 3 days" or "This is critical and risky."</p>
+            </div>
+        </section>
+
+        <!-- EXPERIMENT DESIGN -->
+        <section id="experiment">
+            <h2>Designing a Safe-to-Fail Experiment</h2>
+
+            <div class="quote-block">
+                <p class="quote-text">"The goal is discovery of something unknown and the compounding of learning—not proving you were right."</p>
+                <p class="quote-source">The Ready</p>
+            </div>
+
+            <p>Treat the organization as a "weather system" not a "watch." Outcomes are unpredictable—the only way to understand is to poke the system and see how it reacts.</p>
+
+            <h3>The Hypothesis Format</h3>
+            <div class="card" style="background: var(--primary-light); border: 2px solid var(--primary);">
+                <p style="font-size: 1.1rem; color: var(--primary-dark); margin: 0;">
+                    <strong>"We believe that</strong> [action] <strong>will result in</strong> [outcome] <strong>because</strong> [reason]<strong>"</strong>
+                </p>
+            </div>
+
+            <p><strong>For mob programming:</strong></p>
+            <div class="card">
+                <p style="color: var(--text); margin: 0;">
+                    "We believe that <em>making mob slots available for stuck work</em> will result in <em>faster unblocking and broader knowledge spread</em> because <em>real-time collaboration eliminates handoff delays and creates shared context</em>."
+                </p>
+            </div>
+
+            <h3>Safe-to-Try Tests</h3>
+            <p>Before launching, the experiment must pass these hurdles:</p>
+
+            <div class="phase-card open">
+                <div class="phase-header" onclick="togglePhase(this)">
+                    <span class="phase-number">1</span>
+                    <span class="phase-title">The Waterline Test</span>
+                    <span class="phase-chevron">▼</span>
+                </div>
+                <div class="phase-content">
+                    <p><strong>Above the waterline:</strong> Safe to try, easy to patch if it leaks</p>
+                    <p><strong>Below the waterline:</strong> Could sink the ship—needs explicit consent</p>
+                    <div class="hero-alert" style="margin-top: 16px;">
+                        <div class="hero-alert-title">🚢 Mob programming is above the waterline</div>
+                        <p>Worst case: A few wasted calendar hours. No production risk, no customer impact, fully reversible.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="phase-card">
+                <div class="phase-header" onclick="togglePhase(this)">
+                    <span class="phase-number">2</span>
+                    <span class="phase-title">The Blast Radius Test</span>
+                    <span class="phase-chevron">▼</span>
+                </div>
+                <div class="phase-content">
+                    <p>Run in a small, constrained context to limit potential negative consequences.</p>
+                    <ul class="checklist">
+                        <li>
+                            <span class="check-box" onclick="toggleCheck(this)"></span>
+                            <span>Limited to one team (not company-wide rollout)</span>
+                        </li>
+                        <li>
+                            <span class="check-box" onclick="toggleCheck(this)"></span>
+                            <span>Opt-in participation (no mandates)</span>
+                        </li>
+                        <li>
+                            <span class="check-box" onclick="toggleCheck(this)"></span>
+                            <span>Fixed duration (8 weeks max before review)</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="phase-card">
+                <div class="phase-header" onclick="togglePhase(this)">
+                    <span class="phase-number">3</span>
+                    <span class="phase-title">The Adjacent Possible Test</span>
+                    <span class="phase-chevron">▼</span>
+                </div>
+                <div class="phase-content">
+                    <p>Target the state "right next door"—not an insurmountable leap.</p>
+                    <table class="friction-table">
+                        <tr>
+                            <td style="color: var(--run);">❌ Too big</td>
+                            <td>"All development will now be mob programming"</td>
+                        </tr>
+                        <tr>
+                            <td style="color: var(--change);">✅ Adjacent</td>
+                            <td>"Mob slots available when someone's stuck"</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="phase-card">
+                <div class="phase-header" onclick="togglePhase(this)">
+                    <span class="phase-number">4</span>
+                    <span class="phase-title">The Authority Test</span>
+                    <span class="phase-chevron">▼</span>
+                </div>
+                <div class="phase-content">
+                    <p>Do you have the explicit right to change ways of working in this domain?</p>
+                    <ul class="checklist">
+                        <li>
+                            <span class="check-box" onclick="toggleCheck(this)"></span>
+                            <span>Manager aware and supportive (even if not championing)</span>
+                        </li>
+                        <li>
+                            <span class="check-box" onclick="toggleCheck(this)"></span>
+                            <span>Team has autonomy over their collaboration methods</span>
+                        </li>
+                        <li>
+                            <span class="check-box" onclick="toggleCheck(this)"></span>
+                            <span>Not treated as "side-of-desk"—real time allocated</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Common Failure Modes</h3>
+            <p>Experiments fail due to design flaws, not bad ideas:</p>
+
+            <div class="trojan-card" style="border-left: 4px solid var(--run);">
+                <div class="trojan-pain">Excessive Complexity</div>
+                <div class="trojan-reframe">Testing too many variables at once. Focus on ONE change.</div>
+            </div>
+
+            <div class="trojan-card" style="border-left: 4px solid var(--run);">
+                <div class="trojan-pain">Insufficient Boldness</div>
+                <div class="trojan-reframe">So safe it can't generate meaningful learning. Be radical at non-radical scale.</div>
+            </div>
+
+            <div class="trojan-card" style="border-left: 4px solid var(--run);">
+                <div class="trojan-pain">Organizational Antibodies</div>
+                <div class="trojan-reframe">Killed before it has time to yield data. Protect the experiment explicitly.</div>
+            </div>
+
+            <div class="trojan-card" style="border-left: 4px solid var(--run);">
+                <div class="trojan-pain">Premature Judgement</div>
+                <div class="trojan-reframe">Declaring success/failure before timeline elapsed. Commit to the duration.</div>
+            </div>
+
+            <h3>Kill / Pivot / Scale Decision</h3>
+            <table class="friction-table">
+                <thead>
+                    <tr>
+                        <th>Signal</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>>15% improvement + positive feedback + low resource cost</td>
+                        <td style="color: var(--change);"><strong>Scale</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Goal valid but approach ineffective—new insights available</td>
+                        <td style="color: var(--serve);"><strong>Pivot</strong></td>
+                    </tr>
+                    <tr>
+                        <td>No meaningful impact, high cost, or abandoned for 6 months</td>
+                        <td style="color: var(--run);"><strong>Kill</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="quote-block" style="margin-top: 30px; border-left-color: var(--change);">
+                <p class="quote-text">"In a healthy experimental culture, most experiments should fail. A 90% success rate means you weren't being bold enough to learn."</p>
+            </div>
+        </section>
+
+        <!-- PILOT -->
+        <section id="pilot">
+            <h2>The 8-Week Experiment</h2>
+
+            <div class="hero-alert" style="border-color: var(--primary); background: linear-gradient(135deg, rgba(23, 10, 240, 0.08), rgba(198, 212, 255, 0.3));">
+                <div class="hero-alert-title" style="color: var(--primary);">🧠 Why 8 Weeks?</div>
+                <p><strong>The Dip:</strong> Weeks 1-2 capture only the "hell" of transition—the discomfort of unlearning. The good stuff is on the other side.</p>
+                <p style="margin-top: 8px;"><strong>Conscious Incompetence:</strong> At 2-3 weeks, teams think they've tried it and want to quit. They haven't built the muscle yet.</p>
+                <p style="margin-top: 8px;"><strong>Different Learning Paces:</strong> Not everyone arrives at insights at the same speed. 8 weeks ensures the whole group finds the value.</p>
+            </div>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-week">Weeks 1-2: The Dip</div>
+                    <p>This will feel harder, not easier. That's normal—new muscles.</p>
+                    <ul style="margin-left: 20px; margin-top: 8px;">
+                        <li>Mob slots available when stuck or high-risk</li>
+                        <li>Expect awkwardness, coordination friction</li>
+                        <li><strong>Don't judge yet</strong>—you're in conscious incompetence</li>
+                    </ul>
+                    <p style="margin-top: 12px;"><strong>Track:</strong> What got mobbed, why, early observations</p>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-week">Weeks 3-4: The Messy Middle</div>
+                    <p>Sunk cost bias kicks in. Resist the urge to start a new experiment.</p>
+                    <ul style="margin-left: 20px; margin-top: 8px;">
+                        <li>Pick ONE feature to mob start-to-finish</li>
+                        <li>Search for signal in the noise</li>
+                        <li>First "oh shit, that was fast" moments appear</li>
+                    </ul>
+                    <p style="margin-top: 12px;"><strong>Checkpoint:</strong> Quick retro—adjust format, don't abandon</p>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-week">Weeks 5-6: Building Muscle</div>
+                    <p>The practice starts to feel natural. Patterns emerge.</p>
+                    <ul style="margin-left: 20px; margin-top: 8px;">
+                        <li>Team develops its own mob rhythm</li>
+                        <li>Knowledge spread becomes visible</li>
+                        <li>Comparison data accumulates</li>
+                    </ul>
+                    <p style="margin-top: 12px;"><strong>Track:</strong> Cycle time, bugs, knowledge surveys</p>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-week">Weeks 7-8: The Summit</div>
+                    <p>Now you can objectively assess. Full 8-week data set.</p>
+                    <ul style="margin-left: 20px; margin-top: 8px;">
+                        <li>What made mobbing hard? (Be honest)</li>
+                        <li>What made it valuable?</li>
+                        <li>Decide: <strong>Scale</strong>, <strong>Pivot</strong>, or <strong>Kill</strong></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="quote-block" style="border-left-color: var(--warning);">
+                <p class="quote-text">"At 2-3 weeks, teams think they've tried it. They haven't. They've only experienced conscious incompetence—the discomfort of not yet having the muscle."</p>
+                <p class="quote-source">The Ready</p>
+            </div>
+
+            <h3>What Usually Happens</h3>
+
+            <div class="card">
+                <div class="card-title">If you remove friction...</div>
+                <p>People try it when genuinely stuck. They experience the "oh shit, we solved that in 30 minutes" moment. Word spreads organically.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title">If you make costs visible...</div>
+                <p>Managers start asking: "Why did this PR take 4 days?" Someone eventually says: "You know what we could try..."</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title">If you generate comparison data...</div>
+                <p>You're not advocating—you're reporting. "Mobbed work has 40% fewer post-release bugs."</p>
+            </div>
+
+            <div class="quote-block" style="margin-top: 30px; border-left-color: var(--change);">
+                <p class="quote-text">"The work is: Set up infrastructure so mobbing is available without heroics. Make hidden costs visible. Run small experiments that generate evidence, not advocacy. Let people choose."</p>
+            </div>
+        </section>
+
+        <!-- AI + MOB RESEARCH -->
+        <section id="ai-research">
+            <h2>AI + Mob: The Research</h2>
+
+            <div class="quote-block">
+                <p class="quote-text">"The mob becomes the human-in-the-loop layer for AI-assisted development."</p>
+            </div>
+
+            <p>Gold standard research on how engineering teams are collaborating with AI—and why mob programming may be the missing piece.</p>
+
+            <h3>Gold Standard Studies</h3>
+
+            <div class="card">
+                <div class="card-title">📊 AIDev Dataset (2025)</div>
+                <p><strong>Scale:</strong> 456K PRs, 61K repos, 47K developers</p>
+                <p>First large-scale empirical data on autonomous coding agents (Copilot, Claude Code, Devin, Cursor) in practice. Provides real-world evidence of how AI is changing software development.</p>
+                <p style="font-size: 0.85rem; color: var(--primary);"><a href="https://arxiv.org/abs/2507.15003" target="_blank">arxiv.org/abs/2507.15003</a></p>
+            </div>
+
+            <div class="card">
+                <div class="card-title">⚠️ AI Hasn't Fixed Teamwork (2023-2025 Longitudinal)</div>
+                <p><strong>Finding:</strong> Core collaboration challenges of distributed software development teamwork <em>remained largely unresolved</em> under AI + remote pressure.</p>
+                <p style="margin-top: 12px;"><strong>Implication:</strong> AI tools haven't solved coordination. Mob + LS might address what AI can't.</p>
+                <p style="font-size: 0.85rem; color: var(--primary);"><a href="https://arxiv.org/html/2509.10956v1" target="_blank">arxiv.org/html/2509.10956v1</a></p>
+            </div>
+
+            <div class="card">
+                <div class="card-title">👥 Human-Human vs Human-AI Pair Programming</div>
+                <p><strong>Sample:</strong> 234 students, 2 academic years</p>
+                <p><strong>Finding:</strong> Human-human pair programming fostered <em>highest perceptions of collaboration and social presence</em>, surpassing both AI-assisted and individual conditions.</p>
+                <p style="margin-top: 12px;"><strong>Implication:</strong> AI doesn't replace social sensemaking. The <strong>2+ humans rule</strong> makes sense—AI is tool, not teammate.</p>
+                <p style="font-size: 0.85rem; color: var(--primary);"><a href="https://stemeducationjournal.springeropen.com/articles/10.1186/s40594-025-00537-3" target="_blank">STEM Education Journal</a></p>
+            </div>
+
+            <div class="card" style="border-left: 4px solid var(--run);">
+                <div class="card-title">🔴 The Review Problem (Autopilot Study 2026)</div>
+                <p><strong>Finding:</strong> 80% of AI-co-authored PRs from non-owners merged <em>without explicit review</em>.</p>
+                <p style="margin-top: 12px;"><strong>Implication:</strong> AI accelerates individual work but may <strong>erode peer review culture</strong>. Mob programming is a structural counter to this drift.</p>
+                <p style="font-size: 0.85rem; color: var(--primary);"><a href="https://arxiv.org/html/2601.13754" target="_blank">arxiv.org/html/2601.13754</a></p>
+            </div>
+
+            <h3>The HULA Pattern (Atlassian's Gold Standard)</h3>
+
+            <div class="hero-alert" style="border-color: var(--change); background: linear-gradient(135deg, rgba(5, 150, 105, 0.08), rgba(198, 212, 255, 0.2));">
+                <div class="hero-alert-title" style="color: var(--change);">🤖 Human-in-Loop Agents Framework</div>
+                <p><strong>3-Agent Model:</strong></p>
+                <ul style="margin: 12px 0 12px 20px;">
+                    <li><strong>AI Planner Agent</strong> → creates plan</li>
+                    <li><strong>AI Coding Agent</strong> → generates code</li>
+                    <li><strong>Human Agent</strong> → reviews, approves, redirects</li>
+                </ul>
+                <p><strong>Result:</strong> 900 PRs merged via this framework at Atlassian.</p>
+                <p style="margin-top: 12px;"><strong>Key insight:</strong> The "Human Agent" could be <em>the mob</em>, not an individual.</p>
+                <p style="font-size: 0.85rem; color: var(--change); margin-top: 12px;"><a href="https://www.atlassian.com/blog/atlassian-engineering/hula-blog-autodev-paper-human-in-the-loop-software-development-agents" target="_blank">Atlassian Engineering Blog</a></p>
+            </div>
+
+            <h3>Synthesis: What This Means for Mob</h3>
+
+            <table class="friction-table">
+                <thead>
+                    <tr>
+                        <th style="width: 30%;">Challenge</th>
+                        <th style="width: 35%;">Research Says</th>
+                        <th style="width: 35%;">Design Implication</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>"How do we use AI in mob?"</td>
+                        <td style="color: var(--text-muted);">Social presence still requires humans</td>
+                        <td><strong>2+ humans rule</strong> — AI is tool, not teammate</td>
+                    </tr>
+                    <tr>
+                        <td>"Won't AI replace the mob?"</td>
+                        <td style="color: var(--text-muted);">Collaboration problems unresolved</td>
+                        <td>Mob solves what AI can't: sensemaking, knowledge transfer</td>
+                    </tr>
+                    <tr>
+                        <td>"What's the gold standard?"</td>
+                        <td style="color: var(--text-muted);">HULA (Human-in-Loop Agents)</td>
+                        <td><strong>Mob AS the human-in-loop layer</strong></td>
+                    </tr>
+                    <tr>
+                        <td>"What about code review?"</td>
+                        <td style="color: var(--text-muted);">80% of AI PRs unreviewed</td>
+                        <td>Mob = built-in review; counters AI review erosion</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>The New Mental Model</h3>
+
+            <div class="rsc-grid" style="grid-template-columns: 1fr 1fr;">
+                <div class="card" style="border-top: 4px solid var(--run);">
+                    <div class="card-title">❌ Without Mob</div>
+                    <p style="font-size: 0.9rem;">Individual + AI → individual PR → (maybe) review → silent bugs</p>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">80% unreviewed. Knowledge silos. Review culture erodes.</p>
+                </div>
+                <div class="card" style="border-top: 4px solid var(--change);">
+                    <div class="card-title">✅ With Mob</div>
+                    <p style="font-size: 0.9rem;">Mob + AI → live review → ship</p>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">Real-time review. Knowledge spread. Social sensemaking preserved.</p>
+                </div>
+            </div>
+
+            <div class="quote-block" style="margin-top: 30px; border-left-color: var(--change);">
+                <p class="quote-text">"AI makes task-work easier. Mob makes coordination-work easier. Together, they compound."</p>
+            </div>
+
+            <h3>What The Mob Provides (That AI Can't)</h3>
+
+            <ul class="checklist">
+                <li>
+                    <span style="font-size: 1.2rem; margin-right: 8px;">👁️</span>
+                    <span><strong>Real-time review:</strong> Counters the 80% unreviewed problem</span>
+                </li>
+                <li>
+                    <span style="font-size: 1.2rem; margin-right: 8px;">🧠</span>
+                    <span><strong>Social sensemaking:</strong> Making meaning together (Weick)</span>
+                </li>
+                <li>
+                    <span style="font-size: 1.2rem; margin-right: 8px;">📚</span>
+                    <span><strong>Knowledge distribution:</strong> Counters AI-accelerated silo risk</span>
+                </li>
+                <li>
+                    <span style="font-size: 1.2rem; margin-right: 8px;">⚖️</span>
+                    <span><strong>Friction arbitrage:</strong> AI speeds individual work; mob speeds coordination</span>
+                </li>
+            </ul>
+
+            <h3>Industry Evidence</h3>
+
+            <div class="card">
+                <table class="friction-table" style="margin: 0;">
+                    <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th>AI Code %</th>
+                            <th>Velocity Gain</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Google</td>
+                            <td>25-30%</td>
+                            <td>~10%</td>
+                        </tr>
+                        <tr>
+                            <td>Microsoft</td>
+                            <td>~33%</td>
+                            <td>30-50% (engaged users)</td>
+                        </tr>
+                        <tr>
+                            <td>GitHub (internal)</td>
+                            <td>-</td>
+                            <td>55% fewer bugs</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 20px;"><strong>Sources:</strong> <a href="https://arxiv.org/abs/2507.15003" target="_blank">AIDev Dataset</a> • <a href="https://arxiv.org/html/2509.10956v1" target="_blank">AI Collaboration Longitudinal</a> • <a href="https://arxiv.org/html/2601.13754" target="_blank">Autopilot Study</a> • <a href="https://stemeducationjournal.springeropen.com/articles/10.1186/s40594-025-00537-3" target="_blank">Pair Programming Comparative</a> • <a href="https://www.atlassian.com/blog/atlassian-engineering/hula-blog-autodev-paper-human-in-the-loop-software-development-agents" target="_blank">Atlassian HULA</a> • <a href="https://github.blog/news-insights/product-news/from-pair-to-peer-programmer-our-vision-for-agentic-workflows-in-github-copilot/" target="_blank">GitHub Copilot Vision</a></p>
+        </section>
+    </div>
+
+    <div class="progress-ring" id="progressRing">0%</div>
+
+    <footer>
+        <p>Based on Claydon's Run/Serve/Change framework + The Ready's experiment design</p>
+    </footer>
+
+    <script>
+        // Safe localStorage wrapper for iOS
+        const storage = {
+            get: (key) => { try { return localStorage.getItem(key); } catch(e) { return null; } },
+            set: (key, val) => { try { localStorage.setItem(key, val); } catch(e) {} },
+            remove: (key) => { try { localStorage.removeItem(key); } catch(e) {} }
+        };
+
+        // Navigation
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Update buttons
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Update sections
+                document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+                document.getElementById(btn.dataset.section).classList.add('active');
+
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+
+        // Phase accordion
+        function togglePhase(header) {
+            header.parentElement.classList.toggle('open');
+        }
+
+        // Checklist
+        let checkedCount = 0;
+        const totalChecks = document.querySelectorAll('.check-box').length;
+
+        function toggleCheck(box) {
+            box.classList.toggle('checked');
+
+            // Count checked
+            checkedCount = document.querySelectorAll('.check-box.checked').length;
+            updateProgress();
+
+            // Save state
+            saveState();
+
+            // Celebrate at milestones
+            if (checkedCount === totalChecks) {
+                celebrate();
+            }
+        }
+
+        function updateProgress() {
+            const percent = Math.round((checkedCount / totalChecks) * 100);
+            document.getElementById('progressRing').textContent = percent + '%';
+        }
+
+        function celebrate() {
+            const ring = document.getElementById('progressRing');
+            ring.style.background = 'linear-gradient(135deg, var(--change), var(--primary))';
+            ring.style.color = 'white';
+            ring.classList.add('pulse');
+
+            // Confetti simulation with emojis
+            const emojis = ['🎉', '✨', '🚀', '🎯'];
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => {
+                    const emoji = document.createElement('div');
+                    emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    emoji.style.cssText = `
+                        position: fixed;
+                        font-size: 2rem;
+                        top: ${Math.random() * 50 + 25}%;
+                        left: ${Math.random() * 80 + 10}%;
+                        animation: fadeIn 0.3s ease;
+                        pointer-events: none;
+                    `;
+                    document.body.appendChild(emoji);
+                    setTimeout(() => emoji.remove(), 1500);
+                }, i * 100);
+            }
+        }
+
+        // RSC card detail
+        function showDetail(type) {
+            const details = {
+                run: "RUN work is visible and measurable—it wins budget fights. Engineers grab tickets, work alone, report back. The metric is individual completion.",
+                serve: "SERVE work is invisible until it stops. Someone is carrying integration, standards, and team coherence—none of it on their job description. Classic exhausted hero.",
+                change: "CHANGE work requires psychological safety to try/fail. Mob programming is stuck in 'convince' mode because there's no bandwidth—Run consumes everything."
+            };
+
+            alert(details[type]);
+        }
+
+        // Save/restore state
+        function saveState() {
+            const checked = [];
+            document.querySelectorAll('.check-box').forEach((box, i) => {
+                if (box.classList.contains('checked')) checked.push(i);
+            });
+            storage.set('mob-playbook-checked', JSON.stringify(checked));
+        }
+
+        function restoreState() {
+            const saved = storage.get('mob-playbook-checked');
+            if (saved) {
+                const checked = JSON.parse(saved);
+                document.querySelectorAll('.check-box').forEach((box, i) => {
+                    if (checked.includes(i)) {
+                        box.classList.add('checked');
+                    }
+                });
+                checkedCount = checked.length;
+                updateProgress();
+            }
+        }
+
+        // Initialize
+        restoreState();
+    </script>
+</body>
+</html>
