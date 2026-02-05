@@ -706,10 +706,10 @@
                 <p class="quote-source">Core insight</p>
             </div>
 
-            <p>Before trying to convince anyone, understand what makes collaboration structurally hard.</p>
+            <p>Before trying to convince anyone of mob programming's value, understand why the current structure makes collaboration <em>structurally hard</em>.</p>
 
             <h3>Run / Serve / Change</h3>
-            <p>Every organization has three types of work. Most fail to balance them.</p>
+            <p>Every organization has three types of work. Most fail to balance them — and this explains why mob programming faces resistance.</p>
 
             <div class="rsc-grid">
                 <div class="rsc-card run" onclick="showDetail('run')">
@@ -732,15 +732,53 @@
                 </div>
             </div>
 
+            <h3>Why Mob Programming Is Structurally Hard</h3>
+
+            <table class="even-over-table" style="margin: 20px 0;">
+                <thead>
+                    <tr>
+                        <th>Work Type</th>
+                        <th>What It Looks Like</th>
+                        <th>Mob Programming Reality</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="even"><strong>⚡ RUN</strong></td>
+                        <td class="over">Tickets, shipping, velocity metrics</td>
+                        <td class="bites">Solo coding <em>appears</em> faster. People are measured here.</td>
+                    </tr>
+                    <tr>
+                        <td class="even"><strong>🤝 SERVE</strong></td>
+                        <td class="over">Knowledge transfer, reducing bus factor</td>
+                        <td class="bites"><strong>Mob programming IS Serve work</strong> — but nobody measures it.</td>
+                    </tr>
+                    <tr>
+                        <td class="even"><strong>🚀 CHANGE</strong></td>
+                        <td class="over">Learning new practices, experiments</td>
+                        <td class="bites">This experiment is Change work — and Change is always deprioritized.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="hero-alert" style="border-color: var(--warning); background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(254, 243, 199, 0.3));">
+                <div class="hero-alert-title" style="color: var(--warning);">💡 The Insight</div>
+                <p><strong>Developers are measured on Run</strong> (story points, PRs, velocity).<br>
+                <strong>Mob programming's value is in Serve</strong> (shared understanding, bus factor, onboarding).<br>
+                <strong>But Serve is invisible</strong> — it doesn't show up on burndown charts.<br>
+                <strong>So mobbing looks like "wasting time"</strong> when judged by Run metrics.</p>
+            </div>
+
             <h3>Current Imbalance</h3>
             <div class="imbalance-bar">
                 <div class="imbalance-segment run">RUN 70%</div>
                 <div class="imbalance-segment serve">15%</div>
                 <div class="imbalance-segment change">15%</div>
             </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">Most teams are trapped in Run. Serve and Change get squeezed out — then people wonder why knowledge doesn't transfer and experiments never happen.</p>
 
             <h3>Why Traditional Dev Wins</h3>
-            <p>The current way of working isn't broken—it's <em>optimized</em>. Each behavior persists because the system rewards it.</p>
+            <p>The current way of working isn't broken—it's <em>optimized for Run</em>. Each behavior persists because the system rewards it.</p>
 
             <div class="card" style="padding: 0; overflow: hidden;">
                 <table class="friction-table" style="margin: 0;">
@@ -798,7 +836,8 @@
             </div>
 
             <h3>Depth Map: Where The Real Problem Lives</h3>
-            <p>Organizations are like oceans. What you see on the surface rarely explains what's happening below. Use this depth map to diagnose where the resistance actually lives.</p>
+            <p>So you understand the Run/Serve/Change imbalance. Now: <strong>where do you intervene?</strong></p>
+            <p>Organizations are like oceans. What you see on the surface rarely explains what's happening below. Most change initiatives fail because they target the wrong depth.</p>
 
             <div class="card" style="background: linear-gradient(180deg, #1a3a5c 0%, #0d1f33 50%, #050a10 100%); border: none; padding: 0; overflow: hidden;">
                 <!-- Sky -->
@@ -808,7 +847,8 @@
                         <span style="font-weight: 700; color: #7dd3fc; text-transform: uppercase; letter-spacing: 1px;">Sky</span>
                         <span style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-left: auto;">EXTERNAL WHY • READ-ONLY</span>
                     </div>
-                    <p style="margin: 0; color: rgba(255,255,255,0.8); font-size: 0.9rem;">AI is reshaping software delivery. Competitors are shipping faster. Atlassian ecosystem slowing. Monday pivot didn't deliver expected returns. External financial pressure creating scrutiny. BU needs to break even. No successful new app has hit £250k ARR in years.</p>
+                    <p style="margin: 0; color: rgba(255,255,255,0.6); font-size: 0.85rem; font-style: italic;">Market forces, competitive pressure, investor expectations. You can't change these.</p>
+                    <p style="margin: 8px 0 0 0; color: rgba(255,255,255,0.8); font-size: 0.9rem;">AI is reshaping software delivery. Competitors are shipping faster. BU needs to break even. External pressure creating scrutiny.</p>
                 </div>
 
                 <!-- Sunlight Zone -->
@@ -818,7 +858,8 @@
                         <span style="font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 1px;">Sunlight Zone</span>
                         <span style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-left: auto;">SURFACE WHAT • READ-ONLY</span>
                     </div>
-                    <p style="margin: 0; color: rgba(255,255,255,0.8); font-size: 0.9rem;">"We're the innovation hub!" "Act like startups!" "Ship 12 apps in 12 months!" Strategy decks say experiment and collaborate—but metrics still reward individual ticket completion.</p>
+                    <p style="margin: 0; color: rgba(255,255,255,0.6); font-size: 0.85rem; font-style: italic;">Strategy, vision, what leaders say. Sounds great but doesn't change behavior.</p>
+                    <p style="margin: 8px 0 0 0; color: rgba(255,255,255,0.8); font-size: 0.9rem;">"We're the innovation hub!" "Act like startups!" "Ship 12 apps in 12 months!" Strategy decks say experiment and collaborate—but metrics still reward individual ticket completion.</p>
                 </div>
 
                 <!-- Twilight Zone - EDITABLE -->
@@ -828,8 +869,8 @@
                         <span style="font-weight: 700; color: var(--change); text-transform: uppercase; letter-spacing: 1px;">Twilight Zone</span>
                         <span style="font-size: 0.75rem; color: var(--change); margin-left: auto; font-weight: 600;">⚡ OPERATIONAL HOW • EDITABLE</span>
                     </div>
-                    <p style="margin: 0; color: rgba(255,255,255,0.9); font-size: 0.9rem;"><strong>Jira assigns one person per ticket. No experiment grammar—no hypothesis, no exit criteria, no named owner. Handover means inheriting someone else's code with no ritual. Mobbing requires coordinating five calendars.</strong></p>
-                    <p style="margin: 8px 0 0 0; color: var(--change); font-size: 0.85rem;">← This is the ONLY zone you can actually change</p>
+                    <p style="margin: 0; color: rgba(255,255,255,0.6); font-size: 0.85rem; font-style: italic;">How work actually gets done. The rituals, tools, defaults. <strong>This is the only zone you can change.</strong></p>
+                    <p style="margin: 8px 0 0 0; color: rgba(255,255,255,0.9); font-size: 0.9rem;"><strong>Jira assigns one person per ticket. No experiment grammar—no hypothesis, no exit criteria. Handover means inheriting code with no ritual. Mobbing requires coordinating five calendars.</strong></p>
                 </div>
 
                 <!-- Midnight Zone -->
@@ -839,13 +880,59 @@
                         <span style="font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 1px;">Midnight Zone</span>
                         <span style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-left: auto;">INTERNAL WHY • READ-ONLY</span>
                     </div>
-                    <p style="margin: 0; color: rgba(255,255,255,0.7); font-size: 0.9rem;">"We had redundancies last year. Am I next if this experiment fails?" "If I take someone else's app, I'm accountable for their mistakes." "They want AI-first but my skills are being made obsolete." "The innovation hub sounds vulnerable—I'd rather be on a stable product."</p>
+                    <p style="margin: 0; color: rgba(255,255,255,0.6); font-size: 0.85rem; font-style: italic;">What people believe but don't say. Fear, identity, psychological safety. Can't be directly addressed.</p>
+                    <p style="margin: 8px 0 0 0; color: rgba(255,255,255,0.7); font-size: 0.9rem;">"Am I next if this experiment fails?" "If I take someone else's app, I'm accountable for their mistakes." "They want AI-first but my skills are being made obsolete."</p>
                 </div>
             </div>
+
+            <h3>The Intervention Logic</h3>
+            <table class="even-over-table" style="margin: 20px 0;">
+                <thead>
+                    <tr>
+                        <th>Zone</th>
+                        <th>What It Contains</th>
+                        <th>Can You Change It?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="even">☀️ Sky</td>
+                        <td class="over">Market forces, competitor moves, investor pressure</td>
+                        <td class="bites">No — external reality</td>
+                    </tr>
+                    <tr>
+                        <td class="even">🌊 Sunlight</td>
+                        <td class="over">Strategy decks, vision statements, what leaders say</td>
+                        <td class="bites">No — talk doesn't change behavior</td>
+                    </tr>
+                    <tr>
+                        <td class="even" style="background: rgba(16, 185, 129, 0.2);">🌑 Twilight</td>
+                        <td class="over" style="background: rgba(16, 185, 129, 0.2);"><strong>Rituals, tools, defaults, how work actually flows</strong></td>
+                        <td class="bites" style="background: rgba(16, 185, 129, 0.2);"><strong>YES — the only lever</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="even">🌌 Midnight</td>
+                        <td class="over">Beliefs, fears, identity, psychological safety</td>
+                        <td class="bites">No — but it shifts when Twilight changes</td>
+                    </tr>
+                </tbody>
+            </table>
 
             <div class="quote-block" style="margin-top: 20px; border-left-color: var(--change);">
                 <p class="quote-text">"You can't directly change what people believe (Midnight) or what strategy says (Sunlight). You can only change how work actually gets done (Twilight). Change the rituals, and the beliefs follow."</p>
                 <p class="quote-source">The Ready - Depthfinding</p>
+            </div>
+
+            <div class="card" style="margin-top: 20px; border-left: 4px solid var(--change);">
+                <div class="card-title">🎯 For Mob Programming</div>
+                <p>Don't try to convince people mobbing is valuable (Sunlight). Don't try to address their fears directly (Midnight). Instead:</p>
+                <ul style="margin: 12px 0 0 20px; color: var(--text);">
+                    <li><strong>Change the default</strong> — Pre-book mob slots so canceling requires action</li>
+                    <li><strong>Change the tooling</strong> — One-click VS Code Live Share, permanent mob room</li>
+                    <li><strong>Change the metrics</strong> — Track knowledge spread and stuck-time, not just velocity</li>
+                    <li><strong>Change the grammar</strong> — "Blocked >90 min? Drop it in #mob-room"</li>
+                </ul>
+                <p style="margin-top: 12px; color: var(--change);"><strong>The Twilight Zone moves are in the Approach tab →</strong></p>
             </div>
         </section>
 
