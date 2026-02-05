@@ -687,8 +687,7 @@
     <nav>
         <button class="nav-btn active" data-section="diagnosis">Diagnosis</button>
         <button class="nav-btn" data-section="value">Value</button>
-        <button class="nav-btn" data-section="strategy">Strategy</button>
-        <button class="nav-btn" data-section="tactics">Tactics</button>
+        <button class="nav-btn" data-section="approach">Approach</button>
         <button class="nav-btn ai-tab" data-section="ai-collab">+ AI Collab</button>
         <button class="nav-btn" data-section="experiment">Experiment</button>
         <button class="nav-btn" data-section="pilot">8-Week Cycle</button>
@@ -885,8 +884,8 @@
             </div>
         </section>
 
-        <!-- STRATEGY -->
-        <section id="strategy">
+        <!-- APPROACH (Strategy + Tactics combined) -->
+        <section id="approach">
             <h2>Friction Arbitrage</h2>
 
             <div class="quote-block">
@@ -981,10 +980,9 @@
                     </ul>
                 </div>
             </div>
-        </section>
 
-        <!-- TACTICS -->
-        <section id="tactics">
+            <hr style="margin: 40px 0; border: none; border-top: 2px solid var(--border);">
+
             <h2>The Trojan Mice Approach</h2>
 
             <p><strong>Trojan Mice:</strong> Small, seemingly innocuous changes that slip past organizational antibodies and create bigger shifts over time. Don't call it "adopting mob programming"—that triggers immune responses.</p>
@@ -1326,25 +1324,38 @@
                 </div>
             </div>
 
-            <h3>Ground Rules</h3>
-            <ul class="checklist">
-                <li>
-                    <span class="check-box" onclick="toggleCheck(this)"></span>
-                    <span><strong>Get on the pitch:</strong> Both people contribute, no sideline spectators</span>
-                </li>
-                <li>
-                    <span class="check-box" onclick="toggleCheck(this)"></span>
-                    <span><strong>Deliberateness over impulsiveness:</strong> "Read it twice before we hit the button"</span>
-                </li>
-                <li>
-                    <span class="check-box" onclick="toggleCheck(this)"></span>
-                    <span><strong>Chatham House rules:</strong> What stays here, stays here (recontract before sharing)</span>
-                </li>
-                <li>
-                    <span class="check-box" onclick="toggleCheck(this)"></span>
-                    <span><strong>Playful/experimental:</strong> Not too rigid — we're still learning</span>
-                </li>
-            </ul>
+            <h3>Ground Rules: Even/Over</h3>
+            <table class="even-over-table">
+                <thead>
+                    <tr>
+                        <th>Even</th>
+                        <th>Over</th>
+                        <th>When It Bites</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="even">Contributing</td>
+                        <td class="over">Spectating</td>
+                        <td class="bites">When someone has genuine expertise to observe first</td>
+                    </tr>
+                    <tr>
+                        <td class="even">Deliberateness</td>
+                        <td class="over">Impulsiveness</td>
+                        <td class="bites">"Read it twice before we hit the button"</td>
+                    </tr>
+                    <tr>
+                        <td class="even">Confidentiality</td>
+                        <td class="over">Sharing</td>
+                        <td class="bites">When lessons should be shared more broadly</td>
+                    </tr>
+                    <tr>
+                        <td class="even">Playfulness</td>
+                        <td class="over">Rigidity</td>
+                        <td class="bites">When consistency matters more than experimentation</td>
+                    </tr>
+                </tbody>
+            </table>
 
             <h3>Warning Stickers</h3>
             <p>Name your own risks before starting:</p>
@@ -1407,7 +1418,7 @@
                 </tbody>
             </table>
 
-            <h3>🎭 Trickster Move</h3>
+            <h3>Flip the Default</h3>
             <div class="trickster-card">
                 <p style="color: var(--text); margin: 0; font-size: 1rem;">
                     <strong>Instead of asking:</strong> "Should we mob this?"<br><br>
