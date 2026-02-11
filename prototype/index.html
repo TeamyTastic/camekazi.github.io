@@ -1,33 +1,875 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url=https://teamytastic.github.io/camekazi.github.io/gist/?1d1c0f86d462f101afcebdba737a4f19/mvi-experiment.html">
-    <title>Latest Prototype</title>
-    <meta name="description" content="Mvi Experiment - Latest prototype">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MVI Experiment Designer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <script>
+    const storage = {
+        get: (key) => { try { return localStorage.getItem(key); } catch(e) { return null; } },
+        set: (key, val) => { try { localStorage.setItem(key, val); } catch(e) {} },
+        remove: (key) => { try { localStorage.removeItem(key); } catch(e) {} }
+    };
+    </script>
     <style>
+        :root {
+            --ink: #1a1a2e;
+            --ink-light: #4a4a5e;
+            --surface: #faf8f5;
+            --surface-warm: #f5f0e8;
+            --accent: #c45d2c;
+            --accent-light: #e8a87c;
+            --accent-glow: rgba(196, 93, 44, 0.12);
+            --success: #2d6a4f;
+            --success-bg: #d8f3dc;
+            --border: #e0dcd4;
+            --radius: 12px;
+            --shadow: 0 2px 12px rgba(26, 26, 46, 0.06);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'DM Sans', -apple-system, sans-serif;
+            background: var(--surface);
+            color: var(--ink);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: var(--ink);
+            color: var(--surface);
+            padding: 40px 24px 32px;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::after {
+            content: '';
+            position: absolute;
+            top: -60%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(196,93,44,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .header-inner {
+            max-width: 720px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        .header h1 {
+            font-family: 'Instrument Serif', Georgia, serif;
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+        .header p {
+            opacity: 0.7;
+            font-size: 0.95rem;
+        }
+        .header .tag {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 16px;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            max-width: 720px;
+            margin: -16px auto 0;
+            padding: 0 24px;
+            position: relative;
+            z-index: 2;
+        }
+        .progress-track {
+            background: white;
+            border-radius: 20px;
+            padding: 12px 20px;
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+        .progress-dot {
+            width: 28px;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border);
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+        .progress-dot.active {
+            background: var(--accent);
+        }
+        .progress-dot.done {
+            background: var(--success);
+        }
+        .progress-label {
+            font-size: 0.75rem;
+            color: var(--ink-light);
+            margin-left: 12px;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        /* Form Container */
+        .form-container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* Sections */
+        .section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .section.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 28px 24px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+        }
+        .section-number {
+            font-family: 'Instrument Serif', serif;
+            font-size: 0.85rem;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+        .section-title {
+            font-family: 'Instrument Serif', Georgia, serif;
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin-bottom: 4px;
+            letter-spacing: -0.01em;
+        }
+        .section-subtitle {
+            color: var(--ink-light);
+            font-size: 0.85rem;
+            margin-bottom: 24px;
+        }
+
+        /* Form Elements */
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 6px;
+        }
+        label .hint {
+            font-weight: 400;
+            color: var(--ink-light);
+            font-size: 0.8rem;
+            display: block;
+            margin-top: 2px;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--ink);
+            background: var(--surface);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            -webkit-appearance: none;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+            line-height: 1.5;
+        }
+
+        .field-group {
+            margin-bottom: 20px;
+        }
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        @media (max-width: 500px) {
+            .field-row { grid-template-columns: 1fr; }
+        }
+
+        /* Hypothesis builder */
+        .hypothesis-builder {
+            background: var(--surface-warm);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .hypothesis-builder .preview {
+            font-family: 'Instrument Serif', serif;
+            font-size: 1.1rem;
+            font-style: italic;
+            color: var(--ink);
+            line-height: 1.5;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+        .hypothesis-builder .preview .blank {
+            color: var(--accent);
+            border-bottom: 2px solid var(--accent-light);
+        }
+        .hypothesis-builder .h-field {
+            margin-bottom: 10px;
+        }
+        .hypothesis-builder input {
+            background: white;
+        }
+
+        /* Duration selector */
+        .duration-options {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .duration-option {
+            padding: 10px 20px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+        }
+        .duration-option:hover {
+            border-color: var(--accent-light);
+        }
+        .duration-option.selected {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* Waterline indicator */
+        .waterline {
+            background: linear-gradient(180deg, #e8f4f8 0%, #e8f4f8 49%, #1a1a2e 50%, #2d3a5e 100%);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .waterline-label {
+            position: absolute;
+            right: 16px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .waterline-label.above { top: 8px; color: var(--ink-light); }
+        .waterline-label.below { bottom: 8px; color: rgba(255,255,255,0.6); }
+        .waterline-toggle {
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            gap: 12px;
+            padding: 8px;
+        }
+        .waterline-toggle button {
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            min-height: 44px;
+            transition: all 0.2s;
+        }
+        .waterline-toggle .above-btn {
+            background: white;
+            color: var(--ink);
+        }
+        .waterline-toggle .above-btn.selected {
+            border-color: var(--success);
+            background: var(--success-bg);
+        }
+        .waterline-toggle .below-btn {
+            background: rgba(255,255,255,0.15);
             color: white;
         }
-        .message { text-align: center; }
-        a { color: white; text-decoration: underline; }
+        .waterline-toggle .below-btn.selected {
+            border-color: var(--accent);
+            background: rgba(196,93,44,0.3);
+        }
+
+        /* Navigation */
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            gap: 12px;
+        }
+        .btn {
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            min-height: 48px;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+        .btn-primary:hover { background: #a84e25; transform: translateY(-1px); }
+        .btn-primary:active { transform: translateY(0); }
+        .btn-secondary {
+            background: transparent;
+            color: var(--ink-light);
+            border: 1.5px solid var(--border);
+        }
+        .btn-secondary:hover { border-color: var(--ink-light); }
+        .btn-submit {
+            background: var(--success);
+            color: white;
+            width: 100%;
+            font-size: 1.05rem;
+            padding: 16px;
+        }
+        .btn-submit:hover { background: #245a42; }
+
+        /* Success state */
+        .success-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(26,26,46,0.6);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        .success-overlay.show { display: flex; }
+        .success-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .success-card .icon { font-size: 3rem; margin-bottom: 16px; }
+        .success-card h2 {
+            font-family: 'Instrument Serif', serif;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+        .success-card p { color: var(--ink-light); margin-bottom: 24px; }
+        .success-card a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Experiment list */
+        .experiment-list {
+            margin-top: 16px;
+        }
+        .experiment-item {
+            background: white;
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            margin-bottom: 8px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+        .experiment-item:hover { transform: translateX(4px); }
+        .experiment-item .name { font-weight: 600; }
+        .experiment-item .meta { font-size: 0.8rem; color: var(--ink-light); }
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .status-badge.active { background: #dbeafe; color: #1e40af; }
+        .status-badge.scale { background: var(--success-bg); color: var(--success); }
+        .status-badge.pivot { background: #fef3c7; color: #92400e; }
+        .status-badge.kill { background: #fee2e2; color: #991b1b; }
+
+        /* Setup banner */
+        .setup-banner {
+            background: var(--surface-warm);
+            border: 1.5px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .setup-banner h3 {
+            font-family: 'Instrument Serif', serif;
+            margin-bottom: 8px;
+        }
+        .setup-banner code {
+            background: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        .setup-banner .field-group { margin-top: 16px; text-align: left; }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 24px;
+            color: var(--ink-light);
+            font-size: 0.8rem;
+        }
+        .footer a { color: var(--accent); text-decoration: none; }
     </style>
 </head>
 <body>
-    <div class="message">
-        <h1>Loading Latest Prototype...</h1>
-        <p><strong>Mvi Experiment</strong></p>
-        <p style="margin-top: 20px; font-size: 14px; opacity: 0.7;">Published: 2026-02-11</p>
+
+<div class="header">
+    <div class="header-inner">
+        <span class="tag">The Ready</span>
+        <h1>MVI Experiment Designer</h1>
+        <p>Radical change at a non-radical scale</p>
     </div>
-    <script>
-        window.location.href = 'https://teamytastic.github.io/camekazi.github.io/gist/?1d1c0f86d462f101afcebdba737a4f19/mvi-experiment.html';
-    </script>
+</div>
+
+<div class="progress-bar">
+    <div class="progress-track">
+        <div class="progress-dot done" data-step="0"></div>
+        <div class="progress-dot" data-step="1"></div>
+        <div class="progress-dot" data-step="2"></div>
+        <div class="progress-dot" data-step="3"></div>
+        <div class="progress-dot" data-step="4"></div>
+        <span class="progress-label">1 / 5</span>
+    </div>
+</div>
+
+<div class="form-container">
+
+    <!-- SETUP (one-time) -->
+    <div id="setup-banner" class="setup-banner" style="display:none">
+        <h3>Connect to Google Sheets</h3>
+        <p>Paste your Apps Script Web App URL to save experiments to your sheet.</p>
+        <div class="field-group">
+            <label>Apps Script URL</label>
+            <input type="text" id="script-url" placeholder="https://script.google.com/macros/s/.../exec">
+        </div>
+        <button class="btn btn-primary" onclick="saveScriptUrl()" style="margin-top:8px">Save Connection</button>
+        <p style="margin-top:12px; font-size:0.8rem; color:var(--ink-light)">
+            Sheet: <a href="https://docs.google.com/spreadsheets/d/1pfFE56uYNIt9F0pfXkv-wWKPvuknxC0fj0fvYBn-o08/edit" target="_blank">MVI Experiment Tracker</a>
+        </p>
+    </div>
+
+    <!-- SECTION 1: The Tension -->
+    <div class="section active" data-step="0">
+        <div class="section-card">
+            <div class="section-number">Step 1 of 5</div>
+            <h2 class="section-title">Name the Tension</h2>
+            <p class="section-subtitle">What gap exists between current reality and what could be true?</p>
+
+            <div class="field-group">
+                <label>Experiment Name
+                    <span class="hint">A memorable label for this experiment</span>
+                </label>
+                <input type="text" id="name" placeholder="e.g. Async Standups Trial">
+            </div>
+
+            <div class="field-group">
+                <label>Tension / Opportunity
+                    <span class="hint">The specific gap you've observed. Be concrete.</span>
+                </label>
+                <textarea id="tension" rows="3" placeholder="e.g. Our daily standups consume 45 min and most people zone out after 5. The information shared could be async."></textarea>
+            </div>
+        </div>
+
+        <div class="nav">
+            <div></div>
+            <button class="btn btn-primary" onclick="goTo(1)">Next &rarr;</button>
+        </div>
+    </div>
+
+    <!-- SECTION 2: Hypothesis -->
+    <div class="section" data-step="1">
+        <div class="section-card">
+            <div class="section-number">Step 2 of 5</div>
+            <h2 class="section-title">Form Your Hypothesis</h2>
+            <p class="section-subtitle">What do you believe will happen, and why?</p>
+
+            <div class="hypothesis-builder">
+                <div class="h-field">
+                    <label>We believe that...</label>
+                    <input type="text" id="h-action" placeholder="replacing daily standups with async check-ins">
+                </div>
+                <div class="h-field">
+                    <label>will result in...</label>
+                    <input type="text" id="h-outcome" placeholder="30 min/day saved per person with no loss in team alignment">
+                </div>
+                <div class="h-field">
+                    <label>because...</label>
+                    <input type="text" id="h-reason" placeholder="most standup content is status updates that don't need synchronous discussion">
+                </div>
+                <div class="preview">
+                    "We believe that <span class="blank" id="preview-action">___</span>
+                    will result in <span class="blank" id="preview-outcome">___</span>
+                    because <span class="blank" id="preview-reason">___</span>."
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>Practice / Proposal
+                    <span class="hint">Exactly what will you try? Be specific about the how.</span>
+                </label>
+                <textarea id="proposal" rows="3" placeholder="e.g. Replace Mon-Thu standup with a Slack thread posted at 9am. Keep Friday standup synchronous for planning."></textarea>
+            </div>
+
+            <div class="field-group">
+                <label>Other Options Considered
+                    <span class="hint">What alternatives did you reject? (Preempts "did you think about X?")</span>
+                </label>
+                <textarea id="alternatives" rows="2" placeholder="e.g. Considered cutting to 15 min, moving to twice weekly, or using video updates"></textarea>
+            </div>
+        </div>
+
+        <div class="nav">
+            <button class="btn btn-secondary" onclick="goTo(0)">&larr; Back</button>
+            <button class="btn btn-primary" onclick="goTo(2)">Next &rarr;</button>
+        </div>
+    </div>
+
+    <!-- SECTION 3: Scope -->
+    <div class="section" data-step="2">
+        <div class="section-card">
+            <div class="section-number">Step 3 of 5</div>
+            <h2 class="section-title">Scope &amp; Boundaries</h2>
+            <p class="section-subtitle">Keep it minimal. One variable at a time.</p>
+
+            <div class="field-row">
+                <div class="field-group">
+                    <label>Participants</label>
+                    <input type="text" id="participants" placeholder="e.g. Platform team (8 people)">
+                </div>
+                <div class="field-group">
+                    <label>Decision-Maker</label>
+                    <input type="text" id="decision-maker" placeholder="Who approves this?">
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>Duration</label>
+                <div class="duration-options">
+                    <div class="duration-option" data-weeks="2" onclick="selectDuration(this)">2 weeks</div>
+                    <div class="duration-option" data-weeks="4" onclick="selectDuration(this)">4 weeks</div>
+                    <div class="duration-option selected" data-weeks="8" onclick="selectDuration(this)">8 weeks <span style="font-size:0.75rem;opacity:0.7;margin-left:4px">(default)</span></div>
+                    <div class="duration-option" data-weeks="12" onclick="selectDuration(this)">12 weeks</div>
+                </div>
+            </div>
+
+            <div class="field-group" style="margin-top: 20px">
+                <label>Waterline Check
+                    <span class="hint">Is this above or below the waterline? Above = safe to try, easy to undo. Below = could sink the ship.</span>
+                </label>
+                <div class="waterline">
+                    <span class="waterline-label above">Safe to try</span>
+                    <span class="waterline-label below">Needs caution</span>
+                    <div class="waterline-toggle">
+                        <button class="above-btn selected" onclick="setWaterline('above', this)">Above</button>
+                        <button class="below-btn" onclick="setWaterline('below', this)">Below</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>Requirements
+                    <span class="hint">Resources, tools, budget, permissions needed</span>
+                </label>
+                <textarea id="requirements" rows="2" placeholder="e.g. Slack channel, async standup bot license ($0), manager approval"></textarea>
+            </div>
+        </div>
+
+        <div class="nav">
+            <button class="btn btn-secondary" onclick="goTo(1)">&larr; Back</button>
+            <button class="btn btn-primary" onclick="goTo(3)">Next &rarr;</button>
+        </div>
+    </div>
+
+    <!-- SECTION 4: Metrics -->
+    <div class="section" data-step="3">
+        <div class="section-card">
+            <div class="section-number">Step 4 of 5</div>
+            <h2 class="section-title">How Will You Know?</h2>
+            <p class="section-subtitle">Define what success and failure look like before you start.</p>
+
+            <div class="field-group">
+                <label>Leading Indicators
+                    <span class="hint">Early signals (within 1-2 weeks) that this is working or not</span>
+                </label>
+                <textarea id="leading" rows="3" placeholder="e.g. Thread participation rate >80%, average response time <2 hours, fewer Slack DMs asking 'what's the status of X?'"></textarea>
+            </div>
+
+            <div class="field-group">
+                <label>Lagging Indicators
+                    <span class="hint">Outcome measures you'll check at the end of the cycle</span>
+                </label>
+                <textarea id="lagging" rows="3" placeholder="e.g. Time saved per person per week, team alignment score (survey), sprint velocity maintained"></textarea>
+            </div>
+        </div>
+
+        <div class="nav">
+            <button class="btn btn-secondary" onclick="goTo(2)">&larr; Back</button>
+            <button class="btn btn-primary" onclick="goTo(4)">Next &rarr;</button>
+        </div>
+    </div>
+
+    <!-- SECTION 5: Risks & Assumptions -->
+    <div class="section" data-step="4">
+        <div class="section-card">
+            <div class="section-number">Step 5 of 5</div>
+            <h2 class="section-title">Risks, Assumptions &amp; Constraints</h2>
+            <p class="section-subtitle">Map what you know, what you're guessing, and what could go wrong.</p>
+
+            <div class="field-group">
+                <label>Facts
+                    <span class="hint">What do you know for certain?</span>
+                </label>
+                <textarea id="facts" rows="2" placeholder="e.g. Current standup takes 45 min, 3 of 8 people actively speak"></textarea>
+            </div>
+
+            <div class="field-group">
+                <label>Assumptions
+                    <span class="hint">What are you betting on being true?</span>
+                </label>
+                <textarea id="assumptions" rows="2" placeholder="e.g. People will actually write updates. Async works across timezones."></textarea>
+            </div>
+
+            <div class="field-group">
+                <label>Constraints
+                    <span class="hint">Non-negotiable boundaries</span>
+                </label>
+                <textarea id="constraints" rows="2" placeholder="e.g. Must keep Friday sync. Cannot change sprint cadence."></textarea>
+            </div>
+
+            <div class="field-group">
+                <label>Risks &amp; Dependencies
+                    <span class="hint">What happens if a key assumption is wrong?</span>
+                </label>
+                <textarea id="risks" rows="2" placeholder="e.g. If participation drops below 50%, alignment issues surface in sprint review — revert immediately."></textarea>
+            </div>
+        </div>
+
+        <div class="section-card" style="text-align:center; padding: 24px">
+            <p style="color:var(--ink-light); margin-bottom:16px; font-size:0.9rem">
+                Ready to launch this experiment?
+            </p>
+            <button class="btn btn-submit" onclick="submitExperiment()">
+                Save to Google Sheets &rarr;
+            </button>
+            <p style="margin-top:12px; font-size:0.8rem; color:var(--ink-light)" id="submit-status"></p>
+        </div>
+
+        <div class="nav">
+            <button class="btn btn-secondary" onclick="goTo(3)">&larr; Back</button>
+            <div></div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Success Overlay -->
+<div class="success-overlay" id="success-overlay">
+    <div class="success-card">
+        <div class="icon">🧪</div>
+        <h2>Experiment Logged</h2>
+        <p>Your MVI has been saved to the tracker. Review it in 8 weeks — or at your next monthly retro.</p>
+        <p><a href="https://docs.google.com/spreadsheets/d/1pfFE56uYNIt9F0pfXkv-wWKPvuknxC0fj0fvYBn-o08/edit" target="_blank">Open Google Sheet &rarr;</a></p>
+        <button class="btn btn-primary" onclick="resetForm()" style="margin-top:16px; width:100%">Design Another Experiment</button>
+    </div>
+</div>
+
+<div class="footer">
+    Based on <a href="https://theready.com" target="_blank">The Ready</a>'s MVI framework &middot;
+    Radical change at a non-radical scale
+</div>
+
+<script>
+    let currentStep = 0;
+    const totalSteps = 5;
+    let selectedDuration = 8;
+    let waterlinePosition = 'above';
+
+    // Hypothesis live preview
+    ['h-action', 'h-outcome', 'h-reason'].forEach(id => {
+        const el = document.getElementById(id);
+        const previewId = 'preview-' + id.split('-')[1];
+        el.addEventListener('input', () => {
+            document.getElementById(previewId).textContent = el.value || '___';
+        });
+    });
+
+    function goTo(step) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelector(`.section[data-step="${step}"]`).classList.add('active');
+
+        document.querySelectorAll('.progress-dot').forEach((dot, i) => {
+            dot.classList.remove('active', 'done');
+            if (i < step) dot.classList.add('done');
+            if (i === step) dot.classList.add('active');
+        });
+
+        document.querySelector('.progress-label').textContent = `${step + 1} / ${totalSteps}`;
+        currentStep = step;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function selectDuration(el) {
+        document.querySelectorAll('.duration-option').forEach(o => o.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedDuration = parseInt(el.dataset.weeks);
+    }
+
+    function setWaterline(pos, btn) {
+        waterlinePosition = pos;
+        document.querySelectorAll('.waterline-toggle button').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+    }
+
+    function saveScriptUrl() {
+        const url = document.getElementById('script-url').value.trim();
+        if (url) {
+            storage.set('mvi-script-url', url);
+            document.getElementById('setup-banner').style.display = 'none';
+        }
+    }
+
+    // Show setup if no URL saved
+    if (!storage.get('mvi-script-url')) {
+        document.getElementById('setup-banner').style.display = 'block';
+    }
+
+    function gatherData() {
+        const hypothesis = `We believe that ${document.getElementById('h-action').value} will result in ${document.getElementById('h-outcome').value} because ${document.getElementById('h-reason').value}`;
+        return {
+            timestamp: new Date().toISOString(),
+            name: document.getElementById('name').value,
+            status: 'Active',
+            tension: document.getElementById('tension').value,
+            hypothesis: hypothesis,
+            proposal: document.getElementById('proposal').value,
+            alternatives: document.getElementById('alternatives').value,
+            participants: document.getElementById('participants').value,
+            duration: selectedDuration,
+            leading: document.getElementById('leading').value,
+            lagging: document.getElementById('lagging').value,
+            requirements: document.getElementById('requirements').value,
+            facts: document.getElementById('facts').value,
+            assumptions: document.getElementById('assumptions').value,
+            constraints: document.getElementById('constraints').value,
+            risks: document.getElementById('risks').value,
+            decisionMaker: document.getElementById('decision-maker').value,
+            notes: `Waterline: ${waterlinePosition}`
+        };
+    }
+
+    async function submitExperiment() {
+        const statusEl = document.getElementById('submit-status');
+        const data = gatherData();
+
+        if (!data.name) {
+            statusEl.textContent = 'Please name your experiment (Step 1)';
+            statusEl.style.color = 'var(--accent)';
+            return;
+        }
+
+        const scriptUrl = storage.get('mvi-script-url');
+
+        if (!scriptUrl) {
+            // Fallback: copy to clipboard as TSV
+            const row = Object.values(data).join('\t');
+            try {
+                await navigator.clipboard.writeText(row);
+                statusEl.innerHTML = 'Copied to clipboard! Paste into your <a href="https://docs.google.com/spreadsheets/d/1pfFE56uYNIt9F0pfXkv-wWKPvuknxC0fj0fvYBn-o08/edit" target="_blank" style="color:var(--accent)">Google Sheet</a> row.';
+                statusEl.style.color = 'var(--success)';
+            } catch(e) {
+                statusEl.textContent = 'Set up Google Sheets connection above to save directly.';
+                statusEl.style.color = 'var(--accent)';
+            }
+            return;
+        }
+
+        statusEl.textContent = 'Saving to Google Sheets...';
+        statusEl.style.color = 'var(--ink-light)';
+
+        try {
+            const response = await fetch(scriptUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            // no-cors means we can't read response, but it goes through
+            document.getElementById('success-overlay').classList.add('show');
+        } catch (err) {
+            statusEl.textContent = 'Error saving. Check your Apps Script URL.';
+            statusEl.style.color = 'var(--accent)';
+        }
+    }
+
+    function resetForm() {
+        document.getElementById('success-overlay').classList.remove('show');
+        document.querySelectorAll('input[type="text"], textarea').forEach(el => el.value = '');
+        document.querySelectorAll('.preview .blank').forEach(el => el.textContent = '___');
+        goTo(0);
+    }
+</script>
+
 </body>
 </html>
