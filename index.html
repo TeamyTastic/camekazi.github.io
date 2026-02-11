@@ -209,6 +209,7 @@
         <a href="#research" style="padding: 0.35rem 0.75rem; background: var(--border); color: var(--text); border-radius: 4px; text-decoration: none;">Research</a>
         <a href="#leadership" style="padding: 0.35rem 0.75rem; background: var(--border); color: var(--text); border-radius: 4px; text-decoration: none;">Strategy & Leadership</a>
         <a href="#ai-dev" style="padding: 0.35rem 0.75rem; background: var(--border); color: var(--text); border-radius: 4px; text-decoration: none;">AI & Dev</a>
+        <a href="#running" style="padding: 0.35rem 0.75rem; background: var(--border); color: var(--text); border-radius: 4px; text-decoration: none;">Running</a>
         <a href="#home" style="padding: 0.35rem 0.75rem; background: var(--border); color: var(--text); border-radius: 4px; text-decoration: none;">Home</a>
         <a href="#insights" style="padding: 0.35rem 0.75rem; background: var(--border); color: var(--text); border-radius: 4px; text-decoration: none;">Insights</a>
     </nav>
@@ -221,27 +222,27 @@
         <h2>Recently Added</h2>
         <ul>
             <li>
-                <a href="#depthfinding">Depthfinding</a>
+                <a href="#file-explorer">File Explorer</a>
                 <span class="date">Feb 2026</span>
             </li>
             <li>
-                <a href="#power-dynamics">Power Dynamics Analysis</a>
+                <a href="#claude-telegram">Claude Code Telegram</a>
                 <span class="date">Feb 2026</span>
             </li>
             <li>
-                <a href="#estuarine">Estuarine Mapping</a>
+                <a href="#running-coaching">Running Coaching Platform</a>
                 <span class="date">Feb 2026</span>
             </li>
             <li>
-                <a href="#aiify">AIify Agent</a>
+                <a href="#swarm">Swarm Orchestration</a>
                 <span class="date">Feb 2026</span>
             </li>
             <li>
-                <a href="#glassdoor">Glassdoor Research</a>
-                <span class="date">Feb 2026</span>
+                <a href="#mlx-whisper">MLX Whisper MCP</a>
+                <span class="date">Jan 2026</span>
             </li>
             <li>
-                <a href="#html-proto">HTML Prototyping</a>
+                <a href="#cynefin">Cynefin Framework</a>
                 <span class="date">Feb 2026</span>
             </li>
         </ul>
@@ -265,9 +266,28 @@
                 <li><strong>Agent self-improvement</strong> — Domain agents propose their own improvements based on session patterns; humans approve via <code>/review-improvements</code></li>
                 <li><strong>Coached-thinker mode</strong> — Nudges toward action over analysis paralysis; asks "What's the smallest step?" not "Have you considered..."</li>
                 <li><strong>Domain agents</strong> — Immunity to Change coaching (Kegan), systems thinking (Meadows), organizational sensemaking (Cynefin + Estuarine)</li>
-                <li><strong>76 skills</strong> — JTBD, ONA network analysis, Wardley Maps, financial modeling, stakeholder analysis, power dynamics, and more</li>
+                <li><strong>75 skills</strong> — JTBD, ONA network analysis, Wardley Maps, financial modeling, stakeholder analysis, power dynamics, and more</li>
             </ul>
             <p style="margin-top: 0.75rem; color: var(--text-muted);">Two files. Simple format. Grep to search. Built for individuals and teams who want to systematize expertise instead of rediscovering it.</p>
+        </div>
+
+        <h3 style="font-size: 0.85rem; color: var(--text-muted); margin: 1.5rem 0 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">Canonical Patterns</h3>
+        <div class="tools">
+            <div class="tool">
+                <a href="https://github.com/Camekazi/.claude">Whenwords</a>
+                <span class="desc">A "spec-only library" for human-friendly time formatting — behavioral rules, no code shipped. Inspired by <a href="https://www.dbreunig.com/2026/01/08/a-software-library-with-no-code.html">Drew Breunig</a></span>
+                <span class="tag tag-python">Python</span>
+            </div>
+            <div class="tool">
+                <a href="https://github.com/Camekazi/.claude">Benefits-Risks-Costs Lens</a>
+                <span class="desc">5-question evaluation framework for new patterns and tools — combines StrongDM Attractor, deterministic/probabilistic classification, and Trickster questions</span>
+                <span class="tag tag-cli">Framework</span>
+            </div>
+            <div class="tool">
+                <a href="https://github.com/Camekazi/.claude">Progressive Reflection</a>
+                <span class="desc">Tiered knowledge management: Hot (always-loaded) to Warm (one grep) to Stale (delete). Patterns earn their place through application count.</span>
+                <span class="tag tag-cli">Pattern</span>
+            </div>
         </div>
     </section>
 
@@ -325,6 +345,11 @@
                 <span class="desc">Apply Goldratt's TOC to identify and address system bottlenecks — throughput over local efficiency</span>
                 <span class="tag tag-skill">Claude Code Skill</span>
             </div>
+            <div class="tool">
+                <a href="https://github.com/Camekazi/.claude">Marketing Psychology</a>
+                <span class="desc">Apply psychological principles and mental models to marketing strategy — framing, anchoring, loss aversion, social proof</span>
+                <span class="tag tag-skill">Claude Code Skill</span>
+            </div>
         </div>
 
         <h3 style="font-size: 0.85rem; color: var(--text-muted); margin: 1.5rem 0 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">Organisational Design</h3>
@@ -369,6 +394,16 @@
                 <span class="desc">Manage interdependent tensions that can't be "solved" — map poles, design early warning indicators, avoid over-correction</span>
                 <span class="tag tag-skill">Claude Code Skill</span>
             </div>
+            <div class="tool" id="cynefin">
+                <a href="https://github.com/Camekazi/.claude">Cynefin Framework</a>
+                <span class="desc">Classify problems by complexity domain (Clear, Complicated, Complex, Chaotic, Confused) — match interventions to the problem type, not the other way around</span>
+                <span class="tag tag-skill">Claude Code Skill</span>
+            </div>
+            <div class="tool">
+                <a href="https://github.com/Camekazi/.claude">Loopy Causal Diagrams</a>
+                <span class="desc">Generate ASCII causal loop diagrams for terminal — visualize reinforcing and balancing feedback loops without leaving the CLI</span>
+                <span class="tag tag-skill">Claude Code Skill</span>
+            </div>
         </div>
 
         <h3 style="font-size: 0.85rem; color: var(--text-muted); margin: 1.5rem 0 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">Leadership</h3>
@@ -408,6 +443,11 @@
                 <span class="desc">Design and facilitate group sensemaking using Weick's seven properties — create shared meaning from ambiguous, complex situations</span>
                 <span class="tag tag-skill">Claude Code Skill</span>
             </div>
+            <div class="tool">
+                <a href="https://github.com/Camekazi/.claude">Problem Framing</a>
+                <span class="desc">Navigate complex problem situations through 6 layers of understanding — from surface symptoms to structural root causes</span>
+                <span class="tag tag-skill">Claude Code Skill</span>
+            </div>
         </div>
 
         <h3 style="font-size: 0.85rem; color: var(--text-muted); margin: 1.5rem 0 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">Coaching</h3>
@@ -438,10 +478,30 @@
     <section id="ai-dev">
         <h2>AI & Development</h2>
         <div class="tools">
+            <div class="tool featured" id="claude-telegram">
+                <a href="https://github.com/Camekazi/claude-code-telegram">Claude Code Telegram</a>
+                <span class="desc">Remote Claude Code access via Telegram bot — interact with your projects from anywhere with full AI assistance and session persistence</span>
+                <span class="tag tag-node">Node.js</span>
+            </div>
+            <div class="tool featured" id="file-explorer">
+                <a href="https://github.com/Camekazi/file-explorer">File Explorer</a>
+                <span class="desc">Self-hosted multi-machine file browser — browse, search, and manage files across your devices from a single web interface</span>
+                <span class="tag tag-node">Node.js</span>
+            </div>
             <div class="tool featured" id="aiify">
                 <a href="https://github.com/Camekazi/.claude">AIify Agent</a>
                 <span class="desc">Transform existing designs into agent-native architectures — features are prompts, tools are primitives, agents have user parity</span>
                 <span class="tag tag-agent">Claude Code Agent</span>
+            </div>
+            <div class="tool" id="swarm">
+                <a href="https://github.com/Camekazi/.claude">Swarm Orchestration</a>
+                <span class="desc">Orchestrate complex tasks by spawning parallel Haiku sub-agents — divide and conquer with automatic result synthesis</span>
+                <span class="tag tag-skill">Claude Code Skill</span>
+            </div>
+            <div class="tool" id="mlx-whisper">
+                <a href="https://github.com/Camekazi/mlx-whisper-mcp">MLX Whisper MCP</a>
+                <span class="desc">Local MCP server for MLX Whisper transcription — on-device speech-to-text with Apple Silicon acceleration, no cloud required</span>
+                <span class="tag tag-python">Python</span>
             </div>
             <div class="tool">
                 <a href="https://github.com/Camekazi/ReadingCompanion">ReadingCompanion</a>
@@ -505,6 +565,47 @@
         </div>
     </section>
 
+    <section id="running">
+        <h2>Running & Performance</h2>
+        <div class="tools">
+            <div class="tool featured" id="running-coaching">
+                <a href="https://github.com/TeamyTastic/running-coaching">Running Coaching Platform</a>
+                <span class="desc">Data infrastructure for running coaching practice — athlete management, training analysis, and performance tracking with longitudinal data import</span>
+                <span class="tag tag-python">Python</span>
+            </div>
+            <div class="tool">
+                <a href="https://github.com/Camekazi/.claude">Palladino Power Analysis</a>
+                <span class="desc">Analyze Stryd running power using Coach Steve Palladino's methodology — power-duration curves, training zones, race predictions from power data</span>
+                <span class="tag tag-skill">Claude Code Skill</span>
+            </div>
+            <div class="tool">
+                <a href="https://github.com/Camekazi/.claude">Seiler HR Drift Analysis</a>
+                <span class="desc">Analyze running performance using Stephen Seiler's HR drift methodology — aerobic decoupling, cardiac drift detection, training intensity distribution</span>
+                <span class="tag tag-skill">Claude Code Skill</span>
+            </div>
+            <div class="tool">
+                <a href="https://github.com/Camekazi/.claude">Marathon Time Estimation</a>
+                <span class="desc">Estimate marathon time using Riegel, VDOT, and Critical Speed methods — triangulate predictions from race history and training data</span>
+                <span class="tag tag-skill">Claude Code Skill</span>
+            </div>
+            <div class="tool">
+                <a href="https://github.com/Camekazi/.claude">Athlete Coaching Brief</a>
+                <span class="desc">Generate professional multi-page HTML coaching briefs — training summaries, performance trends, and actionable recommendations</span>
+                <span class="tag tag-skill">Claude Code Skill</span>
+            </div>
+            <div class="tool">
+                <a href="https://github.com/Camekazi/.claude">Strava &amp; Garmin Data Import</a>
+                <span class="desc">Systematically import longitudinal running data from Strava and Garmin Connect with advanced field mapping and historical analysis</span>
+                <span class="tag tag-skill">Claude Code Skill</span>
+            </div>
+            <div class="tool">
+                <a href="https://github.com/Camekazi/.claude">Context-Performance Timeline</a>
+                <span class="desc">Visual overlay showing life context alongside performance data — correlate training outcomes with sleep, stress, motivation, and external factors</span>
+                <span class="tag tag-skill">Claude Code Skill</span>
+            </div>
+        </div>
+    </section>
+
     <!-- Personal ONA archived - private at scottish-scaleup-ona.netlify.app -->
 
     <section id="home">
@@ -540,7 +641,7 @@
 
     <section id="insights">
         <h2>Insights from Using AI Agents</h2>
-        <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">Patterns from building 76 skills and 7 specialized agents with Claude Code</p>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">Patterns from building 75 skills and 7 specialized agents with Claude Code</p>
 
         <h3 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">The Learning Loop</h3>
         <ol style="list-style: none; counter-reset: insight;">
