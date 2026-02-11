@@ -208,15 +208,6 @@
         .tag-pattern { background: #fef3c7; color: #78350f; }
         .tag-framework { background: #f3e8ff; color: #6b21a8; }
 
-        /* Featured items */
-        .tool.featured {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            border: 1px solid #bae6fd;
-            border-radius: 8px;
-            padding: 0.75rem;
-            margin: 0 -0.75rem;
-        }
-
         /* Card grid for featured sections */
         .card-grid {
             display: grid;
@@ -328,6 +319,43 @@
             justify-content: center;
             font-size: 0.8rem;
             font-weight: 600;
+        }
+
+        /* Sources grid */
+        .sources-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .source-group h4 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.25rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .source-group a {
+            display: block;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-top: 0.4rem;
+        }
+
+        .source-group a:hover {
+            text-decoration: underline;
+        }
+
+        .source-group span {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-bottom: 0.15rem;
         }
 
         /* Footer */
@@ -523,6 +551,10 @@
                 align-items: flex-start;
             }
 
+            .sources-grid {
+                grid-template-columns: 1fr;
+            }
+
             .timeline-arc {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 0.5rem;
@@ -582,6 +614,7 @@
             <a href="#ai-dev">AI & Dev</a>
             <a href="#running">Running</a>
             <a href="#home">Home</a>
+            <a href="#sources">Sources</a>
         </nav>
 
         <div class="intro-card">
@@ -649,24 +682,6 @@
                 <li class="insight"><strong>Compose before extend</strong> &mdash; "What if we composed instead of adding features?" A composition layer beats adding features individually. Change the ritual, not the content.</li>
             </ol>
 
-            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);">
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;"><strong>Inspired by:</strong></p>
-                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.8;">
-                    <a href="https://every.to/chain-of-thought/what-comes-after-saas">Compound Engineering</a> (Dan Shipper / Every) &middot;
-                    <a href="https://every.to/compound-engineering-manifesto">Manifesto</a> (Kieran Klaassen / Every) &middot;
-                    <a href="https://www.anthropic.com/claude-code">Claude Code</a> (Anthropic) &middot;
-                    <a href="https://simonwillison.net/">Simon Willison</a> &middot;
-                    <a href="https://bensbites.beehiiv.com/">Ben's Bites</a> (Ben Tossell) &middot;
-                    <a href="https://www.howaiai.com/">How I AI</a> &middot;
-                    <a href="https://ghuntley.com/claudesian/">Claudesian</a> (Geoffrey Huntley) &middot;
-                    <a href="https://www.dbreunig.com/2026/01/08/a-software-library-with-no-code.html">Spec-Only Libraries</a> (Drew Breunig) &middot;
-                    <a href="https://www.exponentialview.co/">Exponential View</a> (Azeem Azhar) &middot;
-                    <a href="https://www.robcross.org/">ONA Methodology</a> (Rob Cross) &middot;
-                    <a href="https://mindsatwork.com/the-immunity-to-change-process/">Immunity to Change</a> (Kegan & Lahey) &middot;
-                    <a href="https://www.youtube.com/@drrichardclaydon">Leadership Rewritten</a> (Richard Claydon) &middot;
-                    <a href="https://github.com/anthropics/anthropic-cookbook/tree/main/misc/prompt_caching">ACE Patterns</a>
-                </p>
-            </div>
         </details>
 
     </div>
@@ -825,7 +840,7 @@
             <details>
                 <summary>Organisational Design (10 items)</summary>
                 <div class="tools">
-                    <div class="tool featured" id="depthfinding">
+                    <div class="tool" id="depthfinding">
                         <a href="https://github.com/Camekazi/.claude">Depthfinding</a>
                         <span class="desc">Map organizational challenges across four depth zones (Sky, Sunshine, Twilight, Midnight) &mdash; surface visible symptoms vs hidden systemic drivers</span>
                         <span class="tag tag-skill">Skill</span>
@@ -1033,12 +1048,15 @@
     <section id="lifestyle">
         <div class="content-wrap">
             <h2>&#127807; Lifestyle</h2>
-            <div class="tools">
-                <div class="tool featured">
+            <div class="card-grid">
+                <div class="card">
                     <a href="https://github.com/Camekazi/wildlife-alerter">Wildlife & Aurora Alerter</a>
-                    <span class="desc">Real-time dolphin, whale, and seal sighting alerts for Edinburgh coast &mdash; plus aurora borealis alerts when northern lights are visible. Polls eBird, iNaturalist, GBIF, and AuroraWatch UK with push notifications</span>
+                    <div class="desc">Real-time dolphin, whale, and seal sighting alerts for Edinburgh coast &mdash; plus aurora borealis alerts. Polls eBird, iNaturalist, GBIF, and AuroraWatch UK with push notifications</div>
                     <span class="tag tag-python">Python</span>
                 </div>
+            </div>
+
+            <div class="tools">
                 <div class="tool">
                     <a href="https://camekazi.github.io/ewans-exercises/">Ewan's Exercises</a>
                     <span class="desc">Strength training workout tracker PWA with structured programs</span>
@@ -1129,6 +1147,33 @@
                     <a href="https://github.com/Camekazi/.claude">Daily Individual Emails</a>
                     <span class="desc">Personalized daily briefings for each family member &mdash; tailored schedules, reminders, and relevant info based on their day ahead</span>
                     <span class="tag tag-skill">Skill</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="sources">
+        <div class="content-wrap">
+            <h2>&#128218; Sources & Inspiration</h2>
+            <div class="sources-grid">
+                <div class="source-group">
+                    <h4>AI & Engineering</h4>
+                    <a href="https://every.to/chain-of-thought/what-comes-after-saas">Compound Engineering</a> <span>Dan Shipper / Every</span>
+                    <a href="https://every.to/compound-engineering-manifesto">Manifesto</a> <span>Kieran Klaassen / Every</span>
+                    <a href="https://www.anthropic.com/claude-code">Claude Code</a> <span>Anthropic</span>
+                    <a href="https://simonwillison.net/">Simon Willison</a> <span>AI tools & analysis</span>
+                    <a href="https://bensbites.beehiiv.com/">Ben's Bites</a> <span>Ben Tossell</span>
+                    <a href="https://www.howaiai.com/">How I AI</a> <span>AI workflows</span>
+                    <a href="https://ghuntley.com/claudesian/">Claudesian</a> <span>Geoffrey Huntley</span>
+                    <a href="https://www.dbreunig.com/2026/01/08/a-software-library-with-no-code.html">Spec-Only Libraries</a> <span>Drew Breunig</span>
+                    <a href="https://github.com/anthropics/anthropic-cookbook/tree/main/misc/prompt_caching">ACE Patterns</a> <span>Anthropic Cookbook</span>
+                </div>
+                <div class="source-group">
+                    <h4>Systems & Leadership</h4>
+                    <a href="https://www.youtube.com/@drrichardclaydon">Leadership Rewritten</a> <span>Richard Claydon</span>
+                    <a href="https://mindsatwork.com/the-immunity-to-change-process/">Immunity to Change</a> <span>Kegan & Lahey</span>
+                    <a href="https://www.robcross.org/">ONA Methodology</a> <span>Rob Cross</span>
+                    <a href="https://www.exponentialview.co/">Exponential View</a> <span>Azeem Azhar</span>
                 </div>
             </div>
         </div>
