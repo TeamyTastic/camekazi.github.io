@@ -10,7 +10,8 @@
             --primary-light: #3b82f6;
             --text: #1f2937;
             --text-muted: #6b7280;
-            --bg: #f9fafb;
+            --bg: #ffffff;
+            --bg-alt: #f8fafc;
             --card-bg: #ffffff;
             --border: #e5e7eb;
         }
@@ -26,61 +27,128 @@
             background: var(--bg);
             color: var(--text);
             line-height: 1.6;
-            padding: 2rem 1rem;
-            max-width: 800px;
-            margin: 0 auto;
         }
 
+        /* Layout wrapper */
+        .content-wrap {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header */
         header {
-            margin-bottom: 2rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid var(--border);
+            padding: 2.5rem 0 1.5rem;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
         }
 
         h1 {
             font-size: 1.75rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
         }
 
-        header p {
+        .social-links {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .social-links a {
             color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.15s;
         }
 
-        .recent {
-            background: var(--card-bg);
+        .social-links a:hover {
+            color: var(--primary);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .header-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            padding: 0.5rem 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stats-bar span {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* Nav */
+        nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 1rem 0;
+            font-size: 0.85rem;
+        }
+
+        nav a {
+            padding: 0.35rem 0.75rem;
+            background: var(--border);
+            color: var(--text);
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background 0.15s;
+        }
+
+        nav a:hover {
+            background: #d1d5db;
+        }
+
+        nav a.nav-active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Intro card */
+        .intro-card {
+            background: var(--bg-alt);
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 1rem 1.25rem;
-            margin-bottom: 2rem;
-        }
-
-        .recent h2 {
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            margin-bottom: 1.5rem;
             color: var(--text-muted);
-            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
         }
 
-        .recent ul {
-            list-style: none;
-        }
-
-        .recent li {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            padding: 0.25rem 0;
-        }
-
-        .recent .date {
+        .tag-legend {
             font-size: 0.8rem;
             color: var(--text-muted);
+            margin-top: 0.75rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--border);
         }
 
+        /* Sections */
         section {
-            margin-bottom: 2rem;
+            padding: 2rem 0;
+        }
+
+        section:nth-child(even) {
+            background: var(--bg-alt);
         }
 
         section h2 {
@@ -92,6 +160,7 @@
             border-bottom: 2px solid var(--primary);
         }
 
+        /* Tools grid */
         .tools {
             display: grid;
             gap: 0.75rem;
@@ -125,6 +194,7 @@
             padding: 0.15rem 0.4rem;
             border-radius: 4px;
             margin-left: 0.5rem;
+            white-space: nowrap;
         }
 
         /* Tag color coding */
@@ -135,6 +205,8 @@
         .tag-pwa { background: #d1fae5; color: #065f46; }
         .tag-cli { background: #e5e7eb; color: #374151; }
         .tag-node { background: #dcfce7; color: #166534; }
+        .tag-pattern { background: #fef3c7; color: #78350f; }
+        .tag-framework { background: #f3e8ff; color: #6b21a8; }
 
         /* Featured items */
         .tool.featured {
@@ -145,18 +217,91 @@
             margin: 0 -0.75rem;
         }
 
-        footer {
-            margin-top: 3rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border);
+        /* Card grid for featured sections */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transform: translateY(-1px);
+        }
+
+        .card a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .card a:hover {
+            text-decoration: underline;
+        }
+
+        .card .desc {
             color: var(--text-muted);
             font-size: 0.85rem;
+            margin-top: 0.35rem;
         }
 
-        footer a {
-            color: var(--primary);
+        .card .tag {
+            font-size: 0.7rem;
+            background: var(--border);
+            color: var(--text-muted);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 0.5rem;
         }
 
+        /* Collapsible subsections */
+        details {
+            margin-bottom: 0.5rem;
+        }
+
+        details summary {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            padding: 0.5rem 0;
+            list-style: none;
+            user-select: none;
+        }
+
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details summary::before {
+            content: '\25B6';
+            display: inline-block;
+            margin-right: 0.5rem;
+            font-size: 0.7rem;
+            transition: transform 0.2s;
+        }
+
+        details[open] summary::before {
+            transform: rotate(90deg);
+        }
+
+        details .tools {
+            padding-top: 0.5rem;
+        }
+
+        /* Insights */
         .insight {
             counter-increment: insight;
             padding: 0.5rem 0 0.5rem 2.5rem;
@@ -185,6 +330,169 @@
             font-weight: 600;
         }
 
+        /* Footer */
+        footer {
+            padding: 2rem 0;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-stats {
+            font-size: 0.8rem;
+        }
+
+        /* Pruning hero */
+        .pruning-hero {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .pruning-hero .big-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.02em;
+        }
+
+        .pruning-hero .big-number .arrow {
+            color: var(--primary);
+            margin: 0 0.25rem;
+        }
+
+        .pruning-hero .pruning-tagline {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 0.35rem;
+        }
+
+        /* Timeline arc */
+        .timeline-arc {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+            margin-top: 1rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.8rem;
+        }
+
+        .timeline-phase {
+            text-align: center;
+            position: relative;
+            padding-top: 1rem;
+        }
+
+        .timeline-phase::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border);
+            transform: translateX(-50%);
+        }
+
+        .timeline-phase.active::before {
+            background: var(--primary);
+        }
+
+        .timeline-phase::after {
+            content: '';
+            position: absolute;
+            top: 3.5px;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border);
+            z-index: -1;
+        }
+
+        .timeline-phase:first-child::after {
+            left: 50%;
+        }
+
+        .timeline-phase:last-child::after {
+            right: 50%;
+        }
+
+        .timeline-phase .phase-date {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .timeline-phase .phase-label {
+            font-weight: 600;
+            color: var(--text);
+            margin-top: 0.15rem;
+        }
+
+        .timeline-phase.active .phase-label {
+            color: var(--primary);
+        }
+
+        /* Feedback loop diagram */
+        .feedback-loop {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            padding: 1.25rem 0;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        .loop-node {
+            background: var(--card-bg);
+            border: 1.5px solid var(--border);
+            border-radius: 6px;
+            padding: 0.4rem 0.75rem;
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: var(--text);
+            white-space: nowrap;
+        }
+
+        .loop-node.primary {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .loop-node.destructive {
+            border-color: #ef4444;
+            color: #dc2626;
+            background: #fef2f2;
+        }
+
+        .loop-arrow {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            padding: 0 0.3rem;
+        }
+
         @media (max-width: 600px) {
             .tool {
                 flex-direction: column;
@@ -195,413 +503,598 @@
                 flex-direction: column;
                 gap: 0.1rem;
             }
+
+            .header-top {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .stats-bar {
+                flex-wrap: wrap;
+                gap: 0.75rem;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .timeline-arc {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+
+            .timeline-phase::after {
+                display: none;
+            }
+
+            .feedback-loop {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+
+            .loop-arrow {
+                transform: rotate(90deg);
+            }
+
+            .pruning-hero .big-number {
+                font-size: 1.2rem;
+            }
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Ewan Cameron</h1>
-        <p>AI agents, automation tools, and insights from building learning systems</p>
-    </header>
 
-    <nav style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; font-size: 0.85rem;">
-        <a href="#learning-system" style="padding: 0.35rem 0.75rem; background: var(--primary); color: white; border-radius: 4px; text-decoration: none;">Learning System</a>
-        <a href="#research" style="padding: 0.35rem 0.75rem; background: var(--border); color: var(--text); border-radius: 4px; text-decoration: none;">Research</a>
-        <a href="#leadership" style="padding: 0.35rem 0.75rem; background: var(--border); color: var(--text); border-radius: 4px; text-decoration: none;">Strategy & Leadership</a>
-        <a href="#ai-dev" style="padding: 0.35rem 0.75rem; background: var(--border); color: var(--text); border-radius: 4px; text-decoration: none;">AI & Dev</a>
-        <a href="#running" style="padding: 0.35rem 0.75rem; background: var(--border); color: var(--text); border-radius: 4px; text-decoration: none;">Running</a>
-        <a href="#home" style="padding: 0.35rem 0.75rem; background: var(--border); color: var(--text); border-radius: 4px; text-decoration: none;">Home</a>
-        <a href="#insights" style="padding: 0.35rem 0.75rem; background: var(--border); color: var(--text); border-radius: 4px; text-decoration: none;">Insights</a>
-    </nav>
+    <div class="content-wrap">
+        <header>
+            <div class="header-top">
+                <h1>Ewan Cameron</h1>
+                <div class="social-links">
+                    <a href="https://github.com/Camekazi" title="GitHub">
+                        <svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    </a>
+                    <a href="https://linkedin.com/in/ewancameron1" title="LinkedIn">
+                        <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                    </a>
+                </div>
+            </div>
+            <p class="header-subtitle">Running coach. Systems thinker. Builder of AI tools that compound expertise.</p>
+            <div class="stats-bar">
+                <div><span>75</span> skills</div>
+                <div><span>7</span> agents</div>
+                <div><span>10+</span> automations</div>
+            </div>
+        </header>
 
-    <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.9rem;">
-        <p>I build tools that compound expertise instead of rediscovering it. Everything here runs on Claude Code — skills, agents, and automations that turn individual insights into reusable systems. The unifying question: <em>"Did the system learn, or did I just get through today?"</em></p>
-    </div>
+        <div class="pruning-hero">
+            <div class="big-number">A system that learns from every session and improves the next one.</div>
+            <div class="pruning-tagline">Friction becomes rules. Rules become skills. Stale skills get pruned. The system compounds.</div>
+        </div>
 
-    <div class="recent">
-        <h2>Recently Added</h2>
-        <ul>
-            <li>
-                <a href="#file-explorer">File Explorer</a>
-                <span class="date">Feb 2026</span>
-            </li>
-            <li>
-                <a href="#claude-telegram">Claude Code Telegram</a>
-                <span class="date">Feb 2026</span>
-            </li>
-            <li>
-                <a href="#running-coaching">Running Coaching Platform</a>
-                <span class="date">Feb 2026</span>
-            </li>
-            <li>
-                <a href="#swarm">Swarm Orchestration</a>
-                <span class="date">Feb 2026</span>
-            </li>
-            <li>
-                <a href="#mlx-whisper">MLX Whisper MCP</a>
-                <span class="date">Jan 2026</span>
-            </li>
-            <li>
-                <a href="#cynefin">Cynefin Framework</a>
-                <span class="date">Feb 2026</span>
-            </li>
-        </ul>
+        <nav>
+            <a href="#learning-system" class="nav-active">Learning System</a>
+            <a href="#research">Research</a>
+            <a href="#leadership">Strategy & Leadership</a>
+            <a href="#ai-dev">AI & Dev</a>
+            <a href="#running">Running</a>
+            <a href="#home">Home</a>
+        </nav>
+
+        <div class="intro-card">
+            <p>I build tools that compound expertise instead of rediscovering it. Everything here runs on Claude Code &mdash; skills, agents, and automations that turn individual insights into reusable systems. The unifying question: <em>"Did the system learn, or did I just get through today?"</em></p>
+            <div class="tag-legend">All skills and agents run on <a href="https://www.anthropic.com/claude-code" style="color: var(--primary);">Claude Code</a>. Tags show the primary technology.</div>
+            <div class="timeline-arc">
+                <div class="timeline-phase">
+                    <div class="phase-date">Dec 2024</div>
+                    <div class="phase-label">Built</div>
+                </div>
+                <div class="timeline-phase">
+                    <div class="phase-date">Jan 2026</div>
+                    <div class="phase-label">Systematized</div>
+                </div>
+                <div class="timeline-phase">
+                    <div class="phase-date">Late Jan</div>
+                    <div class="phase-label">Turned inward</div>
+                </div>
+                <div class="timeline-phase active">
+                    <div class="phase-date">Feb 2026</div>
+                    <div class="phase-label">Pruned</div>
+                </div>
+            </div>
+        </div>
+
+        <details id="insights">
+            <summary>Patterns / Insights (26 items)</summary>
+
+            <h3 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">The Learning Loop</h3>
+            <ol style="list-style: none; counter-reset: insight;">
+                <li class="insight"><strong>Failures are gold</strong> &mdash; Document what failed, not just what worked. The &#10060; field is the most valuable part of any learning.</li>
+                <li class="insight"><strong>5+ occurrences, then operationalize</strong> &mdash; Wait for patterns to prove themselves before building infrastructure around them.</li>
+                <li class="insight"><strong>Propose, don't auto-apply</strong> &mdash; AI should suggest changes; humans approve. Prevents drift and maintains trust.</li>
+                <li class="insight"><strong>Grep when needed, delete what's stale</strong> &mdash; One searchable file beats elaborate tracking systems.</li>
+                <li class="insight"><strong>Evidence before infrastructure</strong> &mdash; Analyzed 20 PRs &rarr; only 3 had critical issues &rarr; built minimal tooling. Check the data before building the system.</li>
+            </ol>
+
+            <h3 style="font-size: 0.9rem; color: var(--primary); margin: 1.5rem 0 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Agent Design</h3>
+            <ol style="list-style: none; counter-reset: insight;" start="6">
+                <li class="insight"><strong>Match complexity to artifact</strong> &mdash; Simple &rarr; Command. Complicated &rarr; Skill. Complex &rarr; Agent. Wrong artifact type = wasted effort.</li>
+                <li class="insight"><strong>Extend, don't create</strong> &mdash; Adding 200 lines to existing code beats 500 lines standalone. Check what exists first.</li>
+                <li class="insight"><strong>Skill names should be grep-able</strong> &mdash; "subtext-analysis" beats "hermeneutic-observation". Name for discovery.</li>
+                <li class="insight"><strong>Features are prompts, tools are primitives</strong> &mdash; Define outcomes in natural language. Tools provide capability, not behavior.</li>
+                <li class="insight"><strong>Agent-user parity</strong> &mdash; Whatever the user can do, the agent can do. Whatever the user can see, the agent can see.</li>
+                <li class="insight"><strong>Don't LLM what regex can do</strong> &mdash; Use deterministic handling for structured inputs. Save the LLM for genuinely ambiguous cases.</li>
+                <li class="insight"><strong>Multi-agent review cuts scope</strong> &mdash; 3 agents reviewing a plan identified 60-70% cuts. 45 min plan &rarr; 12 min implementation.</li>
+            </ol>
+
+            <h3 style="font-size: 0.9rem; color: var(--primary); margin: 1.5rem 0 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Working with AI</h3>
+            <ol style="list-style: none; counter-reset: insight;" start="13">
+                <li class="insight"><strong>Brainstorm before simplifying</strong> &mdash; Present 5-7 options before rewriting. Let humans shape direction.</li>
+                <li class="insight"><strong>URL-driven task initiation</strong> &mdash; Concrete URLs beat abstract descriptions. "Install X from [link]" works; "add that library" doesn't.</li>
+                <li class="insight"><strong>After 3 failed fixes, disable and move on</strong> &mdash; Know when to stop debugging. Revisit with fresh context later.</li>
+                <li class="insight"><strong>Inject domain context into prompts</strong> &mdash; "DO NOT suggest X for these items" prevents obvious mistakes. LLMs need explicit exclusions.</li>
+                <li class="insight"><strong>Check native before customizing</strong> &mdash; Query the changelog first. The feature you're building might already exist.</li>
+                <li class="insight"><strong>Match planning fidelity to task size</strong> &mdash; One-line fix? Skip planning. Multi-file clear scope? Light plan. Major feature? Full ceremony with parallel agents.</li>
+                <li class="insight"><strong>CLI over MCP for reliability</strong> &mdash; CLI tools are predictable and debuggable. MCP can miss data. When reliability matters, use the boring option.</li>
+            </ol>
+
+            <h3 style="font-size: 0.9rem; color: var(--primary); margin: 1.5rem 0 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Working Practices</h3>
+            <ol style="list-style: none; counter-reset: insight;" start="20">
+                <li class="insight"><strong>The $100 Rule</strong> &mdash; Every failure must produce a permanent fix &mdash; a test, a rule, an eval &mdash; before you move on. Optional capture fires ~50%. Mandatory capture compounds.</li>
+                <li class="insight"><strong>Three questions for AI output</strong> &mdash; Ask: "What was hardest? What did you reject? What are you least confident about?" Two-minute conversation beats ten-minute read.</li>
+                <li class="insight"><strong>Investigate all before fixing any</strong> &mdash; Triaged 4 "broken" pipelines. 2 were healthy. Investigation-first prevented building unnecessary fixes for working systems.</li>
+                <li class="insight"><strong>Compose before extend</strong> &mdash; "What if we composed instead of adding features?" A composition layer beats adding features individually. Change the ritual, not the content.</li>
+            </ol>
+
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;"><strong>Inspired by:</strong></p>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.8;">
+                    <a href="https://every.to/chain-of-thought/what-comes-after-saas">Compound Engineering</a> (Dan Shipper / Every) &middot;
+                    <a href="https://every.to/compound-engineering-manifesto">Manifesto</a> (Kieran Klaassen / Every) &middot;
+                    <a href="https://www.anthropic.com/claude-code">Claude Code</a> (Anthropic) &middot;
+                    <a href="https://simonwillison.net/">Simon Willison</a> &middot;
+                    <a href="https://bensbites.beehiiv.com/">Ben's Bites</a> (Ben Tossell) &middot;
+                    <a href="https://www.howaiai.com/">How I AI</a> &middot;
+                    <a href="https://ghuntley.com/claudesian/">Claudesian</a> (Geoffrey Huntley) &middot;
+                    <a href="https://www.dbreunig.com/2026/01/08/a-software-library-with-no-code.html">Spec-Only Libraries</a> (Drew Breunig) &middot;
+                    <a href="https://www.exponentialview.co/">Exponential View</a> (Azeem Azhar) &middot;
+                    <a href="https://www.robcross.org/">ONA Methodology</a> (Rob Cross) &middot;
+                    <a href="https://mindsatwork.com/the-immunity-to-change-process/">Immunity to Change</a> (Kegan & Lahey) &middot;
+                    <a href="https://www.youtube.com/@drrichardclaydon">Leadership Rewritten</a> (Richard Claydon) &middot;
+                    <a href="https://github.com/anthropics/anthropic-cookbook/tree/main/misc/prompt_caching">ACE Patterns</a>
+                </p>
+            </div>
+        </details>
+
     </div>
 
     <section id="learning-system">
-        <h2>Claude Code Learning System</h2>
-        <div class="tools">
-            <div class="tool featured">
-                <a href="https://github.com/Camekazi/.claude">Compounding Learning System</a>
-                <span class="desc">Built on one question: <em>"Did the system learn, or did I just get through today?"</em></span>
-                <span class="tag tag-cli">CLI</span>
-            </div>
-        </div>
-        <div class="learning-system-details" style="margin-top: 1rem; padding: 1rem; background: var(--bg); border-radius: 6px; font-size: 0.9rem;">
-            <p style="margin-bottom: 0.75rem;"><strong>Philosophy:</strong> Every interaction should make future interactions better. Capture what worked AND failed, grep when needed, delete what's stale.</p>
-            <p style="margin-bottom: 0.75rem;"><strong>How it works:</strong></p>
-            <ul style="margin-left: 1.25rem; color: var(--text-muted);">
-                <li><strong>Friction detection</strong> — <code>/hookify</code> analyzes conversations for corrections and frustration, then proposes prevention rules automatically</li>
-                <li><strong>Pattern promotion</strong> — Observations that recur 3+ times get promoted to rules, skills, or agents</li>
-                <li><strong>Agent self-improvement</strong> — Domain agents propose their own improvements based on session patterns; humans approve via <code>/review-improvements</code></li>
-                <li><strong>Coached-thinker mode</strong> — Nudges toward action over analysis paralysis; asks "What's the smallest step?" not "Have you considered..."</li>
-                <li><strong>Domain agents</strong> — Immunity to Change coaching (Kegan), systems thinking (Meadows), organizational sensemaking (Cynefin + Estuarine)</li>
-                <li><strong>75 skills</strong> — JTBD, ONA network analysis, Wardley Maps, financial modeling, stakeholder analysis, power dynamics, and more</li>
-            </ul>
-            <p style="margin-top: 0.75rem; color: var(--text-muted);">Two files. Simple format. Grep to search. Built for individuals and teams who want to systematize expertise instead of rediscovering it.</p>
-        </div>
+        <div class="content-wrap">
+            <h2>&#9881;&#65039; Claude Code Learning System</h2>
 
-        <h3 style="font-size: 0.85rem; color: var(--text-muted); margin: 1.5rem 0 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">Canonical Patterns</h3>
-        <div class="tools">
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Whenwords</a>
-                <span class="desc">A "spec-only library" for human-friendly time formatting — behavioral rules, no code shipped. Inspired by <a href="https://www.dbreunig.com/2026/01/08/a-software-library-with-no-code.html">Drew Breunig</a></span>
-                <span class="tag tag-python">Python</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Benefits-Risks-Costs Lens</a>
-                <span class="desc">5-question evaluation framework for new patterns and tools — combines StrongDM Attractor, deterministic/probabilistic classification, and Trickster questions</span>
-                <span class="tag tag-cli">Framework</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Progressive Reflection</a>
-                <span class="desc">Tiered knowledge management: Hot (always-loaded) to Warm (one grep) to Stale (delete). Patterns earn their place through application count.</span>
-                <span class="tag tag-cli">Pattern</span>
+            <div style="padding: 1rem; background: var(--bg-alt); border-radius: 6px; font-size: 0.9rem; margin-bottom: 1rem;">
+                <p style="margin-bottom: 0.75rem;"><strong>Philosophy:</strong> Every interaction should make future interactions better. Capture what worked AND failed, grep when needed, delete what's stale.</p>
+
+                <p style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 1rem; margin-bottom: 0.5rem;">Triple Learning Loop</p>
+                <div class="feedback-loop">
+                    <span class="loop-node">Single Loop</span>
+                    <span class="loop-arrow">&rarr;</span>
+                    <span class="loop-node primary">Double Loop</span>
+                    <span class="loop-arrow">&rarr;</span>
+                    <span class="loop-node" style="border-color: #7c3aed; color: #7c3aed; background: #f5f3ff;">Triple Loop</span>
+                </div>
+                <div style="display: flex; justify-content: space-around; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.25rem; padding: 0 0.5rem; text-align: center;">
+                    <span>Fix errors<br/><em>Friction &rarr; Rule</em></span>
+                    <span>Change rules<br/><em>3x applied &rarr; Operationalize</em></span>
+                    <span>Change how we learn<br/><em>Prune the system itself</em></span>
+                </div>
+
+                <p style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 1.5rem; margin-bottom: 0.5rem;">Friction Detection</p>
+                <div class="feedback-loop">
+                    <span class="loop-node">Friction</span>
+                    <span class="loop-arrow">&rarr;</span>
+                    <span class="loop-node primary">/hookify</span>
+                    <span class="loop-arrow">&rarr;</span>
+                    <span class="loop-node">Rule</span>
+                    <span class="loop-arrow">&rarr;</span>
+                    <span class="loop-node">Prevention</span>
+                    <span class="loop-arrow">&rarr;</span>
+                    <span class="loop-node destructive">Delete at 6mo</span>
+                </div>
+
+                <p style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 1rem; margin-bottom: 0.5rem;">Learning Capture</p>
+                <div class="feedback-loop">
+                    <span class="loop-node">Session ends</span>
+                    <span class="loop-arrow">&rarr;</span>
+                    <span class="loop-node primary">/retrospective</span>
+                    <span class="loop-arrow">&rarr;</span>
+                    <span class="loop-node">learnings.md</span>
+                    <span class="loop-arrow">&rarr;</span>
+                    <span class="loop-node">Applied 3x</span>
+                    <span class="loop-arrow">&rarr;</span>
+                    <span class="loop-node primary">Operationalize</span>
+                </div>
+
+                <p style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 1rem; margin-bottom: 0.5rem;">Progressive Reflection</p>
+                <div class="feedback-loop">
+                    <span class="loop-node primary">HOT</span>
+                    <span class="loop-arrow">&rarr;</span>
+                    <span class="loop-node">WARM</span>
+                    <span class="loop-arrow">&rarr;</span>
+                    <span class="loop-node destructive">STALE</span>
+                    <span class="loop-arrow">&rarr;</span>
+                    <span class="loop-node destructive">Delete</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.25rem; padding: 0 0.5rem;">
+                    <span>Always loaded</span>
+                    <span>One grep away</span>
+                    <span>6 months unused</span>
+                    <span>Gone</span>
+                </div>
+
+                <p style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 1rem; margin-bottom: 0.5rem;">Agent Self-Improvement</p>
+                <div class="feedback-loop">
+                    <span class="loop-node">Sessions</span>
+                    <span class="loop-arrow">&rarr;</span>
+                    <span class="loop-node">/behaviour</span>
+                    <span class="loop-arrow">&rarr;</span>
+                    <span class="loop-node">Agent proposes</span>
+                    <span class="loop-arrow">&rarr;</span>
+                    <span class="loop-node primary">Human reviews</span>
+                    <span class="loop-arrow">&rarr;</span>
+                    <span class="loop-node">Update</span>
+                </div>
             </div>
         </div>
     </section>
 
     <section id="research">
-        <h2>Business Intelligence & Research</h2>
-        <div class="tools">
-            <div class="tool featured" id="companies-house">
-                <a href="https://github.com/Camekazi/.claude">Companies House Research CLI</a>
-                <span class="desc">Research UK companies, directors, and ownership structures via CLI. Map power dynamics, identify beneficial owners, and conduct due diligence</span>
-                <span class="tag tag-python">Python CLI</span>
+        <div class="content-wrap">
+            <h2>&#128269; Business Intelligence & Research</h2>
+
+            <div class="card-grid">
+                <div class="card" id="companies-house">
+                    <a href="https://github.com/Camekazi/.claude">Companies House Research CLI</a>
+                    <div class="desc">Research UK companies, directors, and ownership structures via CLI. Map power dynamics, identify beneficial owners, and conduct due diligence</div>
+                    <span class="tag tag-python">CLI</span>
+                </div>
             </div>
-            <div class="tool featured" id="ona">
-                <a href="https://github.com/Camekazi/.claude">Organizational Network Analysis</a>
-                <span class="desc">Map informal organizational structures and influence patterns using Rob Cross methodology. Primitives for nodes, links, metrics, rendering, and deployment</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
+
+            <div class="tools">
+                <div class="tool" id="ona">
+                    <a href="https://github.com/Camekazi/.claude">Organizational Network Analysis</a>
+                    <span class="desc">Map informal organizational structures and influence patterns using Rob Cross methodology. Primitives for nodes, links, metrics, rendering, and deployment</span>
+                    <span class="tag tag-skill">Skill</span>
+                </div>
+                <div class="tool">
+                    <a href="https://github.com/Camekazi/.claude">Jobs-to-be-Done Framework</a>
+                    <span class="desc">Complete JTBD implementation (Christensen + Ulwick) for customer research &mdash; job mapping, forces analysis, and outcome-driven innovation</span>
+                    <span class="tag tag-skill">Skill</span>
+                </div>
+                <div class="tool" id="glassdoor">
+                    <a href="https://github.com/Camekazi/.claude">Glassdoor Research</a>
+                    <span class="desc">Research company culture and employee sentiment for job hunting due diligence &mdash; surface red flags before interviews</span>
+                    <span class="tag tag-skill">Skill</span>
+                </div>
             </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Jobs-to-be-Done Framework</a>
-                <span class="desc">Complete JTBD implementation (Christensen + Ulwick) for customer research — job mapping, forces analysis, and outcome-driven innovation</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
+
+            <div style="margin-top: 0.75rem; padding: 0.75rem; background: var(--bg); border-radius: 6px; font-size: 0.85rem; color: var(--text-muted);">
+                <strong>External validation:</strong> The Companies House power research received positive feedback from senior executives for surfacing ownership structures and directorship networks that informed strategic decisions.
             </div>
-            <div class="tool" id="glassdoor">
-                <a href="https://github.com/Camekazi/.claude">Glassdoor Research</a>
-                <span class="desc">Research company culture and employee sentiment for job hunting due diligence — surface red flags before interviews</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-        </div>
-        <div style="margin-top: 0.75rem; padding: 0.75rem; background: var(--bg); border-radius: 6px; font-size: 0.85rem; color: var(--text-muted);">
-            <strong>External validation:</strong> The Companies House power research received positive feedback from senior executives for surfacing ownership structures and directorship networks that informed strategic decisions.
         </div>
     </section>
 
     <section id="leadership">
-        <h2>Strategy, Organisational Design, Leadership & Coaching</h2>
+        <div class="content-wrap">
+            <h2>&#129517; Strategy, Organisational Design, Leadership & Coaching</h2>
 
-        <h3 style="font-size: 0.85rem; color: var(--text-muted); margin: 1rem 0 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">Strategy</h3>
-        <div class="tools">
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Wardley Maps</a>
-                <span class="desc">Create and analyze Wardley Maps for strategic visualization — value chains, component evolution, and competitive positioning</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Patterns of Strategy</a>
-                <span class="desc">Diagnose strategic positioning and relational dynamics between actors — competitive maneuvers, partnership dynamics, and strategic fit</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Three Horizons Analysis</a>
-                <span class="desc">Balance core, emerging, and transformative work — review strategic plans and innovation portfolios through the Three Horizons framework</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Theory of Constraints</a>
-                <span class="desc">Apply Goldratt's TOC to identify and address system bottlenecks — throughput over local efficiency</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Marketing Psychology</a>
-                <span class="desc">Apply psychological principles and mental models to marketing strategy — framing, anchoring, loss aversion, social proof</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-        </div>
+            <details>
+                <summary>Strategy (5 items)</summary>
+                <div class="tools">
+                    <div class="tool">
+                        <a href="https://github.com/Camekazi/.claude">Wardley Maps</a>
+                        <span class="desc">Create and analyze Wardley Maps for strategic visualization &mdash; value chains, component evolution, and competitive positioning</span>
+                        <span class="tag tag-skill">Skill</span>
+                    </div>
+                    <div class="tool">
+                        <a href="https://github.com/Camekazi/.claude">Patterns of Strategy</a>
+                        <span class="desc">Diagnose strategic positioning and relational dynamics between actors &mdash; competitive maneuvers, partnership dynamics, and strategic fit</span>
+                        <span class="tag tag-skill">Skill</span>
+                    </div>
+                    <div class="tool">
+                        <a href="https://github.com/Camekazi/.claude">Three Horizons Analysis</a>
+                        <span class="desc">Balance core, emerging, and transformative work &mdash; review strategic plans and innovation portfolios through the Three Horizons framework</span>
+                        <span class="tag tag-skill">Skill</span>
+                    </div>
+                    <div class="tool">
+                        <a href="https://github.com/Camekazi/.claude">Theory of Constraints</a>
+                        <span class="desc">Apply Goldratt's TOC to identify and address system bottlenecks &mdash; throughput over local efficiency</span>
+                        <span class="tag tag-skill">Skill</span>
+                    </div>
+                    <div class="tool">
+                        <a href="https://github.com/Camekazi/.claude">Marketing Psychology</a>
+                        <span class="desc">Apply psychological principles and mental models to marketing strategy &mdash; framing, anchoring, loss aversion, social proof</span>
+                        <span class="tag tag-skill">Skill</span>
+                    </div>
+                </div>
+            </details>
 
-        <h3 style="font-size: 0.85rem; color: var(--text-muted); margin: 1.5rem 0 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">Organisational Design</h3>
-        <div class="tools">
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Organizational Coherence Diagnostic</a>
-                <span class="desc">Diagnose organizational dysfunction using Claydon's frameworks — Run/Serve/Change triad, Confusion Tax, 4D Power Map</span>
-                <span class="tag tag-agent">Claude Code Agent</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Organizational Sensemaker</a>
-                <span class="desc">Five-lens diagnostic stack combining Cynefin, Estuarine Mapping, Boundary Critique, System Dynamics, and Six Survival Characters</span>
-                <span class="tag tag-agent">Claude Code Agent</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Soft Systems Methodology</a>
-                <span class="desc">Checkland's SSM for wicked problems where stakeholders disagree on what the problem IS — rich pictures, CATWOE analysis, conceptual modeling</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Viable System Model</a>
-                <span class="desc">Beer's VSM for diagnosing organizational viability — recursive structure, requisite variety, and autonomy vs integration</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool featured" id="depthfinding">
-                <a href="https://github.com/Camekazi/.claude">Depthfinding</a>
-                <span class="desc">Map organizational challenges across four depth zones (Sky, Sunshine, Twilight, Midnight) — surface visible symptoms vs hidden systemic drivers</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool" id="estuarine">
-                <a href="https://github.com/Camekazi/.claude">Estuarine Mapping</a>
-                <span class="desc">Map change initiatives under complexity — balance stability, changeability, and energy over time using Dave Snowden's methodology</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool" id="power-dynamics">
-                <a href="https://github.com/Camekazi/.claude">Power Dynamics</a>
-                <span class="desc">Two modes: Strategic (CSH/Boundary Critique) for who benefits/decides/is excluded; Tactical (4D Power Model) for meeting-level intervention</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Polarity Mapping</a>
-                <span class="desc">Manage interdependent tensions that can't be "solved" — map poles, design early warning indicators, avoid over-correction</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool" id="cynefin">
-                <a href="https://github.com/Camekazi/.claude">Cynefin Framework</a>
-                <span class="desc">Classify problems by complexity domain (Clear, Complicated, Complex, Chaotic, Confused) — match interventions to the problem type, not the other way around</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Loopy Causal Diagrams</a>
-                <span class="desc">Generate ASCII causal loop diagrams for terminal — visualize reinforcing and balancing feedback loops without leaving the CLI</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-        </div>
+            <details>
+                <summary>Organisational Design (10 items)</summary>
+                <div class="tools">
+                    <div class="tool featured" id="depthfinding">
+                        <a href="https://github.com/Camekazi/.claude">Depthfinding</a>
+                        <span class="desc">Map organizational challenges across four depth zones (Sky, Sunshine, Twilight, Midnight) &mdash; surface visible symptoms vs hidden systemic drivers</span>
+                        <span class="tag tag-skill">Skill</span>
+                    </div>
+                    <div class="tool">
+                        <a href="https://github.com/Camekazi/.claude">Organizational Coherence Diagnostic</a>
+                        <span class="desc">Diagnose organizational dysfunction using Claydon's frameworks &mdash; Run/Serve/Change triad, Confusion Tax, 4D Power Map</span>
+                        <span class="tag tag-agent">Agent</span>
+                    </div>
+                    <div class="tool">
+                        <a href="https://github.com/Camekazi/.claude">Organizational Sensemaker</a>
+                        <span class="desc">Five-lens diagnostic stack combining Cynefin, Estuarine Mapping, Boundary Critique, System Dynamics, and Six Survival Characters</span>
+                        <span class="tag tag-agent">Agent</span>
+                    </div>
+                    <div class="tool">
+                        <a href="https://github.com/Camekazi/.claude">Soft Systems Methodology</a>
+                        <span class="desc">Checkland's SSM for wicked problems where stakeholders disagree on what the problem IS &mdash; rich pictures, CATWOE analysis, conceptual modeling</span>
+                        <span class="tag tag-skill">Skill</span>
+                    </div>
+                    <div class="tool">
+                        <a href="https://github.com/Camekazi/.claude">Viable System Model</a>
+                        <span class="desc">Beer's VSM for diagnosing organizational viability &mdash; recursive structure, requisite variety, and autonomy vs integration</span>
+                        <span class="tag tag-skill">Skill</span>
+                    </div>
+                    <div class="tool" id="estuarine">
+                        <a href="https://github.com/Camekazi/.claude">Estuarine Mapping</a>
+                        <span class="desc">Map change initiatives under complexity &mdash; balance stability, changeability, and energy over time using Dave Snowden's methodology</span>
+                        <span class="tag tag-skill">Skill</span>
+                    </div>
+                    <div class="tool" id="power-dynamics">
+                        <a href="https://github.com/Camekazi/.claude">Power Dynamics</a>
+                        <span class="desc">Two modes: Strategic (CSH/Boundary Critique) for who benefits/decides/is excluded; Tactical (4D Power Model) for meeting-level intervention</span>
+                        <span class="tag tag-skill">Skill</span>
+                    </div>
+                    <div class="tool">
+                        <a href="https://github.com/Camekazi/.claude">Polarity Mapping</a>
+                        <span class="desc">Manage interdependent tensions that can't be "solved" &mdash; map poles, design early warning indicators, avoid over-correction</span>
+                        <span class="tag tag-skill">Skill</span>
+                    </div>
+                    <div class="tool" id="cynefin">
+                        <a href="https://github.com/Camekazi/.claude">Cynefin Framework</a>
+                        <span class="desc">Classify problems by complexity domain (Clear, Complicated, Complex, Chaotic, Confused) &mdash; match interventions to the problem type, not the other way around</span>
+                        <span class="tag tag-skill">Skill</span>
+                    </div>
+                    <div class="tool">
+                        <a href="https://github.com/Camekazi/.claude">Loopy Causal Diagrams</a>
+                        <span class="desc">Generate ASCII causal loop diagrams for terminal &mdash; visualize reinforcing and balancing feedback loops without leaving the CLI</span>
+                        <span class="tag tag-skill">Skill</span>
+                    </div>
+                </div>
+            </details>
 
-        <h3 style="font-size: 0.85rem; color: var(--text-muted); margin: 1.5rem 0 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">Leadership</h3>
-        <div class="tools">
-            <div class="tool" id="missing-lenses">
-                <a href="https://github.com/Camekazi/.claude">Missing Lenses Analysis</a>
-                <span class="desc">Systematic framework gap detection for complex decisions — surfaces blind spots by checking which analytical lenses you haven't applied</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Blind Spots</a>
-                <span class="desc">Two modes: Detection (identify missing lenses) and Challenge (stress-test assumptions). Use when you suspect blind spots or want to validate hypotheses</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">First-Move</a>
-                <span class="desc">Minimal navigation that makes the first step obvious — four questions, then route. A traffic cop, not another framework</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Perspective Challenger</a>
-                <span class="desc">Cognitive dissonance navigator — surfaces blind spots using Street Epistemology, Deep Canvassing, and non-WEIRD perspective challenges</span>
-                <span class="tag tag-agent">Claude Code Agent</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">SCARF Neuroleadership</a>
-                <span class="desc">David Rock's SCARF model for understanding threat/reward responses — analyze resistance to change, engagement problems, meeting dynamics</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Systems Thinking Agent</a>
-                <span class="desc">Multi-level systems analysis using 5 intervention levels — from simple levers to complexity emergence. Deep sensemaking mode for high-ambiguity situations</span>
-                <span class="tag tag-agent">Claude Code Agent</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Sensemaking Facilitation</a>
-                <span class="desc">Design and facilitate group sensemaking using Weick's seven properties — create shared meaning from ambiguous, complex situations</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Problem Framing</a>
-                <span class="desc">Navigate complex problem situations through 6 layers of understanding — from surface symptoms to structural root causes</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-        </div>
+            <details>
+                <summary>Leadership (8 items)</summary>
+                <div class="tools">
+                    <div class="tool" id="missing-lenses">
+                        <a href="https://github.com/Camekazi/.claude">Missing Lenses Analysis</a>
+                        <span class="desc">Systematic framework gap detection for complex decisions &mdash; surfaces blind spots by checking which analytical lenses you haven't applied</span>
+                        <span class="tag tag-skill">Skill</span>
+                    </div>
+                    <div class="tool">
+                        <a href="https://github.com/Camekazi/.claude">Blind Spots</a>
+                        <span class="desc">Two modes: Detection (identify missing lenses) and Challenge (stress-test assumptions). Use when you suspect blind spots or want to validate hypotheses</span>
+                        <span class="tag tag-skill">Skill</span>
+                    </div>
+                    <div class="tool">
+                        <a href="https://github.com/Camekazi/.claude">First-Move</a>
+                        <span class="desc">Minimal navigation that makes the first step obvious &mdash; four questions, then route. A traffic cop, not another framework</span>
+                        <span class="tag tag-skill">Skill</span>
+                    </div>
+                    <div class="tool">
+                        <a href="https://github.com/Camekazi/.claude">Perspective Challenger</a>
+                        <span class="desc">Cognitive dissonance navigator &mdash; surfaces blind spots using Street Epistemology, Deep Canvassing, and non-WEIRD perspective challenges</span>
+                        <span class="tag tag-agent">Agent</span>
+                    </div>
+                    <div class="tool">
+                        <a href="https://github.com/Camekazi/.claude">SCARF Neuroleadership</a>
+                        <span class="desc">David Rock's SCARF model for understanding threat/reward responses &mdash; analyze resistance to change, engagement problems, meeting dynamics</span>
+                        <span class="tag tag-skill">Skill</span>
+                    </div>
+                    <div class="tool">
+                        <a href="https://github.com/Camekazi/.claude">Systems Thinking Agent</a>
+                        <span class="desc">Multi-level systems analysis using 5 intervention levels &mdash; from simple levers to complexity emergence. Deep sensemaking mode for high-ambiguity situations</span>
+                        <span class="tag tag-agent">Agent</span>
+                    </div>
+                    <div class="tool">
+                        <a href="https://github.com/Camekazi/.claude">Sensemaking Facilitation</a>
+                        <span class="desc">Design and facilitate group sensemaking using Weick's seven properties &mdash; create shared meaning from ambiguous, complex situations</span>
+                        <span class="tag tag-skill">Skill</span>
+                    </div>
+                    <div class="tool">
+                        <a href="https://github.com/Camekazi/.claude">Problem Framing</a>
+                        <span class="desc">Navigate complex problem situations through 6 layers of understanding &mdash; from surface symptoms to structural root causes</span>
+                        <span class="tag tag-skill">Skill</span>
+                    </div>
+                </div>
+            </details>
 
-        <h3 style="font-size: 0.85rem; color: var(--text-muted); margin: 1.5rem 0 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">Coaching</h3>
-        <div class="tools">
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Immunity to Change Coach</a>
-                <span class="desc">Guided coaching through Kegan & Lahey's four-column methodology — uncovers hidden commitments and big assumptions blocking change</span>
-                <span class="tag tag-agent">Claude Code Agent</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Career Transition Coach</a>
-                <span class="desc">Guide through major career/life transitions using liminality + values frameworks — JTBD/positioning analysis, networking heuristics</span>
-                <span class="tag tag-agent">Claude Code Agent</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">ACT Coaching</a>
-                <span class="desc">Acceptance and Commitment Therapy for perfectionism, analysis paralysis, and avoidance — values clarification, defusion, committed action</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Vertical Development Assessment</a>
-                <span class="desc">Assess vertical development stage (Torbert/Rooke Action Logics) from behavioral signals — Opportunist through Alchemist stages</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
+            <details>
+                <summary>Coaching (4 items)</summary>
+                <div class="tools">
+                    <div class="tool">
+                        <a href="https://github.com/Camekazi/.claude">Immunity to Change Coach</a>
+                        <span class="desc">Guided coaching through Kegan & Lahey's four-column methodology &mdash; uncovers hidden commitments and big assumptions blocking change</span>
+                        <span class="tag tag-agent">Agent</span>
+                    </div>
+                    <div class="tool">
+                        <a href="https://github.com/Camekazi/.claude">Career Transition Coach</a>
+                        <span class="desc">Guide through major career/life transitions using liminality + values frameworks &mdash; JTBD/positioning analysis, networking heuristics</span>
+                        <span class="tag tag-agent">Agent</span>
+                    </div>
+                    <div class="tool">
+                        <a href="https://github.com/Camekazi/.claude">ACT Coaching</a>
+                        <span class="desc">Acceptance and Commitment Therapy for perfectionism, analysis paralysis, and avoidance &mdash; values clarification, defusion, committed action</span>
+                        <span class="tag tag-skill">Skill</span>
+                    </div>
+                    <div class="tool">
+                        <a href="https://github.com/Camekazi/.claude">Vertical Development Assessment</a>
+                        <span class="desc">Assess vertical development stage (Torbert/Rooke Action Logics) from behavioral signals &mdash; Opportunist through Alchemist stages</span>
+                        <span class="tag tag-skill">Skill</span>
+                    </div>
+                </div>
+            </details>
         </div>
     </section>
 
     <section id="ai-dev">
-        <h2>AI & Development</h2>
-        <div class="tools">
-            <div class="tool featured" id="claude-telegram">
-                <a href="https://github.com/Camekazi/claude-code-telegram">Claude Code Telegram</a>
-                <span class="desc">Remote Claude Code access via Telegram bot — interact with your projects from anywhere with full AI assistance and session persistence</span>
-                <span class="tag tag-node">Node.js</span>
+        <div class="content-wrap">
+            <h2>&#129302; AI & Development</h2>
+
+            <div class="card-grid">
+                <div class="card" id="claude-telegram">
+                    <a href="https://github.com/Camekazi/claude-code-telegram">Claude Code Telegram</a>
+                    <div class="desc">Remote Claude Code access via Telegram bot &mdash; interact with your projects from anywhere with full AI assistance and session persistence</div>
+                    <span class="tag tag-node">Node.js</span>
+                </div>
+                <div class="card" id="file-explorer">
+                    <a href="https://github.com/Camekazi/file-explorer">File Explorer</a>
+                    <div class="desc">Self-hosted multi-machine file browser &mdash; browse, search, and manage files across your devices from a single web interface</div>
+                    <span class="tag tag-node">Node.js</span>
+                </div>
             </div>
-            <div class="tool featured" id="file-explorer">
-                <a href="https://github.com/Camekazi/file-explorer">File Explorer</a>
-                <span class="desc">Self-hosted multi-machine file browser — browse, search, and manage files across your devices from a single web interface</span>
-                <span class="tag tag-node">Node.js</span>
-            </div>
-            <div class="tool featured" id="aiify">
-                <a href="https://github.com/Camekazi/.claude">AIify Agent</a>
-                <span class="desc">Transform existing designs into agent-native architectures — features are prompts, tools are primitives, agents have user parity</span>
-                <span class="tag tag-agent">Claude Code Agent</span>
-            </div>
-            <div class="tool" id="swarm">
-                <a href="https://github.com/Camekazi/.claude">Swarm Orchestration</a>
-                <span class="desc">Orchestrate complex tasks by spawning parallel Haiku sub-agents — divide and conquer with automatic result synthesis</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool" id="mlx-whisper">
-                <a href="https://github.com/Camekazi/mlx-whisper-mcp">MLX Whisper MCP</a>
-                <span class="desc">Local MCP server for MLX Whisper transcription — on-device speech-to-text with Apple Silicon acceleration, no cloud required</span>
-                <span class="tag tag-python">Python</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/ReadingCompanion">ReadingCompanion</a>
-                <span class="desc">iOS app with Claude for passage explanations and spoiler-free character queries</span>
-                <span class="tag tag-ios">iOS</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">NotebookLM Integration</a>
-                <span class="desc">Query Google NotebookLM from Claude Code — citation-backed research answers grounded exclusively in your uploaded documents</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Voice-to-Plan</a>
-                <span class="desc">Transform voice transcripts or rambling text into structured plans — works with MacWhisper, dictation, or stream-of-consciousness input</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool" id="html-proto">
-                <a href="https://github.com/Camekazi/.claude">HTML Prototyping</a>
-                <span class="desc">Rapid prototyping with instant sharing — solution-first, skip the process. Deploy to gist viewer in seconds</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
+
+            <div class="tools">
+                <div class="tool" id="aiify">
+                    <a href="https://github.com/Camekazi/.claude">AIify Agent</a>
+                    <span class="desc">Transform existing designs into agent-native architectures &mdash; features are prompts, tools are primitives, agents have user parity</span>
+                    <span class="tag tag-agent">Agent</span>
+                </div>
+                <div class="tool" id="swarm">
+                    <a href="https://github.com/Camekazi/.claude">Swarm Orchestration</a>
+                    <span class="desc">Orchestrate complex tasks by spawning parallel Haiku sub-agents &mdash; divide and conquer with automatic result synthesis</span>
+                    <span class="tag tag-skill">Skill</span>
+                </div>
+                <div class="tool" id="mlx-whisper">
+                    <a href="https://github.com/Camekazi/mlx-whisper-mcp">MLX Whisper MCP</a>
+                    <span class="desc">Local MCP server for MLX Whisper transcription &mdash; on-device speech-to-text with Apple Silicon acceleration, no cloud required</span>
+                    <span class="tag tag-python">Python</span>
+                </div>
+                <div class="tool">
+                    <a href="https://github.com/Camekazi/ReadingCompanion">ReadingCompanion</a>
+                    <span class="desc">iOS app with Claude for passage explanations and spoiler-free character queries</span>
+                    <span class="tag tag-ios">iOS</span>
+                </div>
+                <div class="tool">
+                    <a href="https://github.com/Camekazi/.claude">NotebookLM Integration</a>
+                    <span class="desc">Query Google NotebookLM from Claude Code &mdash; citation-backed research answers grounded exclusively in your uploaded documents</span>
+                    <span class="tag tag-skill">Skill</span>
+                </div>
+                <div class="tool">
+                    <a href="https://github.com/Camekazi/.claude">Voice-to-Plan</a>
+                    <span class="desc">Transform voice transcripts or rambling text into structured plans &mdash; works with MacWhisper, dictation, or stream-of-consciousness input</span>
+                    <span class="tag tag-skill">Skill</span>
+                </div>
+                <div class="tool" id="html-proto">
+                    <a href="https://github.com/Camekazi/.claude">HTML Prototyping</a>
+                    <span class="desc">Rapid prototyping with instant sharing &mdash; solution-first, skip the process. Deploy to gist viewer in seconds</span>
+                    <span class="tag tag-skill">Skill</span>
+                </div>
             </div>
         </div>
     </section>
 
     <section id="productivity">
-        <h2>Productivity & Guides</h2>
-        <div class="tools">
-            <div class="tool">
-                <a href="https://camekazi.github.io/recipe-timer/guideflow.html">GuideFlow</a>
-                <span class="desc">Transform any URL or photo into a step-by-step visual guide using Claude Vision</span>
-            </div>
-            <div class="tool">
-                <a href="https://camekazi.github.io/recipe-timer/">Recipe Timer</a>
-                <span class="desc">Visual cooking timer with step tracking and elapsed time</span>
-            </div>
-            <div class="tool">
-                <a href="#">1-Pager Designed Checklists</a>
-                <span class="desc">Structured checklists with design sensibility — visual information architecture for complex processes</span>
-                <span class="tag">Design</span>
+        <div class="content-wrap">
+            <h2>&#9989; Productivity & Guides</h2>
+            <div class="tools">
+                <div class="tool">
+                    <a href="https://camekazi.github.io/recipe-timer/guideflow.html">GuideFlow</a>
+                    <span class="desc">Transform any URL or photo into a step-by-step visual guide using Claude Vision</span>
+                </div>
+                <div class="tool">
+                    <a href="https://camekazi.github.io/recipe-timer/">Recipe Timer</a>
+                    <span class="desc">Visual cooking timer with step tracking and elapsed time</span>
+                </div>
+                <div class="tool">
+                    <a href="#">1-Pager Designed Checklists</a>
+                    <span class="desc">Structured checklists with design sensibility &mdash; visual information architecture for complex processes</span>
+                    <span class="tag">Design</span>
+                </div>
             </div>
         </div>
     </section>
 
     <section id="lifestyle">
-        <h2>Lifestyle</h2>
-        <div class="tools">
-            <div class="tool featured">
-                <a href="https://github.com/Camekazi/wildlife-alerter">Wildlife & Aurora Alerter</a>
-                <span class="desc">Real-time dolphin, whale, and seal sighting alerts for Edinburgh coast — plus aurora borealis alerts when northern lights are visible. Polls eBird, iNaturalist, GBIF, and AuroraWatch UK with push notifications 🐬🌌</span>
-                <span class="tag tag-python">Python</span>
-            </div>
-            <div class="tool">
-                <a href="https://camekazi.github.io/ewans-exercises/">Ewan's Exercises</a>
-                <span class="desc">Strength training workout tracker PWA with structured programs</span>
-                <span class="tag tag-pwa">PWA</span>
-            </div>
-            <div class="tool">
-                <a href="https://camekazi.github.io/cableloop/">CableLoop</a>
-                <span class="desc">Cable recycling finder and community exchange platform</span>
+        <div class="content-wrap">
+            <h2>&#127807; Lifestyle</h2>
+            <div class="tools">
+                <div class="tool featured">
+                    <a href="https://github.com/Camekazi/wildlife-alerter">Wildlife & Aurora Alerter</a>
+                    <span class="desc">Real-time dolphin, whale, and seal sighting alerts for Edinburgh coast &mdash; plus aurora borealis alerts when northern lights are visible. Polls eBird, iNaturalist, GBIF, and AuroraWatch UK with push notifications</span>
+                    <span class="tag tag-python">Python</span>
+                </div>
+                <div class="tool">
+                    <a href="https://camekazi.github.io/ewans-exercises/">Ewan's Exercises</a>
+                    <span class="desc">Strength training workout tracker PWA with structured programs</span>
+                    <span class="tag tag-pwa">PWA</span>
+                </div>
+                <div class="tool">
+                    <a href="https://camekazi.github.io/cableloop/">CableLoop</a>
+                    <span class="desc">Cable recycling finder and community exchange platform</span>
+                </div>
             </div>
         </div>
     </section>
 
     <section id="running">
-        <h2>Running & Performance</h2>
-        <div class="tools">
-            <div class="tool featured" id="running-coaching">
-                <a href="https://github.com/TeamyTastic/running-coaching">Running Coaching Platform</a>
-                <span class="desc">Data infrastructure for running coaching practice — athlete management, training analysis, and performance tracking with longitudinal data import</span>
-                <span class="tag tag-python">Python</span>
+        <div class="content-wrap">
+            <h2>&#127939; Running & Performance</h2>
+
+            <div class="card-grid">
+                <div class="card" id="running-coaching">
+                    <a href="https://github.com/TeamyTastic/running-coaching">Running Coaching Platform</a>
+                    <div class="desc">Data infrastructure for running coaching practice &mdash; athlete management, training analysis, and performance tracking with longitudinal data import</div>
+                    <span class="tag tag-python">Python</span>
+                </div>
             </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Palladino Power Analysis</a>
-                <span class="desc">Analyze Stryd running power using Coach Steve Palladino's methodology — power-duration curves, training zones, race predictions from power data</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Seiler HR Drift Analysis</a>
-                <span class="desc">Analyze running performance using Stephen Seiler's HR drift methodology — aerobic decoupling, cardiac drift detection, training intensity distribution</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Marathon Time Estimation</a>
-                <span class="desc">Estimate marathon time using Riegel, VDOT, and Critical Speed methods — triangulate predictions from race history and training data</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Athlete Coaching Brief</a>
-                <span class="desc">Generate professional multi-page HTML coaching briefs — training summaries, performance trends, and actionable recommendations</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Strava &amp; Garmin Data Import</a>
-                <span class="desc">Systematically import longitudinal running data from Strava and Garmin Connect with advanced field mapping and historical analysis</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Context-Performance Timeline</a>
-                <span class="desc">Visual overlay showing life context alongside performance data — correlate training outcomes with sleep, stress, motivation, and external factors</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
+
+            <div class="tools">
+                <div class="tool">
+                    <a href="https://github.com/Camekazi/.claude">Palladino Power Analysis</a>
+                    <span class="desc">Analyze Stryd running power using Coach Steve Palladino's methodology &mdash; power-duration curves, training zones, race predictions from power data</span>
+                    <span class="tag tag-skill">Skill</span>
+                </div>
+                <div class="tool">
+                    <a href="https://github.com/Camekazi/.claude">Seiler HR Drift Analysis</a>
+                    <span class="desc">Analyze running performance using Stephen Seiler's HR drift methodology &mdash; aerobic decoupling, cardiac drift detection, training intensity distribution</span>
+                    <span class="tag tag-skill">Skill</span>
+                </div>
+                <div class="tool">
+                    <a href="https://github.com/Camekazi/.claude">Marathon Time Estimation</a>
+                    <span class="desc">Estimate marathon time using Riegel, VDOT, and Critical Speed methods &mdash; triangulate predictions from race history and training data</span>
+                    <span class="tag tag-skill">Skill</span>
+                </div>
+                <div class="tool">
+                    <a href="https://github.com/Camekazi/.claude">Athlete Coaching Brief</a>
+                    <span class="desc">Generate professional multi-page HTML coaching briefs &mdash; training summaries, performance trends, and actionable recommendations</span>
+                    <span class="tag tag-skill">Skill</span>
+                </div>
+                <div class="tool">
+                    <a href="https://github.com/Camekazi/.claude">Strava &amp; Garmin Data Import</a>
+                    <span class="desc">Systematically import longitudinal running data from Strava and Garmin Connect with advanced field mapping and historical analysis</span>
+                    <span class="tag tag-skill">Skill</span>
+                </div>
+                <div class="tool">
+                    <a href="https://github.com/Camekazi/.claude">Context-Performance Timeline</a>
+                    <span class="desc">Visual overlay showing life context alongside performance data &mdash; correlate training outcomes with sleep, stress, motivation, and external factors</span>
+                    <span class="tag tag-skill">Skill</span>
+                </div>
             </div>
         </div>
     </section>
@@ -609,88 +1102,49 @@
     <!-- Personal ONA archived - private at scottish-scaleup-ona.netlify.app -->
 
     <section id="home">
-        <h2>Family & Automation</h2>
-        <div class="tools">
-            <div class="tool">
-                <a href="https://github.com/Camekazi/joppa-bridge">Joppa Bridge</a>
-                <span class="desc">Smart home bridge with Alexa voice control for audio zones and lighting</span>
-                <span class="tag tag-python">Python</span>
+        <div class="content-wrap">
+            <h2>&#127968; Family & Automation</h2>
+            <div class="tools">
+                <div class="tool">
+                    <a href="https://github.com/Camekazi/joppa-bridge">Joppa Bridge</a>
+                    <span class="desc">Smart home bridge with Alexa voice control for audio zones and lighting</span>
+                    <span class="tag tag-python">Python</span>
+                </div>
+                <div class="tool">
+                    <a href="https://github.com/Camekazi">Kids Development Calendar</a>
+                    <span class="desc">Weekly developmental milestone calendar entries for children with evidence-based activities from NHS/CDC/WHO guidelines and "Why now" explanations grounded in developmental psychology</span>
+                    <span class="tag tag-skill">Skill</span>
+                </div>
+                <div class="tool">
+                    <a href="https://github.com/Camekazi/meal-bot">Telegram Meal Bot</a>
+                    <span class="desc">Family meal planning via Telegram &mdash; polls household for preferences, generates meal plans, creates shopping lists</span>
+                    <span class="tag tag-node">Node.js</span>
+                </div>
+                <div class="tool">
+                    <a href="https://github.com/Camekazi/.claude">Daily Family Email</a>
+                    <span class="desc">Automated daily briefing to the household &mdash; weather, calendar events, meal plan, and school info without group chat noise</span>
+                    <span class="tag tag-skill">Skill</span>
+                </div>
+                <div class="tool">
+                    <a href="https://github.com/Camekazi/.claude">Daily Individual Emails</a>
+                    <span class="desc">Personalized daily briefings for each family member &mdash; tailored schedules, reminders, and relevant info based on their day ahead</span>
+                    <span class="tag tag-skill">Skill</span>
+                </div>
             </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi">Kids Development Calendar</a>
-                <span class="desc">Weekly developmental milestone calendar entries for children with evidence-based activities from NHS/CDC/WHO guidelines and "Why now" explanations grounded in developmental psychology</span>
-                <span class="tag tag-skill">Claude Code Skill</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/meal-bot">Telegram Meal Bot</a>
-                <span class="desc">Family meal planning via Telegram — polls household for preferences, generates meal plans, creates shopping lists</span>
-                <span class="tag tag-node">Node.js</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Daily Family Email</a>
-                <span class="desc">Automated daily briefing to the household — weather, calendar events, meal plan, and school info without group chat noise</span>
-                <span class="tag tag-skill">Claude Code</span>
-            </div>
-            <div class="tool">
-                <a href="https://github.com/Camekazi/.claude">Daily Individual Emails</a>
-                <span class="desc">Personalized daily briefings for each family member — tailored schedules, reminders, and relevant info based on their day ahead</span>
-                <span class="tag tag-skill">Claude Code</span>
-            </div>
-        </div>
-    </section>
-
-    <section id="insights">
-        <h2>Insights from Using AI Agents</h2>
-        <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">Patterns from building 75 skills and 7 specialized agents with Claude Code</p>
-
-        <h3 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">The Learning Loop</h3>
-        <ol style="list-style: none; counter-reset: insight;">
-            <li class="insight"><strong>Failures are gold</strong> — Document what failed, not just what worked. The ❌ field is the most valuable part of any learning.</li>
-            <li class="insight"><strong>5+ occurrences, then operationalize</strong> — Wait for patterns to prove themselves before building infrastructure around them.</li>
-            <li class="insight"><strong>Propose, don't auto-apply</strong> — AI should suggest changes; humans approve. Prevents drift and maintains trust.</li>
-            <li class="insight"><strong>Grep when needed, delete what's stale</strong> — One searchable file beats elaborate tracking systems.</li>
-            <li class="insight"><strong>Evidence before infrastructure</strong> — Analyzed 20 PRs → only 3 had critical issues → built minimal tooling. Check the data before building the system.</li>
-        </ol>
-
-        <h3 style="font-size: 0.9rem; color: var(--primary); margin: 1.5rem 0 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Agent Design</h3>
-        <ol style="list-style: none; counter-reset: insight;" start="6">
-            <li class="insight"><strong>Match complexity to artifact</strong> — Simple → Command. Complicated → Skill. Complex → Agent. Wrong artifact type = wasted effort.</li>
-            <li class="insight"><strong>Extend, don't create</strong> — Adding 200 lines to existing code beats 500 lines standalone. Check what exists first.</li>
-            <li class="insight"><strong>Skill names should be grep-able</strong> — "subtext-analysis" beats "hermeneutic-observation". Name for discovery.</li>
-            <li class="insight"><strong>Features are prompts, tools are primitives</strong> — Define outcomes in natural language. Tools provide capability, not behavior.</li>
-            <li class="insight"><strong>Agent-user parity</strong> — Whatever the user can do, the agent can do. Whatever the user can see, the agent can see.</li>
-            <li class="insight"><strong>Don't LLM what regex can do</strong> — Use deterministic handling for structured inputs. Save the LLM for genuinely ambiguous cases.</li>
-            <li class="insight"><strong>Multi-agent review cuts scope</strong> — 3 agents reviewing a plan identified 60-70% cuts. 45 min plan → 12 min implementation.</li>
-        </ol>
-
-        <h3 style="font-size: 0.9rem; color: var(--primary); margin: 1.5rem 0 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Working with AI</h3>
-        <ol style="list-style: none; counter-reset: insight;" start="13">
-            <li class="insight"><strong>Brainstorm before simplifying</strong> — Present 5-7 options before rewriting. Let humans shape direction.</li>
-            <li class="insight"><strong>URL-driven task initiation</strong> — Concrete URLs beat abstract descriptions. "Install X from [link]" works; "add that library" doesn't.</li>
-            <li class="insight"><strong>After 3 failed fixes, disable and move on</strong> — Know when to stop debugging. Revisit with fresh context later.</li>
-            <li class="insight"><strong>Inject domain context into prompts</strong> — "DO NOT suggest X for these items" prevents obvious mistakes. LLMs need explicit exclusions.</li>
-            <li class="insight"><strong>Check native before customizing</strong> — Query the changelog first. The feature you're building might already exist.</li>
-            <li class="insight"><strong>Match planning fidelity to task size</strong> — One-line fix? Skip planning. Multi-file clear scope? Light plan. Major feature? Full ceremony with parallel agents.</li>
-            <li class="insight"><strong>CLI over MCP for reliability</strong> — CLI tools are predictable and debuggable. MCP can miss data. When reliability matters, use the boring option.</li>
-        </ol>
-        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);">
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;"><strong>Inspired by:</strong></p>
-            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.8;">
-                <a href="https://every.to/chain-of-thought/what-comes-after-saas">Compound Engineering</a> (Dan Shipper) ·
-                <a href="https://www.anthropic.com/claude-code">Claude Code</a> (Anthropic) ·
-                <a href="https://github.com/anthropics/anthropic-cookbook/tree/main/misc/prompt_caching">ACE Patterns</a> ·
-                <a href="https://ghuntley.com/claudesian/">Claudesian</a> (Geoffrey Huntley) ·
-                <a href="https://www.dbreunig.com/2026/01/08/a-software-library-with-no-code.html">Spec-Only Libraries</a> (Drew Breunig) ·
-                <a href="https://www.exponentialview.co/">Exponential View</a> (Azeem Azhar) ·
-                <a href="https://www.robcross.org/">ONA Methodology</a> (Rob Cross) ·
-                <a href="https://mindsatwork.com/the-immunity-to-change-process/">Immunity to Change</a> (Kegan & Lahey) ·
-                <a href="https://www.youtube.com/@drrichardclaydon">Leadership Rewritten</a> (Richard Claydon)
-            </p>
         </div>
     </section>
 
     <footer>
-        <p>Built with Claude Code &middot; <a href="https://github.com/Camekazi">GitHub</a></p>
+        <div class="content-wrap">
+            <div class="footer-content">
+                <div>
+                    <p>Built with <a href="https://www.anthropic.com/claude-code">Claude Code</a> &middot; <a href="https://github.com/Camekazi">GitHub</a> &middot; <a href="https://linkedin.com/in/ewancameron1">LinkedIn</a></p>
+                    <p class="footer-stats">75 skills &middot; 7 agents &middot; Compounding since 2024</p>
+                </div>
+                <div style="font-size: 0.8rem;">Last updated: February 2026</div>
+            </div>
+        </div>
     </footer>
+
 </body>
 </html>
