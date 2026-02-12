@@ -350,34 +350,81 @@ tr:hover td { background: var(--accent-glow); }
 }
 
 /* ── Even/Over ── */
+.eo-grid {
+  display: flex; flex-direction: column; gap: 0;
+}
 .eo-row {
-  display: flex; align-items: center; gap: 12px;
-  margin-bottom: 14px;
-  padding: 10px 16px;
-  background: var(--surface);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.2s ease;
 }
+.eo-row:last-child { border-bottom: none; }
+.eo-row:hover { background: rgba(194, 65, 12, 0.03); }
 .eo-even {
-  font-size: 14px; font-weight: 600;
-  min-width: 150px; text-align: right;
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 20px; font-weight: 400;
+  text-align: right;
   color: var(--ink);
+  padding-right: 16px;
+  line-height: 1.2;
 }
-.eo-track {
-  flex: 1; height: 6px;
-  border-radius: 3px;
-  background: var(--warm);
-  position: relative; overflow: hidden;
+.eo-divider {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 0 8px;
 }
-.eo-fill {
-  position: absolute; top: 0; left: 0; height: 100%;
-  border-radius: 3px;
-  background: linear-gradient(90deg, var(--accent), var(--teal));
-  transition: width 0.6s ease;
+.eo-divider-word {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent);
+  opacity: 0.7;
+}
+.eo-divider-line {
+  width: 1px; height: 18px;
+  background: var(--accent);
+  opacity: 0.25;
 }
 .eo-over {
-  font-size: 13px; color: var(--ink-faint);
-  min-width: 130px;
+  font-size: 14px;
+  color: var(--ink-dim);
+  padding-left: 16px;
+  line-height: 1.3;
+}
+.eo-wrapper {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.eo-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  padding: 10px 20px 8px;
+  border-bottom: 1px solid var(--border);
+  background: var(--cream);
+}
+.eo-header-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--ink-faint);
+}
+.eo-header-label:first-child { text-align: right; padding-right: 24px; }
+.eo-header-label:last-child { padding-left: 24px; }
+.eo-footer {
+  padding: 10px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--cream);
+  font-size: 11px;
+  color: var(--ink-faint);
+  text-align: center;
+  font-style: italic;
 }
 
 /* ── Experiment ── */
@@ -615,7 +662,12 @@ blockquote cite {
   h2 { font-size: 22px; }
   .hero-quote { font-size: 18px; }
   .role-grid { grid-template-columns: 1fr; }
-  .eo-even, .eo-over { min-width: 90px; font-size: 12px; }
+  .eo-even { font-size: 16px; padding-right: 10px; }
+  .eo-over { font-size: 12px; padding-left: 10px; }
+  .eo-row { padding: 12px 14px; }
+  .eo-header { padding: 8px 14px 6px; }
+  .eo-header-label:first-child { padding-right: 18px; }
+  .eo-header-label:last-child { padding-left: 18px; }
   .timer-display { font-size: 52px; }
   .section { padding: 28px 16px 100px; }
   .hero-card { padding: 24px; }
@@ -691,13 +743,23 @@ const storage = {
     <hr class="divider">
 
     <h2>Even/over framing</h2>
-    <p style="font-size:13px; color:var(--ink-dim); margin-bottom:18px;">When these are in tension, the left side wins &mdash; but acknowledge the cost on the right.</p>
+    <p style="font-size:13px; color:var(--ink-dim); margin-bottom:18px;">When these are in tension, the left side wins &mdash; but acknowledge the cost on the right. Both sides are valuable; this is a priority declaration, not a judgment.</p>
 
-    <div class="eo-row"><div class="eo-even">Shared understanding</div><div class="eo-track"><div class="eo-fill" style="width:82%"></div></div><div class="eo-over">Individual speed</div></div>
-    <div class="eo-row"><div class="eo-even">Exploration</div><div class="eo-track"><div class="eo-fill" style="width:72%"></div></div><div class="eo-over">Execution</div></div>
-    <div class="eo-row"><div class="eo-even">Deliberateness</div><div class="eo-track"><div class="eo-fill" style="width:76%"></div></div><div class="eo-over">Velocity</div></div>
-    <div class="eo-row"><div class="eo-even">Multiple perspectives</div><div class="eo-track"><div class="eo-fill" style="width:66%"></div></div><div class="eo-over">Single ownership</div></div>
-    <div class="eo-row"><div class="eo-even">Learning</div><div class="eo-track"><div class="eo-fill" style="width:62%"></div></div><div class="eo-over">Pure output</div></div>
+    <div class="eo-wrapper">
+      <div class="eo-header">
+        <span class="eo-header-label">Prioritise</span>
+        <span></span>
+        <span class="eo-header-label">Acknowledge cost</span>
+      </div>
+      <div class="eo-grid">
+        <div class="eo-row"><div class="eo-even">Shared understanding</div><div class="eo-divider"><div class="eo-divider-line"></div><div class="eo-divider-word">even over</div><div class="eo-divider-line"></div></div><div class="eo-over">Individual speed</div></div>
+        <div class="eo-row"><div class="eo-even">Exploration</div><div class="eo-divider"><div class="eo-divider-line"></div><div class="eo-divider-word">even over</div><div class="eo-divider-line"></div></div><div class="eo-over">Execution</div></div>
+        <div class="eo-row"><div class="eo-even">Deliberateness</div><div class="eo-divider"><div class="eo-divider-line"></div><div class="eo-divider-word">even over</div><div class="eo-divider-line"></div></div><div class="eo-over">Velocity</div></div>
+        <div class="eo-row"><div class="eo-even">Multiple perspectives</div><div class="eo-divider"><div class="eo-divider-line"></div><div class="eo-divider-word">even over</div><div class="eo-divider-line"></div></div><div class="eo-over">Single ownership</div></div>
+        <div class="eo-row"><div class="eo-even">Learning</div><div class="eo-divider"><div class="eo-divider-line"></div><div class="eo-divider-word">even over</div><div class="eo-divider-line"></div></div><div class="eo-over">Pure output</div></div>
+      </div>
+      <div class="eo-footer">Source: Even/Over Statements &mdash; Jurriaan Kamer / The Ready</div>
+    </div>
 
     <hr class="divider">
 
