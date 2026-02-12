@@ -1,875 +1,1154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MVI Experiment Designer</title>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-    <script>
-    const storage = {
-        get: (key) => { try { return localStorage.getItem(key); } catch(e) { return null; } },
-        set: (key, val) => { try { localStorage.setItem(key, val); } catch(e) {} },
-        remove: (key) => { try { localStorage.removeItem(key); } catch(e) {} }
-    };
-    </script>
-    <style>
-        :root {
-            --ink: #1a1a2e;
-            --ink-light: #4a4a5e;
-            --surface: #faf8f5;
-            --surface-warm: #f5f0e8;
-            --accent: #c45d2c;
-            --accent-light: #e8a87c;
-            --accent-glow: rgba(196, 93, 44, 0.12);
-            --success: #2d6a4f;
-            --success-bg: #d8f3dc;
-            --border: #e0dcd4;
-            --radius: 12px;
-            --shadow: 0 2px 12px rgba(26, 26, 46, 0.06);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MOB — AI-Collaborative Session Designer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #f5f0e8;
+  --ink: #1a1a1a;
+  --ink-dim: #6b6b6b;
+  --ink-faint: #a0a0a0;
+  --paper: #fffcf5;
+  --warm: #e8dfd0;
+  --accent: #c2410c;
+  --accent-light: #fed7aa;
+  --accent-glow: rgba(194, 65, 12, 0.12);
+  --teal: #0d9488;
+  --teal-light: #ccfbf1;
+  --green: #16a34a;
+  --green-light: #dcfce7;
+  --amber: #d97706;
+  --amber-light: #fef3c7;
+  --red: #dc2626;
+  --red-light: #fecaca;
+  --violet: #7c3aed;
+  --violet-light: #ede9fe;
+  --surface: #ffffff;
+  --border: rgba(0,0,0,0.08);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --serif: 'Instrument Serif', Georgia, serif;
+  --sans: 'DM Sans', -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.1);
+}
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--sans);
+  background: var(--cream);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-size: 15px;
+  line-height: 1.65;
+  /* subtle grain */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+}
 
-        body {
-            font-family: 'DM Sans', -apple-system, sans-serif;
-            background: var(--surface);
-            color: var(--ink);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
+::selection { background: var(--accent-light); color: var(--ink); }
 
-        /* Header */
-        .header {
-            background: var(--ink);
-            color: var(--surface);
-            padding: 40px 24px 32px;
-            position: relative;
-            overflow: hidden;
-        }
-        .header::after {
-            content: '';
-            position: absolute;
-            top: -60%;
-            right: -10%;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(196,93,44,0.15) 0%, transparent 70%);
-            border-radius: 50%;
-        }
-        .header-inner {
-            max-width: 720px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-        .header h1 {
-            font-family: 'Instrument Serif', Georgia, serif;
-            font-size: clamp(2rem, 5vw, 2.8rem);
-            font-weight: 400;
-            letter-spacing: -0.02em;
-            margin-bottom: 8px;
-        }
-        .header p {
-            opacity: 0.7;
-            font-size: 0.95rem;
-        }
-        .header .tag {
-            display: inline-block;
-            background: var(--accent);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            margin-bottom: 16px;
-        }
+/* ── Navigation ── */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(245, 240, 232, 0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 20px;
+  display: flex; align-items: center; gap: 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.nav::-webkit-scrollbar { display: none; }
+.nav-brand {
+  font-family: var(--serif);
+  font-size: 22px;
+  color: var(--accent);
+  margin-right: 12px;
+  flex-shrink: 0;
+  letter-spacing: -0.5px;
+}
+.nav-tab {
+  padding: 7px 16px;
+  border-radius: 24px;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink-dim);
+  transition: all 0.25s ease;
+  min-height: 44px;
+  display: flex; align-items: center;
+}
+.nav-tab:hover { color: var(--ink); background: rgba(0,0,0,0.04); }
+.nav-tab.active {
+  background: var(--ink);
+  color: var(--cream);
+  font-weight: 600;
+}
 
-        /* Progress Bar */
-        .progress-bar {
-            max-width: 720px;
-            margin: -16px auto 0;
-            padding: 0 24px;
-            position: relative;
-            z-index: 2;
-        }
-        .progress-track {
-            background: white;
-            border-radius: 20px;
-            padding: 12px 20px;
-            display: flex;
-            gap: 4px;
-            align-items: center;
-            box-shadow: var(--shadow);
-        }
-        .progress-dot {
-            width: 28px;
-            height: 6px;
-            border-radius: 3px;
-            background: var(--border);
-            transition: all 0.3s ease;
-            flex: 1;
-        }
-        .progress-dot.active {
-            background: var(--accent);
-        }
-        .progress-dot.done {
-            background: var(--success);
-        }
-        .progress-label {
-            font-size: 0.75rem;
-            color: var(--ink-light);
-            margin-left: 12px;
-            white-space: nowrap;
-            font-weight: 500;
-        }
+/* ── Layout ── */
+.section {
+  display: none;
+  padding: 40px 24px 120px;
+  max-width: 780px;
+  margin: 0 auto;
+  animation: fadeUp 0.4s ease;
+}
+.section.active { display: block; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
-        /* Form Container */
-        .form-container {
-            max-width: 720px;
-            margin: 0 auto;
-            padding: 24px;
-        }
+/* ── Typography ── */
+h1 {
+  font-family: var(--serif);
+  font-size: 42px;
+  font-weight: 400;
+  line-height: 1.15;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+h2 {
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 400;
+  margin: 40px 0 16px;
+  color: var(--ink);
+  line-height: 1.2;
+}
+h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 24px 0 8px;
+  letter-spacing: -0.2px;
+}
+.subtitle {
+  color: var(--ink-dim);
+  font-size: 16px;
+  margin-bottom: 32px;
+  max-width: 540px;
+}
+p { margin-bottom: 14px; }
+strong { font-weight: 600; }
+code {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: rgba(0,0,0,0.05);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
 
-        /* Sections */
-        .section {
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-        .section.active {
-            display: block;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+/* ── Hero card ── */
+.hero-card {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 32px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+.hero-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--teal));
+}
+.hero-quote {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 22px;
+  line-height: 1.45;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+.hero-attribution {
+  font-size: 13px;
+  color: var(--ink-faint);
+}
 
-        .section-card {
-            background: white;
-            border-radius: var(--radius);
-            padding: 28px 24px;
-            margin-bottom: 16px;
-            box-shadow: var(--shadow);
-        }
-        .section-number {
-            font-family: 'Instrument Serif', serif;
-            font-size: 0.85rem;
-            color: var(--accent);
-            margin-bottom: 4px;
-        }
-        .section-title {
-            font-family: 'Instrument Serif', Georgia, serif;
-            font-size: 1.5rem;
-            font-weight: 400;
-            margin-bottom: 4px;
-            letter-spacing: -0.01em;
-        }
-        .section-subtitle {
-            color: var(--ink-light);
-            font-size: 0.85rem;
-            margin-bottom: 24px;
-        }
+/* ── Cards ── */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.25s ease;
+}
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
 
-        /* Form Elements */
-        label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--ink);
-            margin-bottom: 6px;
-        }
-        label .hint {
-            font-weight: 400;
-            color: var(--ink-light);
-            font-size: 0.8rem;
-            display: block;
-            margin-top: 2px;
-        }
+/* ── Tables ── */
+.table-wrap { overflow-x: auto; margin: 16px 0 24px; border-radius: var(--radius); border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th {
+  text-align: left; padding: 12px 16px;
+  background: var(--cream);
+  font-weight: 600; font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--ink-dim);
+  border-bottom: 2px solid var(--border);
+}
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  background: var(--surface);
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--accent-glow); }
 
-        input[type="text"],
-        textarea,
-        select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1.5px solid var(--border);
-            border-radius: 8px;
-            font-family: inherit;
-            font-size: 0.95rem;
-            color: var(--ink);
-            background: var(--surface);
-            transition: border-color 0.2s, box-shadow 0.2s;
-            -webkit-appearance: none;
-        }
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-glow);
-        }
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-            line-height: 1.5;
-        }
+/* ── Role Cards ── */
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 14px;
+  margin: 16px 0 28px;
+}
+.role-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 20px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.role-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px; height: 100%;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.role-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+.role-card:hover::after { opacity: 1; }
+.role-name {
+  font-family: var(--serif);
+  font-size: 20px;
+  margin-bottom: 2px;
+}
+.role-level {
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 10px;
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.lvl-1 { background: var(--accent-light); color: var(--accent); }
+.lvl-2 { background: var(--teal-light); color: var(--teal); }
+.lvl-3 { background: var(--amber-light); color: var(--amber); }
+.lvl-4 { background: var(--violet-light); color: var(--violet); }
+.role-desc { font-size: 13px; color: var(--ink-dim); line-height: 1.6; }
+.role-ai {
+  display: inline-block; font-size: 11px; font-weight: 600;
+  padding: 3px 10px; border-radius: 12px; margin-top: 10px;
+}
+.role-ai.yes { background: var(--green-light); color: var(--green); }
+.role-ai.partial { background: var(--amber-light); color: var(--amber); }
+.role-ai.no { background: var(--red-light); color: var(--red); }
 
-        .field-group {
-            margin-bottom: 20px;
-        }
-        .field-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-        @media (max-width: 500px) {
-            .field-row { grid-template-columns: 1fr; }
-        }
+/* ── Working Timer ── */
+.timer-container {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  margin: 20px 0 32px;
+}
+.timer-display {
+  font-family: var(--mono);
+  font-size: 72px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 16px 0;
+  letter-spacing: -2px;
+  transition: color 0.3s;
+}
+.timer-display.warning { color: var(--amber); }
+.timer-display.critical { color: var(--red); animation: pulse 1s ease infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+.timer-label {
+  font-family: var(--serif);
+  font-size: 18px;
+  color: var(--ink-dim);
+  margin-bottom: 4px;
+}
+.timer-driver {
+  font-size: 14px;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+.timer-controls { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.timer-presets { display: flex; gap: 6px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+.timer-preset {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--cream);
+  color: var(--ink-dim);
+  transition: all 0.2s;
+  min-height: 44px;
+  display: flex; align-items: center;
+}
+.timer-preset:hover, .timer-preset.active { background: var(--ink); color: var(--cream); border-color: var(--ink); }
 
-        /* Hypothesis builder */
-        .hypothesis-builder {
-            background: var(--surface-warm);
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 20px;
-        }
-        .hypothesis-builder .preview {
-            font-family: 'Instrument Serif', serif;
-            font-size: 1.1rem;
-            font-style: italic;
-            color: var(--ink);
-            line-height: 1.5;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid var(--border);
-        }
-        .hypothesis-builder .preview .blank {
-            color: var(--accent);
-            border-bottom: 2px solid var(--accent-light);
-        }
-        .hypothesis-builder .h-field {
-            margin-bottom: 10px;
-        }
-        .hypothesis-builder input {
-            background: white;
-        }
+/* ── Progression chart ── */
+.progression {
+  display: flex; gap: 6px; align-items: end;
+  margin: 20px 0;
+  height: 100px;
+  padding: 0 4px;
+}
+.prog-bar {
+  flex: 1;
+  border-radius: 8px 8px 0 0;
+  display: flex; flex-direction: column;
+  justify-content: end; align-items: center;
+  padding: 8px 4px;
+  font-size: 13px; font-weight: 600;
+  color: var(--surface);
+  transition: all 0.4s ease;
+  cursor: pointer;
+  min-height: 30px;
+}
+.prog-bar span {
+  font-size: 10px; font-weight: 500;
+  opacity: 0.8;
+  margin-top: 4px;
+  text-align: center;
+}
 
-        /* Duration selector */
-        .duration-options {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .duration-option {
-            padding: 10px 20px;
-            border: 1.5px solid var(--border);
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-            min-height: 44px;
-            display: flex;
-            align-items: center;
-        }
-        .duration-option:hover {
-            border-color: var(--accent-light);
-        }
-        .duration-option.selected {
-            border-color: var(--accent);
-            background: var(--accent-glow);
-            color: var(--accent);
-            font-weight: 600;
-        }
+/* ── Even/Over ── */
+.eo-row {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 14px;
+  padding: 10px 16px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+.eo-even {
+  font-size: 14px; font-weight: 600;
+  min-width: 150px; text-align: right;
+  color: var(--ink);
+}
+.eo-track {
+  flex: 1; height: 6px;
+  border-radius: 3px;
+  background: var(--warm);
+  position: relative; overflow: hidden;
+}
+.eo-fill {
+  position: absolute; top: 0; left: 0; height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--teal));
+  transition: width 0.6s ease;
+}
+.eo-over {
+  font-size: 13px; color: var(--ink-faint);
+  min-width: 130px;
+}
 
-        /* Waterline indicator */
-        .waterline {
-            background: linear-gradient(180deg, #e8f4f8 0%, #e8f4f8 49%, #1a1a2e 50%, #2d3a5e 100%);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            position: relative;
-        }
-        .waterline-label {
-            position: absolute;
-            right: 16px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-        .waterline-label.above { top: 8px; color: var(--ink-light); }
-        .waterline-label.below { bottom: 8px; color: rgba(255,255,255,0.6); }
-        .waterline-toggle {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            padding: 8px;
-        }
-        .waterline-toggle button {
-            padding: 10px 24px;
-            border-radius: 8px;
-            border: 2px solid transparent;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            min-height: 44px;
-            transition: all 0.2s;
-        }
-        .waterline-toggle .above-btn {
-            background: white;
-            color: var(--ink);
-        }
-        .waterline-toggle .above-btn.selected {
-            border-color: var(--success);
-            background: var(--success-bg);
-        }
-        .waterline-toggle .below-btn {
-            background: rgba(255,255,255,0.15);
-            color: white;
-        }
-        .waterline-toggle .below-btn.selected {
-            border-color: var(--accent);
-            background: rgba(196,93,44,0.3);
-        }
+/* ── Experiment ── */
+.input-group { margin-bottom: 18px; }
+.input-group label {
+  display: block;
+  font-size: 11px; font-weight: 700;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.input-group input, .input-group textarea {
+  width: 100%;
+  background: var(--cream);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  color: var(--ink);
+  font-size: 15px;
+  font-family: var(--sans);
+  outline: none;
+  transition: all 0.25s;
+}
+.input-group input:focus, .input-group textarea:focus {
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.input-group input::placeholder, .input-group textarea::placeholder {
+  color: var(--ink-faint);
+}
+textarea { resize: vertical; min-height: 80px; }
 
-        /* Navigation */
-        .nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 0;
-            gap: 12px;
-        }
-        .btn {
-            padding: 14px 28px;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            min-height: 48px;
-            transition: all 0.2s;
-            font-family: inherit;
-        }
-        .btn-primary {
-            background: var(--accent);
-            color: white;
-        }
-        .btn-primary:hover { background: #a84e25; transform: translateY(-1px); }
-        .btn-primary:active { transform: translateY(0); }
-        .btn-secondary {
-            background: transparent;
-            color: var(--ink-light);
-            border: 1.5px solid var(--border);
-        }
-        .btn-secondary:hover { border-color: var(--ink-light); }
-        .btn-submit {
-            background: var(--success);
-            color: white;
-            width: 100%;
-            font-size: 1.05rem;
-            padding: 16px;
-        }
-        .btn-submit:hover { background: #245a42; }
+.check-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: all 0.25s;
+  min-height: 44px;
+}
+.check-row:hover { background: var(--cream); }
+.check-icon {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--ink-faint);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700;
+  transition: all 0.3s;
+  flex-shrink: 0;
+}
+.check-row.passed .check-icon {
+  border-color: var(--green);
+  background: var(--green-light);
+  color: var(--green);
+}
+.check-row.failed .check-icon {
+  border-color: var(--red);
+  background: var(--red-light);
+  color: var(--red);
+}
+.check-row.passed { border-color: rgba(22,163,74,0.2); }
+.check-row.failed { border-color: rgba(220,38,38,0.2); }
+.check-label { font-weight: 600; font-size: 15px; }
+.check-question { font-size: 13px; color: var(--ink-dim); }
 
-        /* Success state */
-        .success-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(26,26,46,0.6);
-            backdrop-filter: blur(8px);
-            z-index: 100;
-            align-items: center;
-            justify-content: center;
-        }
-        .success-overlay.show { display: flex; }
-        .success-card {
-            background: white;
-            border-radius: 16px;
-            padding: 40px;
-            max-width: 420px;
-            width: 90%;
-            text-align: center;
-            animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        @keyframes popIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        .success-card .icon { font-size: 3rem; margin-bottom: 16px; }
-        .success-card h2 {
-            font-family: 'Instrument Serif', serif;
-            font-size: 1.5rem;
-            margin-bottom: 8px;
-        }
-        .success-card p { color: var(--ink-light); margin-bottom: 24px; }
-        .success-card a {
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 600;
-        }
+.verdict {
+  text-align: center;
+  padding: 24px;
+  border-radius: var(--radius);
+  font-size: 18px; font-weight: 700;
+  margin-top: 20px;
+  transition: all 0.4s;
+  font-family: var(--serif);
+}
+.verdict.safe { background: var(--green-light); color: var(--green); border: 2px solid rgba(22,163,74,0.3); }
+.verdict.unsafe { background: var(--red-light); color: var(--red); border: 2px solid rgba(220,38,38,0.3); }
+.verdict.pending { background: var(--cream); color: var(--ink-faint); border: 2px solid var(--border); }
 
-        /* Experiment list */
-        .experiment-list {
-            margin-top: 16px;
-        }
-        .experiment-item {
-            background: white;
-            border-radius: var(--radius);
-            padding: 16px 20px;
-            margin-bottom: 8px;
-            box-shadow: var(--shadow);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: transform 0.15s;
-        }
-        .experiment-item:hover { transform: translateX(4px); }
-        .experiment-item .name { font-weight: 600; }
-        .experiment-item .meta { font-size: 0.8rem; color: var(--ink-light); }
-        .status-badge {
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        .status-badge.active { background: #dbeafe; color: #1e40af; }
-        .status-badge.scale { background: var(--success-bg); color: var(--success); }
-        .status-badge.pivot { background: #fef3c7; color: #92400e; }
-        .status-badge.kill { background: #fee2e2; color: #991b1b; }
+.hypothesis-out {
+  font-family: var(--serif);
+  font-size: 18px;
+  line-height: 1.7;
+  padding: 28px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+.hypothesis-out .copy-btn {
+  position: absolute; top: 12px; right: 12px;
+  padding: 6px 12px;
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--cream);
+  color: var(--ink-dim);
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.hypothesis-out .copy-btn:hover { background: var(--ink); color: var(--cream); }
 
-        /* Setup banner */
-        .setup-banner {
-            background: var(--surface-warm);
-            border: 1.5px dashed var(--border);
-            border-radius: var(--radius);
-            padding: 20px;
-            margin-bottom: 24px;
-            text-align: center;
-        }
-        .setup-banner h3 {
-            font-family: 'Instrument Serif', serif;
-            margin-bottom: 8px;
-        }
-        .setup-banner code {
-            background: white;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-        }
-        .setup-banner .field-group { margin-top: 16px; text-align: left; }
+/* ── Flowchart ── */
+.flow {
+  display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+.flow-step {
+  padding: 10px 18px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 600;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.flow-arrow { color: var(--accent); font-size: 20px; font-weight: 300; }
 
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 24px;
-            color: var(--ink-light);
-            font-size: 0.8rem;
-        }
-        .footer a { color: var(--accent); text-decoration: none; }
-    </style>
+/* ── Blockquote ── */
+blockquote {
+  border-left: 3px solid var(--accent);
+  padding: 16px 20px;
+  margin: 20px 0;
+  background: var(--surface);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ink);
+  box-shadow: var(--shadow-sm);
+}
+blockquote cite {
+  display: block;
+  font-style: normal;
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--ink-faint);
+  margin-top: 8px;
+}
+
+/* ── Links ── */
+.link-card {
+  display: flex; gap: 14px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  text-decoration: none;
+  color: var(--ink);
+  border: 1px solid var(--border);
+  transition: all 0.25s;
+  align-items: center;
+}
+.link-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateX(4px);
+}
+.link-tag {
+  font-size: 9px; font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.tag-foundation { background: var(--accent-light); color: var(--accent); }
+.tag-ai { background: var(--teal-light); color: var(--teal); }
+.tag-game { background: var(--amber-light); color: var(--amber); }
+.tag-strategy { background: var(--green-light); color: var(--green); }
+.link-info { flex: 1; min-width: 0; }
+.link-title { font-weight: 600; font-size: 14px; }
+.link-url { font-size: 11px; color: var(--ink-faint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.25s;
+  font-family: var(--sans);
+  min-height: 44px;
+}
+.btn-primary {
+  background: var(--ink);
+  color: var(--cream);
+}
+.btn-primary:hover { background: #333; transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-accent {
+  background: var(--accent);
+  color: white;
+}
+.btn-accent:hover { background: #a33a0a; transform: translateY(-1px); }
+.btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+}
+.btn-ghost:hover { background: var(--ink); color: var(--cream); }
+
+/* ── Divider ── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 36px 0;
+}
+
+/* ── Stagger animation ── */
+.stagger > * {
+  opacity: 0;
+  animation: fadeUp 0.4s ease forwards;
+}
+.stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger > *:nth-child(8) { animation-delay: 0.4s; }
+
+@media (max-width: 640px) {
+  h1 { font-size: 30px; }
+  h2 { font-size: 22px; }
+  .hero-quote { font-size: 18px; }
+  .role-grid { grid-template-columns: 1fr; }
+  .eo-even, .eo-over { min-width: 90px; font-size: 12px; }
+  .timer-display { font-size: 52px; }
+  .section { padding: 28px 16px 100px; }
+  .hero-card { padding: 24px; }
+}
+
+/* Safe localStorage wrapper */
+</style>
+<script>
+const storage = {
+  get: (k) => { try { return localStorage.getItem(k); } catch(e) { return null; } },
+  set: (k, v) => { try { localStorage.setItem(k, v); } catch(e) {} },
+  remove: (k) => { try { localStorage.removeItem(k); } catch(e) {} }
+};
+</script>
 </head>
 <body>
 
-<div class="header">
-    <div class="header-inner">
-        <span class="tag">The Ready</span>
-        <h1>MVI Experiment Designer</h1>
-        <p>Radical change at a non-radical scale</p>
+<nav class="nav">
+  <div class="nav-brand">mob</div>
+  <div class="nav-tab active" data-tab="overview">Overview</div>
+  <div class="nav-tab" data-tab="roles">Roles</div>
+  <div class="nav-tab" data-tab="setup">Setup</div>
+  <div class="nav-tab" data-tab="timer">Timer</div>
+  <div class="nav-tab" data-tab="experiment">Experiment</div>
+  <div class="nav-tab" data-tab="rpg">RPG</div>
+  <div class="nav-tab" data-tab="links">Links</div>
+</nav>
+
+<!-- ═══════════ OVERVIEW ═══════════ -->
+<div class="section active" id="overview">
+  <div class="stagger">
+    <h1>AI-Collaborative<br>Mob Programming</h1>
+    <p class="subtitle">Whole team. Same thing. Same time. Same computer. With AI. A structured ritual for shared understanding.</p>
+
+    <div class="hero-card">
+      <div class="hero-quote">"For an idea to go from your head into the computer, it MUST go through someone else's hands."</div>
+      <div class="hero-attribution">Llewellyn Falco &mdash; The foundational constraint that makes mob programming a learning activity, not just a coding activity.</div>
     </div>
+
+    <h2>The business why</h2>
+    <div class="flow">
+      <div class="flow-step">Mob with AI</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step">Shared understanding</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step">Break silos</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step">Maintain more apps (4&rarr;8+)</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step" style="border-color:var(--green); color:var(--green); font-weight:700;">Revenue diversification</div>
+    </div>
+
+    <blockquote>"If you've got the ability to keep ten of those apps in play, suddenly you've got a team able to maintain half a million ARR."<cite>Paul Cutting, Upscale BU</cite></blockquote>
+
+    <p>Not just for "new shiny stuff" &mdash; high value for <strong>legacy maintenance</strong> and <strong>bug fixes</strong> where context has drifted.</p>
+
+    <h2>Even/over framing</h2>
+    <p style="font-size:13px; color:var(--ink-dim); margin-bottom:18px;">When these are in tension, the left side wins &mdash; but acknowledge the cost on the right.</p>
+
+    <div class="eo-row"><div class="eo-even">Shared understanding</div><div class="eo-track"><div class="eo-fill" style="width:82%"></div></div><div class="eo-over">Individual speed</div></div>
+    <div class="eo-row"><div class="eo-even">Exploration</div><div class="eo-track"><div class="eo-fill" style="width:72%"></div></div><div class="eo-over">Execution</div></div>
+    <div class="eo-row"><div class="eo-even">Deliberateness</div><div class="eo-track"><div class="eo-fill" style="width:76%"></div></div><div class="eo-over">Velocity</div></div>
+    <div class="eo-row"><div class="eo-even">Multiple perspectives</div><div class="eo-track"><div class="eo-fill" style="width:66%"></div></div><div class="eo-over">Single ownership</div></div>
+    <div class="eo-row"><div class="eo-even">Learning</div><div class="eo-track"><div class="eo-fill" style="width:62%"></div></div><div class="eo-over">Pure output</div></div>
+
+    <hr class="divider">
+
+    <h2>Evidence from the field</h2>
+    <div class="card">
+      <h3>Crisp (Sweden) &mdash; Daily 3hr sessions</h3>
+      <p>AI as "superintelligent advisor &mdash; always available, never tired." Eliminated code reviews, removed key-person dependencies, reduced technical debt.</p>
+      <p><strong>"We tried splitting up to hit a deadline, but reintegration was painful. We're faster together."</strong></p>
+    </div>
+    <div class="card">
+      <h3>Atlassian &mdash; Define &rarr; Spec &rarr; Generate &rarr; Review &rarr; Iterate</h3>
+      <p>2&ndash;4 developers with rotating facilitator. Features in 1&ndash;2 days vs typical week. AI draft accuracy: ~50% &rarr; ~80% by project end.</p>
+    </div>
+  </div>
 </div>
 
-<div class="progress-bar">
-    <div class="progress-track">
-        <div class="progress-dot done" data-step="0"></div>
-        <div class="progress-dot" data-step="1"></div>
-        <div class="progress-dot" data-step="2"></div>
-        <div class="progress-dot" data-step="3"></div>
-        <div class="progress-dot" data-step="4"></div>
-        <span class="progress-label">1 / 5</span>
+<!-- ═══════════ ROLES ═══════════ -->
+<div class="section" id="roles">
+  <h1>Roles</h1>
+  <p class="subtitle">5 roles for AI-collaborative sessions. Minimum 2 humans &mdash; AI augments, doesn't replace the social learning.</p>
+
+  <h2>AI-adapted roles</h2>
+  <div class="role-grid stagger">
+    <div class="role-card">
+      <div class="role-name">Driver</div>
+      <div class="role-desc">Types prompts, presses buttons. Does NOT decide what to create &mdash; only implements what the Navigator describes.</div>
+      <div class="role-ai no">Human only</div>
     </div>
+    <div class="role-card">
+      <div class="role-name">Facilitator</div>
+      <div class="role-desc">Runs timer, tracks rotation, calls breaks. Key question: "Are we stuck?"</div>
+      <div class="role-ai partial">AI: partial</div>
+    </div>
+    <div class="role-card">
+      <div class="role-name">Subject Matter Expert</div>
+      <div class="role-desc">Brings business context the AI lacks. Domain knowledge, user stories, edge cases.</div>
+      <div class="role-ai no">Human only</div>
+    </div>
+    <div class="role-card">
+      <div class="role-name">Red Team</div>
+      <div class="role-desc">Critiques output, pokes holes, challenges assumptions. "What could go wrong?"</div>
+      <div class="role-ai yes">AI: yes</div>
+    </div>
+    <div class="role-card">
+      <div class="role-name">Outcome Keeper</div>
+      <div class="role-desc">Stays on mission, prevents AI tangents. "Is this still solving our problem?"</div>
+      <div class="role-ai partial">AI: partial</div>
+    </div>
+  </div>
+
+  <h2>AI integration models</h2>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Model</th><th>Who does what</th><th>Best for</th></tr>
+      <tr><td><strong>Copilot</strong></td><td>Driver uses AI suggestions, mob validates</td><td>Teams already comfortable mobbing</td></tr>
+      <tr><td><strong>Draft Generator</strong></td><td>AI writes first draft, mob reviews/refines</td><td>New codebases, specs-heavy work</td></tr>
+      <tr><td><strong>Red Team</strong></td><td>Mob writes, AI critiques</td><td>Learning, quality focus</td></tr>
+      <tr><td><strong>Observer</strong></td><td>Meta-AI watches mob, surfaces patterns</td><td>"Another AI watching us using AI"</td></tr>
+    </table>
+  </div>
+
+  <h2>Classic mob roles</h2>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Role</th><th>Function</th><th>Key rule</th></tr>
+      <tr><td><strong>Driver</strong></td><td>Hands on keyboard. Translates spoken ideas into code.</td><td>Doesn't decide what to create</td></tr>
+      <tr><td><strong>Navigator</strong></td><td>Strategic thinking. Describes next steps verbally.</td><td>Person with the idea navigates, doesn't drive</td></tr>
+      <tr><td><strong>Mobber</strong></td><td>Contributes ideas, asks questions, researches.</td><td>Yield to less-privileged voices</td></tr>
+      <tr><td><strong>Researcher</strong></td><td>Finds docs, blog posts, code examples in parallel.</td><td>Share findings, don't hoard</td></tr>
+      <tr><td><strong>Facilitator</strong></td><td>Timer, rotation, breaks.</td><td>"Are we stuck?" is the key question</td></tr>
+    </table>
+  </div>
 </div>
 
-<div class="form-container">
+<!-- ═══════════ SETUP ═══════════ -->
+<div class="section" id="setup">
+  <h1>Session Setup</h1>
+  <p class="subtitle">Practical setup &mdash; physical, remote, cadence, ground rules.</p>
 
-    <!-- SETUP (one-time) -->
-    <div id="setup-banner" class="setup-banner" style="display:none">
-        <h3>Connect to Google Sheets</h3>
-        <p>Paste your Apps Script Web App URL to save experiments to your sheet.</p>
-        <div class="field-group">
-            <label>Apps Script URL</label>
-            <input type="text" id="script-url" placeholder="https://script.google.com/macros/s/.../exec">
-        </div>
-        <button class="btn btn-primary" onclick="saveScriptUrl()" style="margin-top:8px">Save Connection</button>
-        <p style="margin-top:12px; font-size:0.8rem; color:var(--ink-light)">
-            Sheet: <a href="https://docs.google.com/spreadsheets/d/1pfFE56uYNIt9F0pfXkv-wWKPvuknxC0fj0fvYBn-o08/edit" target="_blank">MVI Experiment Tracker</a>
-        </p>
-    </div>
+  <h2>Timer progression</h2>
+  <div class="progression">
+    <div class="prog-bar" style="height:32%; background: linear-gradient(to top, var(--accent), #f97316);" onclick="setTimer(300)">4-5m<span>First session</span></div>
+    <div class="prog-bar" style="height:55%; background: linear-gradient(to top, var(--accent), #ea580c);" onclick="setTimer(600)">7-10m<span>Week 1-2</span></div>
+    <div class="prog-bar" style="height:80%; background: linear-gradient(to top, var(--teal), #0d9488);" onclick="setTimer(900)">10-15m<span>Established</span></div>
+    <div class="prog-bar" style="height:100%; background: linear-gradient(to top, var(--green), #16a34a);">Natural<span>Experienced</span></div>
+  </div>
+  <p style="font-size:13px; color:var(--ink-dim);">When the timer feels too short, you're at the right length. Click a bar to set the timer.</p>
 
-    <!-- SECTION 1: The Tension -->
-    <div class="section active" data-step="0">
-        <div class="section-card">
-            <div class="section-number">Step 1 of 5</div>
-            <h2 class="section-title">Name the Tension</h2>
-            <p class="section-subtitle">What gap exists between current reality and what could be true?</p>
+  <h2>Cadence options</h2>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Model</th><th>Schedule</th><th>Best for</th></tr>
+      <tr><td><strong>Full-time mob</strong></td><td>09:00&ndash;12:00 + 13:00&ndash;16:00 daily</td><td>Dedicated product teams (Crisp)</td></tr>
+      <tr><td><strong>Standing slot</strong></td><td>1&ndash;2 hours, 2&ndash;3x/week</td><td>Teams adopting gradually</td></tr>
+      <tr><td><strong>Experiment sprint</strong></td><td>1 week intensive</td><td>Proving the concept</td></tr>
+      <tr><td><strong>Ad-hoc</strong></td><td>Called for specific problems</td><td>Bug fixes, legacy ramp-up</td></tr>
+    </table>
+  </div>
 
-            <div class="field-group">
-                <label>Experiment Name
-                    <span class="hint">A memorable label for this experiment</span>
-                </label>
-                <input type="text" id="name" placeholder="e.g. Async Standups Trial">
-            </div>
+  <h2>Remote git handover</h2>
+  <div class="flow">
+    <div class="flow-step" style="font-family:var(--mono); font-size:12px;">mob start</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">Work (10-15 min)</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step" style="font-family:var(--mono); font-size:12px;">mob next</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">Next driver pulls</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">Repeat&hellip;</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step" style="font-family:var(--mono); font-size:12px; border-color:var(--green); color:var(--green);">mob done</div>
+  </div>
+  <p style="font-size:14px;">WIP commits to a <code>mob-session</code> branch. Don't worry about commit messages mid-session. Squash at end.</p>
 
-            <div class="field-group">
-                <label>Tension / Opportunity
-                    <span class="hint">The specific gap you've observed. Be concrete.</span>
-                </label>
-                <textarea id="tension" rows="3" placeholder="e.g. Our daily standups consume 45 min and most people zone out after 5. The information shared could be async."></textarea>
-            </div>
-        </div>
+  <h2>Ground rules</h2>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Rule</th><th>Rationale</th></tr>
+      <tr><td><strong>"Get on the pitch"</strong></td><td>Both contribute. Avoids one person dominating.</td></tr>
+      <tr><td><strong>Deliberateness over impulsiveness</strong></td><td>"Read it twice before we hit the button"</td></tr>
+      <tr><td><strong>Chatham House Rule</strong></td><td>Psychological safety to experiment</td></tr>
+      <tr><td><strong>Playful/experimental feel</strong></td><td>Not too rigid, willing to try things</td></tr>
+      <tr><td><strong>Rotate every 10&ndash;15 min</strong></td><td>Forces knowledge transfer through handover discomfort</td></tr>
+    </table>
+  </div>
 
-        <div class="nav">
-            <div></div>
-            <button class="btn btn-primary" onclick="goTo(1)">Next &rarr;</button>
-        </div>
-    </div>
-
-    <!-- SECTION 2: Hypothesis -->
-    <div class="section" data-step="1">
-        <div class="section-card">
-            <div class="section-number">Step 2 of 5</div>
-            <h2 class="section-title">Form Your Hypothesis</h2>
-            <p class="section-subtitle">What do you believe will happen, and why?</p>
-
-            <div class="hypothesis-builder">
-                <div class="h-field">
-                    <label>We believe that...</label>
-                    <input type="text" id="h-action" placeholder="replacing daily standups with async check-ins">
-                </div>
-                <div class="h-field">
-                    <label>will result in...</label>
-                    <input type="text" id="h-outcome" placeholder="30 min/day saved per person with no loss in team alignment">
-                </div>
-                <div class="h-field">
-                    <label>because...</label>
-                    <input type="text" id="h-reason" placeholder="most standup content is status updates that don't need synchronous discussion">
-                </div>
-                <div class="preview">
-                    "We believe that <span class="blank" id="preview-action">___</span>
-                    will result in <span class="blank" id="preview-outcome">___</span>
-                    because <span class="blank" id="preview-reason">___</span>."
-                </div>
-            </div>
-
-            <div class="field-group">
-                <label>Practice / Proposal
-                    <span class="hint">Exactly what will you try? Be specific about the how.</span>
-                </label>
-                <textarea id="proposal" rows="3" placeholder="e.g. Replace Mon-Thu standup with a Slack thread posted at 9am. Keep Friday standup synchronous for planning."></textarea>
-            </div>
-
-            <div class="field-group">
-                <label>Other Options Considered
-                    <span class="hint">What alternatives did you reject? (Preempts "did you think about X?")</span>
-                </label>
-                <textarea id="alternatives" rows="2" placeholder="e.g. Considered cutting to 15 min, moving to twice weekly, or using video updates"></textarea>
-            </div>
-        </div>
-
-        <div class="nav">
-            <button class="btn btn-secondary" onclick="goTo(0)">&larr; Back</button>
-            <button class="btn btn-primary" onclick="goTo(2)">Next &rarr;</button>
-        </div>
-    </div>
-
-    <!-- SECTION 3: Scope -->
-    <div class="section" data-step="2">
-        <div class="section-card">
-            <div class="section-number">Step 3 of 5</div>
-            <h2 class="section-title">Scope &amp; Boundaries</h2>
-            <p class="section-subtitle">Keep it minimal. One variable at a time.</p>
-
-            <div class="field-row">
-                <div class="field-group">
-                    <label>Participants</label>
-                    <input type="text" id="participants" placeholder="e.g. Platform team (8 people)">
-                </div>
-                <div class="field-group">
-                    <label>Decision-Maker</label>
-                    <input type="text" id="decision-maker" placeholder="Who approves this?">
-                </div>
-            </div>
-
-            <div class="field-group">
-                <label>Duration</label>
-                <div class="duration-options">
-                    <div class="duration-option" data-weeks="2" onclick="selectDuration(this)">2 weeks</div>
-                    <div class="duration-option" data-weeks="4" onclick="selectDuration(this)">4 weeks</div>
-                    <div class="duration-option selected" data-weeks="8" onclick="selectDuration(this)">8 weeks <span style="font-size:0.75rem;opacity:0.7;margin-left:4px">(default)</span></div>
-                    <div class="duration-option" data-weeks="12" onclick="selectDuration(this)">12 weeks</div>
-                </div>
-            </div>
-
-            <div class="field-group" style="margin-top: 20px">
-                <label>Waterline Check
-                    <span class="hint">Is this above or below the waterline? Above = safe to try, easy to undo. Below = could sink the ship.</span>
-                </label>
-                <div class="waterline">
-                    <span class="waterline-label above">Safe to try</span>
-                    <span class="waterline-label below">Needs caution</span>
-                    <div class="waterline-toggle">
-                        <button class="above-btn selected" onclick="setWaterline('above', this)">Above</button>
-                        <button class="below-btn" onclick="setWaterline('below', this)">Below</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="field-group">
-                <label>Requirements
-                    <span class="hint">Resources, tools, budget, permissions needed</span>
-                </label>
-                <textarea id="requirements" rows="2" placeholder="e.g. Slack channel, async standup bot license ($0), manager approval"></textarea>
-            </div>
-        </div>
-
-        <div class="nav">
-            <button class="btn btn-secondary" onclick="goTo(1)">&larr; Back</button>
-            <button class="btn btn-primary" onclick="goTo(3)">Next &rarr;</button>
-        </div>
-    </div>
-
-    <!-- SECTION 4: Metrics -->
-    <div class="section" data-step="3">
-        <div class="section-card">
-            <div class="section-number">Step 4 of 5</div>
-            <h2 class="section-title">How Will You Know?</h2>
-            <p class="section-subtitle">Define what success and failure look like before you start.</p>
-
-            <div class="field-group">
-                <label>Leading Indicators
-                    <span class="hint">Early signals (within 1-2 weeks) that this is working or not</span>
-                </label>
-                <textarea id="leading" rows="3" placeholder="e.g. Thread participation rate >80%, average response time <2 hours, fewer Slack DMs asking 'what's the status of X?'"></textarea>
-            </div>
-
-            <div class="field-group">
-                <label>Lagging Indicators
-                    <span class="hint">Outcome measures you'll check at the end of the cycle</span>
-                </label>
-                <textarea id="lagging" rows="3" placeholder="e.g. Time saved per person per week, team alignment score (survey), sprint velocity maintained"></textarea>
-            </div>
-        </div>
-
-        <div class="nav">
-            <button class="btn btn-secondary" onclick="goTo(2)">&larr; Back</button>
-            <button class="btn btn-primary" onclick="goTo(4)">Next &rarr;</button>
-        </div>
-    </div>
-
-    <!-- SECTION 5: Risks & Assumptions -->
-    <div class="section" data-step="4">
-        <div class="section-card">
-            <div class="section-number">Step 5 of 5</div>
-            <h2 class="section-title">Risks, Assumptions &amp; Constraints</h2>
-            <p class="section-subtitle">Map what you know, what you're guessing, and what could go wrong.</p>
-
-            <div class="field-group">
-                <label>Facts
-                    <span class="hint">What do you know for certain?</span>
-                </label>
-                <textarea id="facts" rows="2" placeholder="e.g. Current standup takes 45 min, 3 of 8 people actively speak"></textarea>
-            </div>
-
-            <div class="field-group">
-                <label>Assumptions
-                    <span class="hint">What are you betting on being true?</span>
-                </label>
-                <textarea id="assumptions" rows="2" placeholder="e.g. People will actually write updates. Async works across timezones."></textarea>
-            </div>
-
-            <div class="field-group">
-                <label>Constraints
-                    <span class="hint">Non-negotiable boundaries</span>
-                </label>
-                <textarea id="constraints" rows="2" placeholder="e.g. Must keep Friday sync. Cannot change sprint cadence."></textarea>
-            </div>
-
-            <div class="field-group">
-                <label>Risks &amp; Dependencies
-                    <span class="hint">What happens if a key assumption is wrong?</span>
-                </label>
-                <textarea id="risks" rows="2" placeholder="e.g. If participation drops below 50%, alignment issues surface in sprint review — revert immediately."></textarea>
-            </div>
-        </div>
-
-        <div class="section-card" style="text-align:center; padding: 24px">
-            <p style="color:var(--ink-light); margin-bottom:16px; font-size:0.9rem">
-                Ready to launch this experiment?
-            </p>
-            <button class="btn btn-submit" onclick="submitExperiment()">
-                Save to Google Sheets &rarr;
-            </button>
-            <p style="margin-top:12px; font-size:0.8rem; color:var(--ink-light)" id="submit-status"></p>
-        </div>
-
-        <div class="nav">
-            <button class="btn btn-secondary" onclick="goTo(3)">&larr; Back</button>
-            <div></div>
-        </div>
-    </div>
-
+  <h2>Warning stickers</h2>
+  <p>Ask each participant: <strong>"What's your known risk in this kind of session?"</strong></p>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Risk</th><th>Antidote</th></tr>
+      <tr><td>Analysis paralysis</td><td>"We decide in 5 minutes"</td></tr>
+      <tr><td>Impatience / wants to build</td><td>"Let's read the output together"</td></tr>
+      <tr><td>Dominates keyboard</td><td>Timer enforces driver swap</td></tr>
+      <tr><td>Goes quiet / defers</td><td>"What are you seeing?"</td></tr>
+    </table>
+  </div>
 </div>
 
-<!-- Success Overlay -->
-<div class="success-overlay" id="success-overlay">
-    <div class="success-card">
-        <div class="icon">🧪</div>
-        <h2>Experiment Logged</h2>
-        <p>Your MVI has been saved to the tracker. Review it in 8 weeks — or at your next monthly retro.</p>
-        <p><a href="https://docs.google.com/spreadsheets/d/1pfFE56uYNIt9F0pfXkv-wWKPvuknxC0fj0fvYBn-o08/edit" target="_blank">Open Google Sheet &rarr;</a></p>
-        <button class="btn btn-primary" onclick="resetForm()" style="margin-top:16px; width:100%">Design Another Experiment</button>
+<!-- ═══════════ TIMER ═══════════ -->
+<div class="section" id="timer">
+  <h1>Mob Timer</h1>
+  <p class="subtitle">A working rotation timer. Add your team, set the duration, hit start.</p>
+
+  <div class="timer-container">
+    <div class="timer-label">Time remaining</div>
+    <div class="timer-display" id="timer-display">10:00</div>
+    <div class="timer-driver" id="timer-driver-label">Add team members below</div>
+    <div class="timer-controls">
+      <button class="btn btn-accent" id="timer-start" onclick="startTimer()">Start</button>
+      <button class="btn btn-ghost" onclick="pauseTimer()">Pause</button>
+      <button class="btn btn-ghost" onclick="resetTimer()">Reset</button>
+      <button class="btn btn-primary" onclick="nextDriver()">Next Driver &rarr;</button>
     </div>
+    <div class="timer-presets">
+      <div class="timer-preset" onclick="setTimer(240)">4 min</div>
+      <div class="timer-preset" onclick="setTimer(300)">5 min</div>
+      <div class="timer-preset active" onclick="setTimer(600)">10 min</div>
+      <div class="timer-preset" onclick="setTimer(900)">15 min</div>
+    </div>
+  </div>
+
+  <h2>Team</h2>
+  <div style="display:flex; gap:8px; margin-bottom:16px;">
+    <input type="text" id="new-member" placeholder="Add a name&hellip;" style="flex:1; background:var(--cream); border:1.5px solid var(--border); border-radius:var(--radius-sm); padding:12px 16px; font-size:15px; font-family:var(--sans); color:var(--ink); outline:none; min-height:44px;" onkeydown="if(event.key==='Enter')addMember()">
+    <button class="btn btn-primary" onclick="addMember()">Add</button>
+  </div>
+  <div id="team-list" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
 </div>
 
-<div class="footer">
-    Based on <a href="https://theready.com" target="_blank">The Ready</a>'s MVI framework &middot;
-    Radical change at a non-radical scale
+<!-- ═══════════ EXPERIMENT ═══════════ -->
+<div class="section" id="experiment">
+  <h1>Experiment Designer</h1>
+  <p class="subtitle">Build a hypothesis, run the safe-to-try check, decide whether to proceed.</p>
+
+  <h2>Hypothesis builder</h2>
+  <div class="card" style="box-shadow:none; border:1.5px solid var(--border);">
+    <div class="input-group"><label>We believe that&hellip;</label><input type="text" id="exp-practice" placeholder="e.g. mob collaboration on maintenance tasks"></div>
+    <div class="input-group"><label>Applied to&hellip;</label><input type="text" id="exp-context" placeholder="e.g. apps untouched for 3+ months"></div>
+    <div class="input-group"><label>Will result in&hellip;</label><input type="text" id="exp-outcome" placeholder="e.g. 50% reduction in ramp-up time"></div>
+    <div class="input-group"><label>Because&hellip;</label><textarea id="exp-reasoning" placeholder="e.g. real-time collaboration eliminates handoff delays and creates shared context quicker"></textarea></div>
+    <div class="input-group"><label>We'll know it's TRUE when&hellip;</label><input type="text" id="exp-true" placeholder="e.g. team resolves first ticket in < 2 hours"></div>
+    <div class="input-group"><label>We'll know it's FALSE when&hellip;</label><input type="text" id="exp-false" placeholder="e.g. ramp-up time is same as solo work"></div>
+    <button class="btn btn-accent" onclick="generateHypothesis()" style="margin-top:8px;">Generate Statement</button>
+  </div>
+
+  <div id="hypothesis-output" style="display:none; margin-top:20px;"></div>
+
+  <h2>Safe-to-try check</h2>
+  <p style="margin-bottom:16px;">Click each test to toggle pass/fail. All 5 must pass.</p>
+
+  <div id="safe-checks">
+    <div class="check-row" onclick="toggleCheck(this)" data-state="pending"><div class="check-icon"></div><div><div class="check-label">Reversible</div><div class="check-question">Can we undo this if it fails?</div></div></div>
+    <div class="check-row" onclick="toggleCheck(this)" data-state="pending"><div class="check-icon"></div><div><div class="check-label">Bounded</div><div class="check-question">Is the blast radius small?</div></div></div>
+    <div class="check-row" onclick="toggleCheck(this)" data-state="pending"><div class="check-icon"></div><div><div class="check-label">Observable</div><div class="check-question">Can we see if it's working?</div></div></div>
+    <div class="check-row" onclick="toggleCheck(this)" data-state="pending"><div class="check-icon"></div><div><div class="check-label">Resourced</div><div class="check-question">Do we have what we need?</div></div></div>
+    <div class="check-row" onclick="toggleCheck(this)" data-state="pending"><div class="check-icon"></div><div><div class="check-label">Consensual</div><div class="check-question">Does anyone have a fundamental objection?</div></div></div>
+  </div>
+  <div id="verdict" class="verdict pending">Complete the checks above</div>
+</div>
+
+<!-- ═══════════ RPG ═══════════ -->
+<div class="section" id="rpg">
+  <h1>Mob Programming RPG</h1>
+  <p class="subtitle">Willem Larsen's gamified mob experience. Earn XP by embodying role behaviours. Print the cards, bring to your next session.</p>
+
+  <h2>Level 1 &mdash; Core</h2>
+  <div class="role-grid stagger">
+    <div class="role-card"><div class="role-level lvl-1">Level 1</div><div class="role-name">Driver</div><div class="role-desc">Ask clarifying questions about typing. Use new keyboard shortcuts. Type something you disagree with. Ignore non-Navigator instructions.</div></div>
+    <div class="role-card"><div class="role-level lvl-1">Level 1</div><div class="role-name">Navigator</div><div class="role-desc">Request ideas from the mob. Filter suggestions and direct Driver precisely. Communicate high-level intent. Follow TDD cycle.</div></div>
+    <div class="role-card"><div class="role-level lvl-1">Level 1</div><div class="role-name">Mobber</div><div class="role-desc">Yield to less-privileged voices. Contribute ideas. Ask questions until understanding is reached. Listen attentively.</div></div>
+  </div>
+
+  <h2>Level 2 &mdash; Support</h2>
+  <div class="role-grid stagger">
+    <div class="role-card"><div class="role-level lvl-2">Level 2</div><div class="role-name">Researcher</div><div class="role-desc">Share relevant documentation. Find blog insights. Locate coding forum solutions.</div></div>
+    <div class="role-card"><div class="role-level lvl-2">Level 2</div><div class="role-name">Sponsor</div><div class="role-desc">Amplify underheard perspectives. Support least-privileged contributors. Recognise moments of excellence.</div></div>
+    <div class="role-card"><div class="role-level lvl-2">Level 2</div><div class="role-name">Rear Admiral</div><div class="role-desc">Offer Navigator guidance privately. Provide minimal cues. Guide at highest abstraction level.</div></div>
+  </div>
+
+  <h2>Level 3 &mdash; Quality</h2>
+  <div class="role-grid stagger">
+    <div class="role-card"><div class="role-level lvl-3">Level 3</div><div class="role-name">Automationist</div><div class="role-desc">Identify repeated tool tasks. Notice repeated processes. Recognise boilerplate. Suggest automation.</div></div>
+    <div class="role-card"><div class="role-level lvl-3">Level 3</div><div class="role-name">Nose</div><div class="role-desc">Flag long lines, complex conditionals, duplication. Name unnamed things. Propose improvements.</div></div>
+    <div class="role-card"><div class="role-level lvl-3">Level 3</div><div class="role-name">Archivist</div><div class="role-desc">Record alternatives visibly. Document ideas on whiteboard. Display current task. Capture decisions.</div></div>
+  </div>
+
+  <h2>Level 4 &mdash; Culture</h2>
+  <div class="role-grid stagger">
+    <div class="role-card"><div class="role-level lvl-4">Level 4</div><div class="role-name">Conductor</div><div class="role-desc">Combine ideas (discard the first). Elicit quiet members. Make ridiculous proposals. Defer to junior voices.</div></div>
+    <div class="role-card"><div class="role-level lvl-4">Level 4</div><div class="role-name">Traffic Cop</div><div class="role-desc">Propose new agreements. Alert to process violations. Support adherence. Identify outdated agreements.</div></div>
+    <div class="role-card"><div class="role-level lvl-4">Level 4</div><div class="role-name">Dr. Feel Good</div><div class="role-desc">Express appreciation (SBI model). Share joy. Acknowledge happiness. Retrospect positive moments.</div></div>
+    <div class="role-card"><div class="role-level lvl-4">Level 4</div><div class="role-name">Major Pain</div><div class="role-desc">Articulate difficulties. Demonstrate empathy. Surface ignored pain points. Call retrospectives on pain.</div></div>
+  </div>
+
+  <hr class="divider">
+  <p><strong>First rule:</strong> Treat each other with Kindness, Consideration, and Respect at all times.</p>
+  <a href="https://github.com/willemlarsen/mobprogrammingrpg" target="_blank" class="btn btn-ghost" style="margin-top:12px;">Get Printable Cards &rarr;</a>
+</div>
+
+<!-- ═══════════ LINKS ═══════════ -->
+<div class="section" id="links">
+  <h1>Reference Library</h1>
+  <p class="subtitle">19 curated URLs &mdash; foundational practice, AI integration, gamification, experimentation strategy.</p>
+
+  <h2>Foundational</h2>
+  <a class="link-card" href="https://mobprogramming.org/mob-programming-basics/" target="_blank"><div class="link-tag tag-foundation">Foundation</div><div class="link-info"><div class="link-title">Mob Programming Basics &mdash; Woody Zuill</div><div class="link-url">mobprogramming.org</div></div></a>
+  <a class="link-card" href="https://www.remotemobprogramming.org/" target="_blank"><div class="link-tag tag-foundation">Foundation</div><div class="link-info"><div class="link-title">Remote Mob Programming &mdash; Git handover + mob CLI</div><div class="link-url">remotemobprogramming.org</div></div></a>
+  <a class="link-card" href="https://woodyzuill.com/" target="_blank"><div class="link-tag tag-foundation">Foundation</div><div class="link-info"><div class="link-title">Woody Zuill &mdash; Talks, Workshops, Blog</div><div class="link-url">woodyzuill.com</div></div></a>
+  <a class="link-card" href="https://www.agilealliance.org/wp-content/uploads/2015/12/ExperienceReport.2014.Zuill_.pdf" target="_blank"><div class="link-tag tag-foundation">Foundation</div><div class="link-info"><div class="link-title">Agile Alliance Experience Report (PDF)</div><div class="link-url">agilealliance.org</div></div></a>
+  <a class="link-card" href="https://martinfowler.com/articles/on-pair-programming.html" target="_blank"><div class="link-tag tag-foundation">Foundation</div><div class="link-info"><div class="link-title">On Pair Programming &mdash; Martin Fowler (strong-style section)</div><div class="link-url">martinfowler.com</div></div></a>
+  <a class="link-card" href="https://medium.com/@maaret.pyhajarvi/the-driver-navigator-in-strong-style-pairing-2df0ecb4f657" target="_blank"><div class="link-tag tag-foundation">Foundation</div><div class="link-info"><div class="link-title">Strong-Style Driver-Navigator &mdash; Maaret Pyhajarvi</div><div class="link-url">medium.com</div></div></a>
+  <a class="link-card" href="https://ensembleprogramming.xyz/" target="_blank"><div class="link-tag tag-foundation">Foundation</div><div class="link-info"><div class="link-title">Ensemble Programming Guidebook &mdash; Maaret Pyhajarvi (book)</div><div class="link-url">ensembleprogramming.xyz</div></div></a>
+
+  <h2>AI + Mob</h2>
+  <a class="link-card" href="https://blog.crisp.se/2025/06/02/michaelgothe/mob-programming-with-ai-inside-a-high-performing-teams-journey" target="_blank"><div class="link-tag tag-ai">AI + Mob</div><div class="link-info"><div class="link-title">Mob Programming with AI &mdash; Crisp (Sweden)</div><div class="link-url">blog.crisp.se &mdash; Daily 3hr sessions, "faster together"</div></div></a>
+  <a class="link-card" href="https://www.atlassian.com/blog/atlassian-engineering/mobbing-with-ai" target="_blank"><div class="link-tag tag-ai">AI + Mob</div><div class="link-info"><div class="link-title">Mobbing with AI &mdash; Atlassian</div><div class="link-url">atlassian.com &mdash; Define/Spec/Generate/Review/Iterate</div></div></a>
+
+  <h2>Gamification &amp; Facilitation</h2>
+  <a class="link-card" href="https://github.com/willemlarsen/mobprogrammingrpg" target="_blank"><div class="link-tag tag-game">Game</div><div class="link-info"><div class="link-title">Mob Programming RPG &mdash; Willem Larsen</div><div class="link-url">github.com &mdash; 4 levels, printable role cards with XP</div></div></a>
+  <a class="link-card" href="https://github.com/willemlarsen/mobprogrammingrpg/blob/master/rpg_roles_plain_text.md" target="_blank"><div class="link-tag tag-game">Game</div><div class="link-info"><div class="link-title">RPG Role Descriptions &mdash; All levels</div><div class="link-url">github.com &mdash; Driver through Dr. Feel Good</div></div></a>
+  <a class="link-card" href="https://jay.bazuzi.com/Mobbing-Pattern-Language/" target="_blank"><div class="link-tag tag-game">Patterns</div><div class="link-info"><div class="link-title">Mobbing Pattern Language &mdash; Jay Bazuzi</div><div class="link-url">jay.bazuzi.com</div></div></a>
+  <a class="link-card" href="https://kata-log.rocks/ensemble-programming" target="_blank"><div class="link-tag tag-game">Practice</div><div class="link-info"><div class="link-title">Ensemble Programming Kata</div><div class="link-url">kata-log.rocks</div></div></a>
+
+  <h2>Experimentation (Strategy)</h2>
+  <a class="link-card" href="https://open.substack.com/pub/strategyinpraxis/p/the-first-one-about-experimentation" target="_blank"><div class="link-tag tag-strategy">Strategy</div><div class="link-info"><div class="link-title">JP Castlin &mdash; Experimentation Part 1</div><div class="link-url">strategyinpraxis.substack.com</div></div></a>
+  <a class="link-card" href="https://open.substack.com/pub/strategyinpraxis/p/the-second-one-about-experimentation" target="_blank"><div class="link-tag tag-strategy">Strategy</div><div class="link-info"><div class="link-title">JP Castlin &mdash; Experimentation Part 2</div><div class="link-url">strategyinpraxis.substack.com</div></div></a>
+  <a class="link-card" href="https://open.substack.com/pub/strategyinpraxis/p/the-third-one-about-experimentation" target="_blank"><div class="link-tag tag-strategy">Strategy</div><div class="link-info"><div class="link-title">JP Castlin &mdash; Experimentation Part 3</div><div class="link-url">strategyinpraxis.substack.com</div></div></a>
+  <a class="link-card" href="https://availagility.co.uk/2021/03/01/strategy-as-enabling-constraints/" target="_blank"><div class="link-tag tag-strategy">Strategy</div><div class="link-info"><div class="link-title">Strategy as Enabling Constraints &mdash; AvailAgility</div><div class="link-url">availagility.co.uk</div></div></a>
+  <a class="link-card" href="https://www.chriscorrigan.com/parkinglot/escaping-confusion/" target="_blank"><div class="link-tag tag-strategy">Strategy</div><div class="link-info"><div class="link-title">Escaping Confusion &mdash; Chris Corrigan (safe-to-fail)</div><div class="link-url">chriscorrigan.com</div></div></a>
+  <a class="link-card" href="https://www.sociocracyforall.org/experiments-with-the-ready/" target="_blank"><div class="link-tag tag-strategy">Strategy</div><div class="link-info"><div class="link-title">Experiments with The Ready &mdash; Sociocracy for All</div><div class="link-url">sociocracyforall.org</div></div></a>
 </div>
 
 <script>
-    let currentStep = 0;
-    const totalSteps = 5;
-    let selectedDuration = 8;
-    let waterlinePosition = 'above';
+// ── Tab navigation ──
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    tab.classList.add('active');
+    const section = document.getElementById(tab.dataset.tab);
+    section.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
 
-    // Hypothesis live preview
-    ['h-action', 'h-outcome', 'h-reason'].forEach(id => {
-        const el = document.getElementById(id);
-        const previewId = 'preview-' + id.split('-')[1];
-        el.addEventListener('input', () => {
-            document.getElementById(previewId).textContent = el.value || '___';
+// ── Working Mob Timer ──
+let timerSeconds = 600;
+let timerRemaining = 600;
+let timerInterval = null;
+let timerRunning = false;
+let team = [];
+let currentDriverIndex = 0;
+
+function setTimer(seconds) {
+  timerSeconds = seconds;
+  timerRemaining = seconds;
+  timerRunning = false;
+  clearInterval(timerInterval);
+  updateTimerDisplay();
+  document.querySelectorAll('.timer-preset').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.timer-preset').forEach(p => {
+    if (parseInt(p.textContent) * 60 === seconds || p.textContent.trim() === (seconds/60) + ' min') p.classList.add('active');
+  });
+  document.getElementById('timer-start').textContent = 'Start';
+}
+
+function updateTimerDisplay() {
+  const mins = Math.floor(timerRemaining / 60);
+  const secs = timerRemaining % 60;
+  const display = document.getElementById('timer-display');
+  display.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+  display.className = 'timer-display';
+  if (timerRemaining <= 30 && timerRemaining > 10) display.classList.add('warning');
+  if (timerRemaining <= 10) display.classList.add('critical');
+  updateDriverLabel();
+}
+
+function updateDriverLabel() {
+  const label = document.getElementById('timer-driver-label');
+  if (team.length === 0) {
+    label.textContent = 'Add team members below';
+  } else {
+    label.textContent = `Driving: ${team[currentDriverIndex % team.length]}`;
+  }
+}
+
+function startTimer() {
+  if (timerRunning) return;
+  timerRunning = true;
+  document.getElementById('timer-start').textContent = 'Running...';
+  timerInterval = setInterval(() => {
+    timerRemaining--;
+    if (timerRemaining <= 0) {
+      clearInterval(timerInterval);
+      timerRunning = false;
+      document.getElementById('timer-start').textContent = 'Start';
+      // Audio alert — two short beeps
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        [0, 0.25].forEach(delay => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.frequency.value = 880;
+          osc.type = 'sine';
+          gain.gain.setValueAtTime(0.3, ctx.currentTime + delay);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.2);
+          osc.start(ctx.currentTime + delay);
+          osc.stop(ctx.currentTime + delay + 0.2);
         });
-    });
-
-    function goTo(step) {
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.querySelector(`.section[data-step="${step}"]`).classList.add('active');
-
-        document.querySelectorAll('.progress-dot').forEach((dot, i) => {
-            dot.classList.remove('active', 'done');
-            if (i < step) dot.classList.add('done');
-            if (i === step) dot.classList.add('active');
-        });
-
-        document.querySelector('.progress-label').textContent = `${step + 1} / ${totalSteps}`;
-        currentStep = step;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch(e) {}
+      timerRemaining = 0;
     }
+    updateTimerDisplay();
+  }, 1000);
+}
 
-    function selectDuration(el) {
-        document.querySelectorAll('.duration-option').forEach(o => o.classList.remove('selected'));
-        el.classList.add('selected');
-        selectedDuration = parseInt(el.dataset.weeks);
-    }
+function pauseTimer() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  document.getElementById('timer-start').textContent = 'Start';
+}
 
-    function setWaterline(pos, btn) {
-        waterlinePosition = pos;
-        document.querySelectorAll('.waterline-toggle button').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-    }
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  timerRemaining = timerSeconds;
+  updateTimerDisplay();
+  document.getElementById('timer-start').textContent = 'Start';
+}
 
-    function saveScriptUrl() {
-        const url = document.getElementById('script-url').value.trim();
-        if (url) {
-            storage.set('mvi-script-url', url);
-            document.getElementById('setup-banner').style.display = 'none';
-        }
-    }
+function nextDriver() {
+  currentDriverIndex = (currentDriverIndex + 1) % Math.max(team.length, 1);
+  resetTimer();
+  updateDriverLabel();
+  // Subtle haptic-like flash
+  const display = document.getElementById('timer-display');
+  display.style.transition = 'none';
+  display.style.color = 'var(--accent)';
+  setTimeout(() => { display.style.transition = 'color 0.5s'; display.style.color = ''; }, 50);
+}
 
-    // Show setup if no URL saved
-    if (!storage.get('mvi-script-url')) {
-        document.getElementById('setup-banner').style.display = 'block';
-    }
+function addMember() {
+  const input = document.getElementById('new-member');
+  const name = input.value.trim();
+  if (!name) return;
+  team.push(name);
+  input.value = '';
+  renderTeam();
+  updateDriverLabel();
+}
 
-    function gatherData() {
-        const hypothesis = `We believe that ${document.getElementById('h-action').value} will result in ${document.getElementById('h-outcome').value} because ${document.getElementById('h-reason').value}`;
-        return {
-            timestamp: new Date().toISOString(),
-            name: document.getElementById('name').value,
-            status: 'Active',
-            tension: document.getElementById('tension').value,
-            hypothesis: hypothesis,
-            proposal: document.getElementById('proposal').value,
-            alternatives: document.getElementById('alternatives').value,
-            participants: document.getElementById('participants').value,
-            duration: selectedDuration,
-            leading: document.getElementById('leading').value,
-            lagging: document.getElementById('lagging').value,
-            requirements: document.getElementById('requirements').value,
-            facts: document.getElementById('facts').value,
-            assumptions: document.getElementById('assumptions').value,
-            constraints: document.getElementById('constraints').value,
-            risks: document.getElementById('risks').value,
-            decisionMaker: document.getElementById('decision-maker').value,
-            notes: `Waterline: ${waterlinePosition}`
-        };
-    }
+function removeMember(index) {
+  team.splice(index, 1);
+  if (currentDriverIndex >= team.length) currentDriverIndex = 0;
+  renderTeam();
+  updateDriverLabel();
+}
 
-    async function submitExperiment() {
-        const statusEl = document.getElementById('submit-status');
-        const data = gatherData();
+function renderTeam() {
+  const list = document.getElementById('team-list');
+  list.innerHTML = team.map((name, i) => `
+    <div style="display:inline-flex; align-items:center; gap:6px; padding:8px 14px; background:${i === currentDriverIndex % team.length ? 'var(--accent-light)' : 'var(--surface)'}; border:1px solid var(--border); border-radius:20px; font-size:14px; font-weight:${i === currentDriverIndex % team.length ? '700' : '500'}; cursor:pointer; min-height:44px;" onclick="removeMember(${i})" title="Click to remove">
+      ${i === currentDriverIndex % team.length ? '<span style="color:var(--accent);">&bull;</span>' : ''}${name} <span style="color:var(--ink-faint); font-size:12px;">&times;</span>
+    </div>
+  `).join('');
+}
 
-        if (!data.name) {
-            statusEl.textContent = 'Please name your experiment (Step 1)';
-            statusEl.style.color = 'var(--accent)';
-            return;
-        }
+updateTimerDisplay();
 
-        const scriptUrl = storage.get('mvi-script-url');
+// ── Hypothesis generator ──
+function generateHypothesis() {
+  const v = id => document.getElementById(id).value;
+  const practice = v('exp-practice') || '[mob practice]';
+  const context = v('exp-context') || '[specific context]';
+  const outcome = v('exp-outcome') || '[measurable outcome]';
+  const reasoning = v('exp-reasoning') || '[reasoning]';
+  const trueSignal = v('exp-true') || '[observable signal]';
+  const falseSignal = v('exp-false') || '[observable signal]';
 
-        if (!scriptUrl) {
-            // Fallback: copy to clipboard as TSV
-            const row = Object.values(data).join('\t');
-            try {
-                await navigator.clipboard.writeText(row);
-                statusEl.innerHTML = 'Copied to clipboard! Paste into your <a href="https://docs.google.com/spreadsheets/d/1pfFE56uYNIt9F0pfXkv-wWKPvuknxC0fj0fvYBn-o08/edit" target="_blank" style="color:var(--accent)">Google Sheet</a> row.';
-                statusEl.style.color = 'var(--success)';
-            } catch(e) {
-                statusEl.textContent = 'Set up Google Sheets connection above to save directly.';
-                statusEl.style.color = 'var(--accent)';
-            }
-            return;
-        }
+  const text = `We believe that ${practice}\napplied to ${context}\nwill result in ${outcome}\nbecause ${reasoning}.\n\nWe will know this is TRUE when ${trueSignal}.\nWe will know this is FALSE when ${falseSignal}.`;
 
-        statusEl.textContent = 'Saving to Google Sheets...';
-        statusEl.style.color = 'var(--ink-light)';
+  const output = document.getElementById('hypothesis-output');
+  output.style.display = 'block';
+  output.innerHTML = `<div class="hypothesis-out">
+    <button class="copy-btn" onclick="copyHypothesis()">Copy</button>
+    <p>We believe that <strong>${practice}</strong></p>
+    <p>applied to <strong>${context}</strong></p>
+    <p>will result in <strong>${outcome}</strong></p>
+    <p>because <em>${reasoning}</em>.</p>
+    <br>
+    <p>We will know this is <span style="color:var(--green); font-weight:600;">TRUE</span> when ${trueSignal}.</p>
+    <p>We will know this is <span style="color:var(--red); font-weight:600;">FALSE</span> when ${falseSignal}.</p>
+  </div>`;
+  output.dataset.text = text;
+  output.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
 
-        try {
-            const response = await fetch(scriptUrl, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            // no-cors means we can't read response, but it goes through
-            document.getElementById('success-overlay').classList.add('show');
-        } catch (err) {
-            statusEl.textContent = 'Error saving. Check your Apps Script URL.';
-            statusEl.style.color = 'var(--accent)';
-        }
-    }
+function copyHypothesis() {
+  const text = document.getElementById('hypothesis-output').dataset.text;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
 
-    function resetForm() {
-        document.getElementById('success-overlay').classList.remove('show');
-        document.querySelectorAll('input[type="text"], textarea').forEach(el => el.value = '');
-        document.querySelectorAll('.preview .blank').forEach(el => el.textContent = '___');
-        goTo(0);
-    }
+// ── Safe-to-try checks ──
+function toggleCheck(el) {
+  const states = ['pending', 'passed', 'failed'];
+  const current = el.dataset.state;
+  const next = states[(states.indexOf(current) + 1) % 3];
+  el.dataset.state = next;
+  el.className = 'check-row ' + (next === 'pending' ? '' : next);
+  el.querySelector('.check-icon').textContent = next === 'passed' ? '\u2713' : next === 'failed' ? '\u2717' : '';
+  updateVerdict();
+}
+
+function updateVerdict() {
+  const checks = document.querySelectorAll('.check-row');
+  let passed = 0, failed = 0, pending = 0;
+  checks.forEach(c => { const s = c.dataset.state; if (s==='passed') passed++; else if (s==='failed') failed++; else pending++; });
+  const v = document.getElementById('verdict');
+  if (pending > 0) { v.className = 'verdict pending'; v.textContent = `${passed}/5 checks complete \u2014 ${pending} remaining`; }
+  else if (failed > 0) { v.className = 'verdict unsafe'; v.textContent = `Not safe to try \u2014 ${failed} check(s) failed. Address before proceeding.`; }
+  else { v.className = 'verdict safe'; v.textContent = 'Safe to try \u2014 All 5 checks passed. Run the experiment.'; }
+}
 </script>
-
 </body>
 </html>
