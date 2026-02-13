@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Before We Go</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@400;500&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #faf9f7;
+            color: #2a2a2a;
+            min-height: 100vh;
+        }
+
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 45px 50px 40px 55px;
+            margin: 0 auto;
+            background: #faf9f7;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Organic background shapes */
+        .blob-1 {
+            position: absolute;
+            top: -80px;
+            right: -120px;
+            width: 380px;
+            height: 380px;
+            background: #e8e4dc;
+            border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
+            opacity: 0.4;
+            z-index: 0;
+        }
+
+        .blob-2 {
+            position: absolute;
+            bottom: 60px;
+            left: -100px;
+            width: 280px;
+            height: 250px;
+            background: #d4cec3;
+            border-radius: 73% 27% 44% 56% / 49% 62% 38% 51%;
+            opacity: 0.25;
+            z-index: 0;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header area - asymmetric */
+        header {
+            margin-bottom: 35px;
+            padding-left: 8px;
+        }
+
+        .eyebrow {
+            font-size: 10px;
+            letter-spacing: 3.5px;
+            text-transform: uppercase;
+            color: #8a8580;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 72px;
+            font-weight: 300;
+            line-height: 0.9;
+            color: #1a1a1a;
+            letter-spacing: -2px;
+        }
+
+        h1 span {
+            display: block;
+            font-style: italic;
+            font-size: 48px;
+            margin-left: 90px;
+            color: #5a5550;
+            letter-spacing: 0;
+        }
+
+        /* Main grid - intentionally asymmetric */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 30px;
+            margin-top: 10px;
+        }
+
+        .column-left {
+            padding-top: 25px;
+        }
+
+        .column-right {
+            padding-top: 0;
+        }
+
+        /* Section styling */
+        .section {
+            margin-bottom: 32px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid #d4cec3;
+            padding-bottom: 8px;
+        }
+
+        .section-number {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 32px;
+            font-weight: 300;
+            color: #b5afa6;
+            line-height: 1;
+        }
+
+        .section-title {
+            font-size: 13px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 500;
+            color: #4a4a4a;
+        }
+
+        .section-subtitle {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 14px;
+            color: #8a8580;
+            margin-left: auto;
+        }
+
+        /* Checklist items */
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 9px 0;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .checklist li:hover {
+            border-bottom-color: #e8e4dc;
+        }
+
+        .checkbox {
+            width: 18px;
+            height: 18px;
+            border: 1.5px solid #c4beb4;
+            border-radius: 3px;
+            flex-shrink: 0;
+            margin-top: 2px;
+            position: relative;
+        }
+
+        /* Hand-drawn style checkbox variation */
+        .checkbox.organic {
+            border-radius: 50%;
+            transform: rotate(-2deg);
+        }
+
+        .checkbox.organic-2 {
+            border-radius: 2px 8px 2px 6px;
+            transform: rotate(1deg);
+        }
+
+        .item-text {
+            font-size: 15px;
+            color: #3a3a3a;
+            line-height: 1.4;
+        }
+
+        .item-note {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 13px;
+            color: #9a958e;
+            margin-left: 4px;
+        }
+
+        /* Winter tag */
+        .tag {
+            display: inline-block;
+            font-size: 9px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            background: #e8e4dc;
+            color: #6a655e;
+            padding: 3px 8px;
+            border-radius: 2px;
+            margin-left: 8px;
+            vertical-align: middle;
+            font-weight: 500;
+        }
+
+        /* Special callout box */
+        .callout {
+            background: linear-gradient(135deg, #f5f3f0 0%, #ebe8e3 100%);
+            border-left: 3px solid #c4beb4;
+            padding: 18px 22px;
+            margin: 25px 0;
+            position: relative;
+        }
+
+        .callout::before {
+            content: '!';
+            position: absolute;
+            top: -8px;
+            left: -12px;
+            width: 22px;
+            height: 22px;
+            background: #8a8580;
+            color: #faf9f7;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .callout-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 18px;
+            font-style: italic;
+            color: #4a4a4a;
+        }
+
+        /* Trips out section - featured */
+        .section.featured {
+            background: #fff;
+            margin: 0 -25px;
+            padding: 22px 25px;
+            border-radius: 4px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.04);
+        }
+
+        .section.featured .section-header {
+            border-bottom-color: #e8e4dc;
+        }
+
+        /* Footer mark */
+        .footer-mark {
+            position: absolute;
+            bottom: 35px;
+            right: 50px;
+            text-align: right;
+        }
+
+        .footer-mark .mark {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 28px;
+            font-weight: 300;
+            color: #d4cec3;
+            letter-spacing: 2px;
+        }
+
+        .footer-mark .date {
+            font-size: 9px;
+            letter-spacing: 2px;
+            color: #b5afa6;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        /* Decorative elements */
+        .deco-line {
+            position: absolute;
+            left: 30px;
+            top: 180px;
+            width: 1px;
+            height: 400px;
+            background: linear-gradient(to bottom, transparent, #d4cec3, transparent);
+        }
+
+        /* Hand-drawn squiggle */
+        .squiggle {
+            position: absolute;
+            bottom: 150px;
+            right: 180px;
+            width: 60px;
+            height: 30px;
+            opacity: 0.3;
+        }
+
+        .squiggle svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .page {
+                margin: 0;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="blob-1"></div>
+        <div class="blob-2"></div>
+        <div class="deco-line"></div>
+
+        <div class="squiggle">
+            <svg viewBox="0 0 60 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2 15 Q 15 5, 30 15 T 58 15" stroke="#c4beb4" stroke-width="1.5" fill="none"/>
+            </svg>
+        </div>
+
+        <div class="content">
+            <header>
+                <p class="eyebrow">A gentle reminder</p>
+                <h1>Before<span>we go</span></h1>
+            </header>
+
+            <div class="main-grid">
+                <div class="column-left">
+                    <div class="section">
+                        <div class="section-header">
+                            <span class="section-number">01</span>
+                            <span class="section-title">Everyday</span>
+                        </div>
+                        <ul class="checklist">
+                            <li>
+                                <span class="checkbox"></span>
+                                <span class="item-text">Water bottle</span>
+                            </li>
+                            <li>
+                                <span class="checkbox organic"></span>
+                                <span class="item-text">Hairbands</span>
+                            </li>
+                            <li>
+                                <span class="checkbox organic-2"></span>
+                                <span class="item-text">Snacks<span class="item-note">— always, always</span></span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-header">
+                            <span class="section-number">02</span>
+                            <span class="section-title">Winter</span>
+                            <span class="section-subtitle">when it's cold</span>
+                        </div>
+                        <ul class="checklist">
+                            <li>
+                                <span class="checkbox organic"></span>
+                                <span class="item-text">Gloves<span class="tag">winter</span></span>
+                            </li>
+                            <li>
+                                <span class="checkbox"></span>
+                                <span class="item-text">Hat<span class="tag">winter</span></span>
+                            </li>
+                            <li>
+                                <span class="checkbox organic-2"></span>
+                                <span class="item-text">All-in-one suit<span class="tag">winter</span></span>
+                            </li>
+                            <li>
+                                <span class="checkbox"></span>
+                                <span class="item-text">Scarf<span class="tag">winter</span></span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="column-right">
+                    <div class="callout">
+                        <p class="callout-text">"Did you remember the snacks?"</p>
+                    </div>
+
+                    <div class="section featured">
+                        <div class="section-header">
+                            <span class="section-number">03</span>
+                            <span class="section-title">Trips Out</span>
+                            <span class="section-subtitle">for adventures</span>
+                        </div>
+                        <ul class="checklist">
+                            <li>
+                                <span class="checkbox organic-2"></span>
+                                <span class="item-text">Toys<span class="item-note">— for the journey</span></span>
+                            </li>
+                            <li>
+                                <span class="checkbox"></span>
+                                <span class="item-text">Carrying utensils</span>
+                            </li>
+                            <li>
+                                <span class="checkbox organic"></span>
+                                <span class="item-text">Paper<span class="item-note">— for emergencies</span></span>
+                            </li>
+                            <li>
+                                <span class="checkbox organic-2"></span>
+                                <span class="item-text">Extra snacks<span class="item-note">— just in case</span></span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-mark">
+            <p class="mark">J</p>
+            <p class="date">Est. 2024</p>
+        </div>
+    </div>
+</body>
+</html>

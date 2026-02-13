@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emily's Post-Natal Exercise Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        .breathing-principles {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+        }
+
+        .breathing-principles h2 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .breathing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .breathing-card {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .breathing-card h3 {
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .breathing-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .breathing-card li {
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .breathing-card li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+        }
+
+        .section-header {
+            margin: 40px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid;
+        }
+
+        .section-header.mobility { border-color: #2196F3; color: #2196F3; }
+        .section-header.stretching { border-color: #4CAF50; color: #4CAF50; }
+        .section-header.core { border-color: #FF9800; color: #FF9800; }
+        .section-header.glutes { border-color: #E91E63; color: #E91E63; }
+
+        .exercise-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .exercise-card {
+            border: 2px solid;
+            border-radius: 12px;
+            padding: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .exercise-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .exercise-card.mobility {
+            border-color: #2196F3;
+            background: linear-gradient(to bottom right, #E3F2FD, white);
+        }
+        .exercise-card.stretching {
+            border-color: #4CAF50;
+            background: linear-gradient(to bottom right, #E8F5E9, white);
+        }
+        .exercise-card.core {
+            border-color: #FF9800;
+            background: linear-gradient(to bottom right, #FFF3E0, white);
+        }
+        .exercise-card.glutes {
+            border-color: #E91E63;
+            background: linear-gradient(to bottom right, #FCE4EC, white);
+        }
+
+        .exercise-card h3 {
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .exercise-card.mobility h3 { color: #2196F3; }
+        .exercise-card.stretching h3 { color: #4CAF50; }
+        .exercise-card.core h3 { color: #FF9800; }
+        .exercise-card.glutes h3 { color: #E91E63; }
+
+        .how-to {
+            margin: 15px 0;
+        }
+
+        .how-to ul {
+            padding-left: 20px;
+        }
+
+        .how-to li {
+            margin: 5px 0;
+        }
+
+        .breathing-cue {
+            background: rgba(0,0,0,0.05);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid;
+        }
+
+        .breathing-cue.mobility { border-left-color: #2196F3; }
+        .breathing-cue.stretching { border-left-color: #4CAF50; }
+        .breathing-cue.core { border-left-color: #FF9800; }
+        .breathing-cue.glutes { border-left-color: #E91E63; }
+
+        .breathing-cue strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .reps {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .quick-flow {
+            background: #f5f5f5;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 40px;
+        }
+
+        .quick-flow h2 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .quick-flow ol {
+            font-size: 1.1em;
+            line-height: 2;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .exercise-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .image-placeholder {
+            background: rgba(0,0,0,0.05);
+            border: 2px dashed rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            color: #999;
+            margin: 15px 0;
+            font-style: italic;
+        }
+
+        .tutorial-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-top: 10px;
+            margin-left: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .tutorial-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Emily's Post-Natal Exercise Guide</h1>
+        <p class="subtitle">More is in you</p>
+
+        <div class="breathing-principles">
+            <h2>🫁 Core Breathing Principles (Very Important)</h2>
+            <div class="breathing-grid">
+                <div class="breathing-card">
+                    <h3>↓ INHALE = Relax</h3>
+                    <ul>
+                        <li>Ribcage expands 360°</li>
+                        <li>Belly softens</li>
+                        <li>Pelvic floor releases down</li>
+                        <li>Jaw & glutes relaxed</li>
+                    </ul>
+                </div>
+                <div class="breathing-card">
+                    <h3>↑ EXHALE = Engage</h3>
+                    <ul>
+                        <li>Soft "sss" or "haa" sound</li>
+                        <li>Lower abs in (20-30% effort)</li>
+                        <li>Pelvic floor lifts gently</li>
+                        <li>Not squeezing hard</li>
+                    </ul>
+                </div>
+                <div class="breathing-card">
+                    <h3>💪 Exhale With Effort</h3>
+                    <ul>
+                        <li>Lifting baby → Exhale</li>
+                        <li>Standing up → Exhale</li>
+                        <li>Picking up objects → Exhale</li>
+                        <li><strong>"Exhale as you exert"</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- MOBILITY & RELAXATION -->
+        <h2 class="section-header mobility">Mobility & Relaxation</h2>
+        <div class="exercise-grid">
+            <div class="exercise-card mobility">
+                <h3>1. Child's Pose (Wide-Knee)</h3>
+                <div class="image-placeholder">
+                    [Stick figure: kneeling with knees wide, sitting back, arms forward]
+                </div>
+                <div class="how-to">
+                    <ul>
+                        <li>Knees wider than hip-width</li>
+                        <li>Hips back toward heels</li>
+                        <li>Arms forward or by sides</li>
+                        <li>Send breath to pelvic floor</li>
+                    </ul>
+                </div>
+                <div class="breathing-cue mobility">
+                    <strong>Breathing:</strong>
+                    Inhale: Belly to thighs, pelvic floor relaxes<br>
+                    Exhale: Ribs narrow, pelvis stays soft
+                </div>
+                <span class="reps">Hold: 1-2 minutes</span>
+                <a href="https://yogawithadriene.com/childs-pose-with-modifications/" target="_blank" class="tutorial-link">📺 Watch Tutorial</a>
+            </div>
+
+            <div class="exercise-card mobility">
+                <h3>2. Cat-Cow</h3>
+                <div class="image-placeholder">
+                    [Stick figure: two positions - cow (back arched) and cat (back rounded)]
+                </div>
+                <div class="how-to">
+                    <ul>
+                        <li>Hands and knees, neutral spine</li>
+                        <li><strong>Cow:</strong> Chest up, belly down</li>
+                        <li><strong>Cat:</strong> Round back, belly in</li>
+                    </ul>
+                </div>
+                <div class="breathing-cue mobility">
+                    <strong>Breathing:</strong>
+                    Inhale: Cow (release/relax)<br>
+                    Exhale: Cat (gentle activation)
+                </div>
+                <span class="reps">8-12 slow cycles</span>
+                <a href="https://yogawithadriene.com/cat-cow-pose/" target="_blank" class="tutorial-link">📺 Watch Tutorial</a>
+            </div>
+        </div>
+
+        <!-- STRETCHING -->
+        <h2 class="section-header stretching">Stretching</h2>
+        <div class="exercise-grid">
+            <div class="exercise-card stretching">
+                <h3>3. Piriformis - Figure-4</h3>
+                <div class="image-placeholder">
+                    [Stick figure: lying on back, ankle crossed over thigh, pulling knee in]
+                </div>
+                <div class="how-to">
+                    <ul>
+                        <li>Lie on back, knees bent</li>
+                        <li>Cross ankle over opposite thigh</li>
+                        <li>Pull knee toward chest</li>
+                        <li>Feel stretch in buttock</li>
+                    </ul>
+                </div>
+                <div class="breathing-cue stretching">
+                    <strong>Breathing:</strong>
+                    Inhale: Soften pelvic floor, deepen stretch<br>
+                    Exhale: Release glute tension
+                </div>
+                <span class="reps">30-45 sec each side</span>
+                <a href="https://www.askdoctorjo.com/piriformis-figure-4-stretch/" target="_blank" class="tutorial-link">📺 Watch Tutorial</a>
+            </div>
+
+            <div class="exercise-card stretching">
+                <h3>4. Piriformis - Seated</h3>
+                <div class="image-placeholder">
+                    [Stick figure: sitting on chair, ankle over knee, leaning forward]
+                </div>
+                <div class="how-to">
+                    <ul>
+                        <li>Sit tall on chair</li>
+                        <li>Cross ankle over knee</li>
+                        <li>Hinge forward from hips</li>
+                        <li>Don't round back</li>
+                    </ul>
+                </div>
+                <div class="breathing-cue stretching">
+                    <strong>Breathing:</strong>
+                    Slow breaths, relax pelvis on inhale
+                </div>
+                <span class="reps">30 sec each side</span>
+                <a href="https://www.youtube.com/results?search_query=seated+piriformis+stretch+figure+4" target="_blank" class="tutorial-link">📺 Watch Tutorial</a>
+            </div>
+
+            <div class="exercise-card stretching">
+                <h3>5. Adductor Stretch (Left)</h3>
+                <div class="image-placeholder">
+                    [Stick figure: kneeling on right knee, left leg extended to side]
+                </div>
+                <div class="how-to">
+                    <ul>
+                        <li>Kneel on right knee</li>
+                        <li>Extend left leg to side, foot flat</li>
+                        <li>Shift hips right for inner thigh stretch</li>
+                    </ul>
+                </div>
+                <div class="breathing-cue stretching">
+                    <strong>Breathing:</strong>
+                    Inhale: Expand ribs, soften inner thigh<br>
+                    Exhale: Keep abs relaxed
+                </div>
+                <span class="reps">30-45 sec</span>
+                <a href="https://www.youtube.com/results?search_query=kneeling+adductor+stretch+inner+thigh" target="_blank" class="tutorial-link">📺 Watch Tutorial</a>
+            </div>
+        </div>
+
+        <!-- CORE STRENGTHENING -->
+        <h2 class="section-header core">Core Strengthening (Pelvic Floor-Friendly)</h2>
+        <div class="exercise-grid">
+            <div class="exercise-card core">
+                <h3>6. Diaphragmatic Breathing</h3>
+                <div class="image-placeholder">
+                    [Stick figure: lying or sitting, hands on ribs and belly]
+                </div>
+                <div class="how-to">
+                    <ul>
+                        <li>Lie on back or sit upright</li>
+                        <li>One hand on ribs, one on belly</li>
+                        <li>Focus on 360° rib expansion</li>
+                    </ul>
+                </div>
+                <div class="breathing-cue core">
+                    <strong>Breathing:</strong>
+                    Inhale: Ribs expand, pelvic floor releases<br>
+                    Exhale: Lower abs in gently (20-30%)
+                </div>
+                <span class="reps">6-10 breaths</span>
+                <a href="https://www.youtube.com/results?search_query=diaphragmatic+breathing+pelvic+floor+postpartum" target="_blank" class="tutorial-link">📺 Watch Tutorial</a>
+            </div>
+
+            <div class="exercise-card core">
+                <h3>7. Heel Slides</h3>
+                <div class="image-placeholder">
+                    [Stick figure: lying down, one heel sliding forward on ground]
+                </div>
+                <div class="how-to">
+                    <ul>
+                        <li>Lie on back, knees bent</li>
+                        <li>Maintain neutral spine</li>
+                        <li>Slide heel forward, pelvis stable</li>
+                    </ul>
+                </div>
+                <div class="breathing-cue core">
+                    <strong>Breathing:</strong>
+                    Exhale: Slide heel out (the effort)<br>
+                    Inhale: Return
+                </div>
+                <span class="reps">8-10 per side</span>
+                <a href="https://www.laurajawad.com/post/heel-slide-exercise-progressions-variations/" target="_blank" class="tutorial-link">📺 Watch Tutorial</a>
+            </div>
+
+            <div class="exercise-card core">
+                <h3>8. Modified Dead Bug</h3>
+                <div class="image-placeholder">
+                    [Stick figure: lying down, knees up, extending one arm/leg]
+                </div>
+                <div class="how-to">
+                    <ul>
+                        <li>Lie back, knees above hips, arms up</li>
+                        <li><strong>One limb at a time only</strong></li>
+                        <li>Keeps pelvic floor relaxed</li>
+                    </ul>
+                </div>
+                <div class="breathing-cue core">
+                    <strong>Breathing:</strong>
+                    Exhale: Extend arm or opposite leg<br>
+                    Inhale: Return to center
+                </div>
+                <span class="reps">6-8 per side</span>
+                <a href="https://www.nourishmovelove.com/dead-bug-exercise/" target="_blank" class="tutorial-link">📺 Watch Tutorial</a>
+            </div>
+
+            <div class="exercise-card core">
+                <h3>9. Side Plank (Knees Down)</h3>
+                <div class="image-placeholder">
+                    [Stick figure: side plank on elbow with knees bent]
+                </div>
+                <div class="how-to">
+                    <ul>
+                        <li>Side-lying, knees bent</li>
+                        <li>Elbow under shoulder</li>
+                        <li>Lift hips, maintain long spine</li>
+                    </ul>
+                </div>
+                <div class="breathing-cue core">
+                    <strong>Breathing:</strong>
+                    Exhale: Lift hips<br>
+                    Inhale: Maintain, soften pelvic floor
+                </div>
+                <span class="reps">10-20 sec per side</span>
+                <a href="https://transformchiropractic.com/back-pain/beginner-side-plank-exercise/" target="_blank" class="tutorial-link">📺 Watch Tutorial</a>
+            </div>
+        </div>
+
+        <!-- GLUTE STRENGTHENING -->
+        <h2 class="section-header glutes">Glute Strengthening</h2>
+        <div class="exercise-grid">
+            <div class="exercise-card glutes">
+                <h3>10. Glute Bridge</h3>
+                <div class="image-placeholder">
+                    [Stick figure: lying down with hips lifted, creating straight line]
+                </div>
+                <div class="how-to">
+                    <ul>
+                        <li>Lie on back, feet hip-width</li>
+                        <li>Press through heels to lift hips</li>
+                        <li>Avoid over-arching back</li>
+                    </ul>
+                </div>
+                <div class="breathing-cue glutes">
+                    <strong>Breathing:</strong>
+                    Exhale: Lift<br>
+                    Inhale: Lower with control
+                </div>
+                <span class="reps">10-12 reps</span>
+                <a href="https://www.laurajawad.com/post/glute-bridge-progressions/" target="_blank" class="tutorial-link">📺 Watch Tutorial</a>
+            </div>
+
+            <div class="exercise-card glutes">
+                <h3>11. Clamshells</h3>
+                <div class="image-placeholder">
+                    [Stick figure: lying on side, top knee opening up]
+                </div>
+                <div class="how-to">
+                    <ul>
+                        <li>Lie on side, knees bent</li>
+                        <li>Hips stacked and stable</li>
+                        <li>Open top knee without rolling pelvis</li>
+                    </ul>
+                </div>
+                <div class="breathing-cue glutes">
+                    <strong>Breathing:</strong>
+                    Exhale: Open knee<br>
+                    Inhale: Close
+                </div>
+                <span class="reps">12-15 per side</span>
+                <a href="https://www.laurajawad.com/post/clamshell-exercise-progressions-variations/" target="_blank" class="tutorial-link">📺 Watch Tutorial</a>
+            </div>
+
+            <div class="exercise-card glutes">
+                <h3>12. Hip Extensions (Donkey Kicks)</h3>
+                <div class="image-placeholder">
+                    [Stick figure: on hands and knees, one leg extended back]
+                </div>
+                <div class="how-to">
+                    <ul>
+                        <li>On hands and knees</li>
+                        <li>Lift leg behind you</li>
+                        <li>Don't arch back</li>
+                    </ul>
+                </div>
+                <div class="breathing-cue glutes">
+                    <strong>Breathing:</strong>
+                    Exhale: Lift<br>
+                    Inhale: Lower
+                </div>
+                <span class="reps">8-12 per side</span>
+                <a href="https://www.healthline.com/health/fitness-exercise/donkey-kick" target="_blank" class="tutorial-link">📺 Watch Tutorial</a>
+            </div>
+
+            <div class="exercise-card glutes">
+                <h3>13. Standing Hip Abduction</h3>
+                <div class="image-placeholder">
+                    [Stick figure: standing at wall, lifting leg to side]
+                </div>
+                <div class="how-to">
+                    <ul>
+                        <li>Stand holding wall</li>
+                        <li>Lift leg out to side</li>
+                        <li>Don't lean away</li>
+                    </ul>
+                </div>
+                <div class="breathing-cue glutes">
+                    <strong>Breathing:</strong>
+                    Exhale: Lift<br>
+                    Inhale: Return
+                </div>
+                <span class="reps">10-15 per side</span>
+                <a href="https://www.mayoclinic.org/healthy-lifestyle/fitness/multimedia/standing-hip-abduction/vid-20084670" target="_blank" class="tutorial-link">📺 Watch Tutorial</a>
+            </div>
+        </div>
+
+        <!-- QUICK FLOW -->
+        <div class="quick-flow">
+            <h2>⚡ Quick Workout Flow</h2>
+            <ol>
+                <li><strong>Warm-up:</strong> Child's Pose (1-2 min) → Cat-Cow (8-12 reps)</li>
+                <li><strong>Stretch:</strong> Piriformis both sides → Adductor left</li>
+                <li><strong>Core:</strong> Breathing → Heel Slides → Dead Bug → Side Plank</li>
+                <li><strong>Glutes:</strong> Bridges → Clamshells → Hip Extensions → Hip Abduction</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>

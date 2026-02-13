@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Journey Timeline</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --bg: #f9fafb;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --accent-purple: #8b5cf6;
+            --accent-red: #ef4444;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border-radius: 16px;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        .timeline-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 28px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, var(--primary), var(--accent-purple), var(--accent-green));
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px 24px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .timeline-item:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -33px;
+            top: 24px;
+            width: 14px;
+            height: 14px;
+            background: var(--primary);
+            border: 3px solid var(--bg);
+            border-radius: 50%;
+        }
+
+        .timeline-item.milestone::before {
+            width: 18px;
+            height: 18px;
+            left: -35px;
+            background: var(--accent-green);
+        }
+
+        .timeline-item.prune::before {
+            background: var(--accent-orange);
+        }
+
+        .timeline-item.peak::before {
+            background: var(--accent-purple);
+        }
+
+        .timeline-date {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .timeline-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .timeline-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .timeline-metrics {
+            display: flex;
+            gap: 16px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .metric-tag {
+            background: #f0f9ff;
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .metric-tag.green { background: #ecfdf5; color: #059669; }
+        .metric-tag.orange { background: #fffbeb; color: #d97706; }
+        .metric-tag.purple { background: #f5f3ff; color: #7c3aed; }
+
+        /* Phase Cards */
+        .phases {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .phase-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            border-top: 4px solid var(--primary);
+        }
+
+        .phase-card.expansion { border-top-color: var(--accent-purple); }
+        .phase-card.operationalization { border-top-color: var(--accent-green); }
+        .phase-card.pruning { border-top-color: var(--accent-orange); }
+
+        .phase-number {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .phase-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .phase-dates {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .phase-details {
+            list-style: none;
+        }
+
+        .phase-details li {
+            padding: 6px 0;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .phase-details li::before {
+            content: '→';
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        /* Loop Diagram */
+        .loop-container {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid var(--border);
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .loop-diagram {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 60px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .loop-ring {
+            position: relative;
+            width: 200px;
+            height: 200px;
+        }
+
+        .loop-ring svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .loop-ring .ring-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .loop-ring .ring-title {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .loop-ring .ring-cadence {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Insights */
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .insight-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .insight-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .insight-title {
+            font-weight: 600;
+        }
+
+        .insight-badge {
+            background: var(--primary);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent-green));
+            border-radius: 4px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.8rem; }
+            .timeline { padding-left: 30px; }
+            .timeline-item::before { left: -23px; }
+            .loop-diagram { gap: 30px; }
+            .loop-ring { width: 150px; height: 150px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧠 Learning Journey</h1>
+            <p>Nov 2025 → Feb 2026 | The Evolution of a Compounding Learning System</p>
+        </header>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">85,635</div>
+                <div class="stat-label">Messages Exchanged</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">10,419</div>
+                <div class="stat-label">Sessions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">75</div>
+                <div class="stat-label">Skills Built</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">102→16</div>
+                <div class="stat-label">Patterns (Pruned)</div>
+            </div>
+        </div>
+
+        <!-- Phases -->
+        <div class="timeline-section">
+            <h2 class="section-title">System Phases</h2>
+            <div class="phases">
+                <div class="phase-card">
+                    <div class="phase-number">Phase 1</div>
+                    <div class="phase-title">Foundation</div>
+                    <div class="phase-dates">Nov 2025 — Dec 2025</div>
+                    <ul class="phase-details">
+                        <li>Pattern capture begins</li>
+                        <li>ONA integration</li>
+                        <li>6-14 commits/day</li>
+                        <li>Skills library seeds</li>
+                    </ul>
+                </div>
+                <div class="phase-card expansion">
+                    <div class="phase-number">Phase 2</div>
+                    <div class="phase-title">Expansion</div>
+                    <div class="phase-dates">Jan 1 — Jan 22, 2026</div>
+                    <ul class="phase-details">
+                        <li>34 commits single day (Jan 6)</li>
+                        <li>Agentification wave</li>
+                        <li>51 artifacts updated</li>
+                        <li>AIify architecture</li>
+                    </ul>
+                </div>
+                <div class="phase-card operationalization">
+                    <div class="phase-number">Phase 3</div>
+                    <div class="phase-title">Operationalization</div>
+                    <div class="phase-dates">Jan 22 — Jan 28, 2026</div>
+                    <ul class="phase-details">
+                        <li>Completion Criteria added</li>
+                        <li>/think router created</li>
+                        <li>Trickster moves integrated</li>
+                        <li>Hooks refined</li>
+                    </ul>
+                </div>
+                <div class="phase-card pruning">
+                    <div class="phase-number">Phase 4</div>
+                    <div class="phase-title">Pruning</div>
+                    <div class="phase-dates">Jan 28 — Feb 6, 2026</div>
+                    <ul class="phase-details">
+                        <li>86 patterns archived</li>
+                        <li>/insights integrated</li>
+                        <li>"Delete what's stale"</li>
+                        <li>Agent teams enabled</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Triple Loop -->
+        <div class="loop-container">
+            <h2 class="section-title" style="justify-content: center;">Triple Learning Loops</h2>
+            <p style="color: var(--text-muted); margin-top: -10px;">Argyris & Schön: Single → Double → Triple Loop Learning</p>
+            <div class="loop-diagram">
+                <div class="loop-ring">
+                    <svg viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="6"/>
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#3b82f6" stroke-width="6"
+                                stroke-dasharray="200" stroke-dashoffset="50" stroke-linecap="round">
+                            <animateTransform attributeName="transform" type="rotate"
+                                              from="0 50 50" to="360 50 50" dur="8s" repeatCount="indefinite"/>
+                        </circle>
+                    </svg>
+                    <div class="ring-label">
+                        <div class="ring-title">Single</div>
+                        <div class="ring-cadence">Per-session</div>
+                    </div>
+                </div>
+                <div class="loop-ring">
+                    <svg viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="6"/>
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#8b5cf6" stroke-width="6"
+                                stroke-dasharray="200" stroke-dashoffset="50" stroke-linecap="round">
+                            <animateTransform attributeName="transform" type="rotate"
+                                              from="0 50 50" to="360 50 50" dur="20s" repeatCount="indefinite"/>
+                        </circle>
+                    </svg>
+                    <div class="ring-label">
+                        <div class="ring-title">Double</div>
+                        <div class="ring-cadence">Weekly</div>
+                    </div>
+                </div>
+                <div class="loop-ring">
+                    <svg viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="6"/>
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#10b981" stroke-width="6"
+                                stroke-dasharray="200" stroke-dashoffset="50" stroke-linecap="round">
+                            <animateTransform attributeName="transform" type="rotate"
+                                              from="0 50 50" to="360 50 50" dur="60s" repeatCount="indefinite"/>
+                        </circle>
+                    </svg>
+                    <div class="ring-label">
+                        <div class="ring-title">Triple</div>
+                        <div class="ring-cadence">Monthly</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline-section">
+            <h2 class="section-title">Key Milestones</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">November 2025</div>
+                    <div class="timeline-title">🌱 Foundation Phase Begins</div>
+                    <div class="timeline-desc">Early pattern capture. ONA integration. Building the first skills.</div>
+                    <div class="timeline-metrics">
+                        <span class="metric-tag">6-14 commits/day</span>
+                        <span class="metric-tag green">System seeding</span>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-date">December 29, 2025</div>
+                    <div class="timeline-title">📈 Expansion Peak</div>
+                    <div class="timeline-desc">16 commits in single day. Transition from expansion to refactoring begins.</div>
+                    <div class="timeline-metrics">
+                        <span class="metric-tag purple">16 commits</span>
+                        <span class="metric-tag">Inflection point</span>
+                    </div>
+                </div>
+
+                <div class="timeline-item peak">
+                    <div class="timeline-date">January 6, 2026</div>
+                    <div class="timeline-title">🚀 Single-Day Record: Agentification</div>
+                    <div class="timeline-desc">34 commits. Major agentification wave. System gains self-awareness.</div>
+                    <div class="timeline-metrics">
+                        <span class="metric-tag purple">34 commits</span>
+                        <span class="metric-tag green">Agent-native</span>
+                    </div>
+                </div>
+
+                <div class="timeline-item milestone">
+                    <div class="timeline-date">January 8, 2026</div>
+                    <div class="timeline-title">🔐 OAuth Unification</div>
+                    <div class="timeline-desc">SessionStart hook. Version detection. CLI/MCP token separation.</div>
+                    <div class="timeline-metrics">
+                        <span class="metric-tag">27 commits</span>
+                        <span class="metric-tag green">Infrastructure</span>
+                    </div>
+                </div>
+
+                <div class="timeline-item milestone">
+                    <div class="timeline-date">January 11, 2026</div>
+                    <div class="timeline-title">📚 Two-File Architecture</div>
+                    <div class="timeline-desc">Learning system formalized. learnings.md + working-with-this-user.md split.</div>
+                    <div class="timeline-metrics">
+                        <span class="metric-tag">Rules extraction</span>
+                        <span class="metric-tag green">Token economy</span>
+                    </div>
+                </div>
+
+                <div class="timeline-item peak">
+                    <div class="timeline-date">January 22, 2026</div>
+                    <div class="timeline-title">⚡ Operationalization Wave</div>
+                    <div class="timeline-desc">51 artifacts updated with Completion Criteria. /think router. Trickster moves.</div>
+                    <div class="timeline-metrics">
+                        <span class="metric-tag purple">18 commits</span>
+                        <span class="metric-tag">51 artifacts</span>
+                        <span class="metric-tag green">AIify born</span>
+                    </div>
+                </div>
+
+                <div class="timeline-item prune">
+                    <div class="timeline-date">January 28, 2026</div>
+                    <div class="timeline-title">✂️ Pruning Begins</div>
+                    <div class="timeline-desc">"Principles over artifacts." 26 redundant patterns deleted.</div>
+                    <div class="timeline-metrics">
+                        <span class="metric-tag orange">-26 patterns</span>
+                        <span class="metric-tag">Simplification</span>
+                    </div>
+                </div>
+
+                <div class="timeline-item prune">
+                    <div class="timeline-date">February 5, 2026</div>
+                    <div class="timeline-title">🔥 Major Prune Event</div>
+                    <div class="timeline-desc">102 → 16 patterns. 86 archived. /insights integrated. "Delete what's stale."</div>
+                    <div class="timeline-metrics">
+                        <span class="metric-tag orange">102→16</span>
+                        <span class="metric-tag">86 archived</span>
+                        <span class="metric-tag green">/insights</span>
+                    </div>
+                </div>
+
+                <div class="timeline-item milestone">
+                    <div class="timeline-date">February 6, 2026</div>
+                    <div class="timeline-title">🤝 Agent Teams Enabled</div>
+                    <div class="timeline-desc">Experimental multi-agent collaboration. /skills-health --deep mode.</div>
+                    <div class="timeline-metrics">
+                        <span class="metric-tag purple">Experimental</span>
+                        <span class="metric-tag green">Swarm audit</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insights Summary -->
+        <div class="timeline-section">
+            <h2 class="section-title">System Insights</h2>
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="insight-header">
+                        <span class="insight-title">Tool Usage</span>
+                        <span class="insight-badge">Top 3</span>
+                    </div>
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 4px;">
+                            <span>Bash</span><span>180,910</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill" style="width: 100%"></div></div>
+                    </div>
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 4px;">
+                            <span>Read</span><span>52,793</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill" style="width: 29%"></div></div>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 4px;">
+                            <span>Edit</span><span>48,770</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill" style="width: 27%"></div></div>
+                    </div>
+                </div>
+
+                <div class="insight-card">
+                    <div class="insight-header">
+                        <span class="insight-title">Activity Pattern</span>
+                        <span class="insight-badge">Peak Hours</span>
+                    </div>
+                    <div style="font-size: 0.9rem; color: var(--text-muted);">
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border);">
+                            <span>🌅 Morning (6-12)</span><span>16,400</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); background: #f0f9ff;">
+                            <span><strong>☀️ Afternoon (12-18)</strong></span><span><strong>32,298</strong></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border);">
+                            <span>🌙 Evening (18-24)</span><span>21,783</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                            <span>🌃 Night (0-6)</span><span>15,154</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="insight-card">
+                    <div class="insight-header">
+                        <span class="insight-title">Pattern Temperature</span>
+                        <span class="insight-badge">Current</span>
+                    </div>
+                    <div style="font-size: 0.9rem;">
+                        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 0;">
+                            <span style="width: 12px; height: 12px; background: #ef4444; border-radius: 50%;"></span>
+                            <span>Hot (CLAUDE.md)</span>
+                            <span style="margin-left: auto; font-weight: 600;">11</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 0;">
+                            <span style="width: 12px; height: 12px; background: #f59e0b; border-radius: 50%;"></span>
+                            <span>Warm (learnings.md)</span>
+                            <span style="margin-left: auto; font-weight: 600;">16</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 0;">
+                            <span style="width: 12px; height: 12px; background: #6b7280; border-radius: 50%;"></span>
+                            <span>Archived</span>
+                            <span style="margin-left: auto; font-weight: 600;">86</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Generated with <a href="https://claude.com/claude-code">Claude Code</a> using /swarm + /html-prototyping</p>
+            <p style="margin-top: 8px;">
+                <a href="https://teamytastic.github.io/camekazi.github.io">Showcase</a> ·
+                <a href="https://teamytastic.github.io/camekazi.github.io/prototype">Learning System Viz</a>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

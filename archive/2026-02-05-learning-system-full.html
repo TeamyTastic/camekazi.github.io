@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Learning System - Triple Loops</title>
+    <script>
+    const storage = {
+        get: (key) => { try { return localStorage.getItem(key); } catch(e) { return null; } },
+        set: (key, val) => { try { localStorage.setItem(key, val); } catch(e) {} },
+        remove: (key) => { try { localStorage.removeItem(key); } catch(e) {} }
+    };
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #e8e8e8;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .philosophy {
+            text-align: center;
+            font-style: italic;
+            color: #a0a0a0;
+            margin-bottom: 40px;
+            padding: 20px;
+            border-left: 3px solid #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* Loop Navigation */
+        .loop-nav {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .loop-tab {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-width: 150px;
+        }
+
+        .loop-tab:hover {
+            transform: translateY(-3px);
+        }
+
+        .loop-tab.active {
+            border-color: var(--loop-color);
+            box-shadow: 0 0 20px var(--loop-glow);
+        }
+
+        .loop-tab.single { --loop-color: #4ade80; --loop-glow: rgba(74, 222, 128, 0.3); }
+        .loop-tab.double { --loop-color: #60a5fa; --loop-glow: rgba(96, 165, 250, 0.3); }
+        .loop-tab.triple { --loop-color: #f472b6; --loop-glow: rgba(244, 114, 182, 0.3); }
+
+        .loop-tab .loop-icon {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .loop-tab .loop-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .loop-tab .loop-question {
+            font-size: 0.7rem;
+            color: #888;
+            margin-top: 3px;
+        }
+
+        /* Loop Visualizations */
+        .loop-container {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .loop-container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .loop-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .loop-card h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .loop-card.single h2 { color: #4ade80; }
+        .loop-card.double h2 { color: #60a5fa; }
+        .loop-card.triple h2 { color: #f472b6; }
+
+        .loop-card .question {
+            font-style: italic;
+            color: #888;
+            margin-bottom: 25px;
+        }
+
+        /* SVG Loop Diagrams */
+        .loop-svg {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto 30px;
+            display: block;
+        }
+
+        .loop-svg text {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        /* Components */
+        .components {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .component {
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 15px 20px;
+            text-align: center;
+            min-width: 120px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .component:hover {
+            transform: scale(1.05);
+        }
+
+        .component .icon {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .component .name {
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .component .role {
+            font-size: 0.7rem;
+            color: #888;
+            margin-top: 3px;
+        }
+
+        /* Loop explanation */
+        .loop-explanation {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .loop-explanation h4 {
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .loop-explanation p {
+            color: #a0a0a0;
+            line-height: 1.6;
+        }
+
+        .cadence {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 10px;
+        }
+
+        /* Nested View */
+        .nested-container {
+            position: relative;
+            margin: 40px auto;
+            max-width: 500px;
+        }
+
+        .nested-ring {
+            border: 3px solid;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin: 0 auto;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nested-ring:hover {
+            transform: scale(1.02);
+        }
+
+        .nested-ring.outer {
+            width: 400px;
+            height: 400px;
+            border-color: #f472b6;
+            background: rgba(244, 114, 182, 0.05);
+        }
+
+        .nested-ring.middle {
+            width: 280px;
+            height: 280px;
+            border-color: #60a5fa;
+            background: rgba(96, 165, 250, 0.05);
+        }
+
+        .nested-ring.inner {
+            width: 160px;
+            height: 160px;
+            border-color: #4ade80;
+            background: rgba(74, 222, 128, 0.1);
+        }
+
+        .ring-label {
+            position: absolute;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        .ring-label.triple {
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(244, 114, 182, 0.3);
+            color: #f472b6;
+        }
+
+        .ring-label.double {
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(96, 165, 250, 0.3);
+            color: #60a5fa;
+        }
+
+        .ring-label.single {
+            background: rgba(74, 222, 128, 0.3);
+            color: #4ade80;
+        }
+
+        .ring-cadence {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.65rem;
+            color: #888;
+        }
+
+        .inner-text {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #4ade80;
+        }
+
+        /* Animation for loops */
+        @keyframes pulse-loop {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .loop-arrow {
+            animation: pulse-loop 2s infinite;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #555;
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8rem; }
+            .nested-ring.outer { width: 300px; height: 300px; }
+            .nested-ring.middle { width: 210px; height: 210px; }
+            .nested-ring.inner { width: 120px; height: 120px; }
+            .loop-card { padding: 20px; }
+        }
+
+        @media (max-width: 480px) {
+            .nested-ring.outer { width: 260px; height: 260px; }
+            .nested-ring.middle { width: 180px; height: 180px; }
+            .nested-ring.inner { width: 100px; height: 100px; }
+            .ring-label { font-size: 0.65rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 Learning System</h1>
+        <p class="subtitle">Triple Learning Loops</p>
+
+        <div class="philosophy">
+            "Did the system learn, or did I just get through today?"
+        </div>
+
+        <!-- Loop Navigation -->
+        <div class="loop-nav">
+            <div class="loop-tab single active" onclick="showLoop('single')">
+                <div class="loop-icon">🔄</div>
+                <div class="loop-name">Single-Loop</div>
+                <div class="loop-question">Fix errors</div>
+            </div>
+            <div class="loop-tab double" onclick="showLoop('double')">
+                <div class="loop-icon">🔁</div>
+                <div class="loop-name">Double-Loop</div>
+                <div class="loop-question">Change rules</div>
+            </div>
+            <div class="loop-tab triple" onclick="showLoop('triple')">
+                <div class="loop-icon">🌀</div>
+                <div class="loop-name">Triple-Loop</div>
+                <div class="loop-question">Learn how to learn</div>
+            </div>
+            <div class="loop-tab nested" onclick="showLoop('nested')" style="--loop-color: #667eea; --loop-glow: rgba(102, 126, 234, 0.3);">
+                <div class="loop-icon">🎯</div>
+                <div class="loop-name">Nested View</div>
+                <div class="loop-question">All three</div>
+            </div>
+        </div>
+
+        <!-- Single Loop -->
+        <div class="loop-container active" id="single-loop">
+            <div class="loop-card single">
+                <h2>🔄 Single-Loop Learning [R]</h2>
+                <p class="question">"Are we doing things right?"</p>
+
+                <svg class="loop-svg" viewBox="0 0 400 200">
+                    <!-- Nodes -->
+                    <rect x="50" y="70" width="100" height="60" rx="10" fill="rgba(74, 222, 128, 0.2)" stroke="#4ade80" stroke-width="2"/>
+                    <text x="100" y="95" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="600">Session</text>
+                    <text x="100" y="115" text-anchor="middle" fill="#888" font-size="10">work happens</text>
+
+                    <rect x="250" y="70" width="100" height="60" rx="10" fill="rgba(239, 68, 68, 0.2)" stroke="#ef4444" stroke-width="2"/>
+                    <text x="300" y="95" text-anchor="middle" fill="#ef4444" font-size="12" font-weight="600">Friction</text>
+                    <text x="300" y="115" text-anchor="middle" fill="#888" font-size="10">detected</text>
+
+                    <rect x="150" y="150" width="100" height="50" rx="10" fill="rgba(251, 191, 36, 0.2)" stroke="#fbbf24" stroke-width="2"/>
+                    <text x="200" y="175" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">/hookify</text>
+
+                    <!-- Arrows -->
+                    <path d="M 150 100 L 240 100" stroke="#4ade80" stroke-width="2" fill="none" marker-end="url(#arrow-green)" class="loop-arrow"/>
+                    <text x="195" y="90" text-anchor="middle" fill="#4ade80" font-size="10">(+)</text>
+
+                    <path d="M 300 130 Q 300 160 260 165" stroke="#ef4444" stroke-width="2" fill="none" marker-end="url(#arrow-red)" class="loop-arrow"/>
+                    <text x="290" y="150" text-anchor="middle" fill="#ef4444" font-size="10">(+)</text>
+
+                    <path d="M 150 165 Q 100 165 100 140" stroke="#fbbf24" stroke-width="2" fill="none" marker-end="url(#arrow-yellow)" class="loop-arrow"/>
+                    <text x="115" y="160" text-anchor="middle" fill="#fbbf24" font-size="10">(-)</text>
+
+                    <!-- Arrow markers -->
+                    <defs>
+                        <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#4ade80"/>
+                        </marker>
+                        <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#ef4444"/>
+                        </marker>
+                        <marker id="arrow-yellow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#fbbf24"/>
+                        </marker>
+                    </defs>
+                </svg>
+
+                <div class="components">
+                    <div class="component">
+                        <div class="icon">🛑</div>
+                        <div class="name">Stop Hook</div>
+                        <div class="role">Detects friction</div>
+                    </div>
+                    <div class="component">
+                        <div class="icon">🪝</div>
+                        <div class="name">/hookify</div>
+                        <div class="role">Creates prevention</div>
+                    </div>
+                    <div class="component">
+                        <div class="icon">⚙️</div>
+                        <div class="name">settings.json</div>
+                        <div class="role">Stores rules</div>
+                    </div>
+                </div>
+
+                <div class="loop-explanation">
+                    <h4>How it works</h4>
+                    <p>Session produces friction → Stop hook detects it → /hookify creates prevention rule → Future sessions have less friction. The loop <strong>corrects errors within existing rules</strong>.</p>
+                    <span class="cadence">⏱️ Per-session (minutes)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Double Loop -->
+        <div class="loop-container" id="double-loop">
+            <div class="loop-card double">
+                <h2>🔁 Double-Loop Learning [R]</h2>
+                <p class="question">"Are we doing the right things?"</p>
+
+                <svg class="loop-svg" viewBox="0 0 500 220">
+                    <!-- Nodes -->
+                    <rect x="30" y="80" width="90" height="50" rx="10" fill="rgba(96, 165, 250, 0.2)" stroke="#60a5fa" stroke-width="2"/>
+                    <text x="75" y="105" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="600">Session</text>
+                    <text x="75" y="120" text-anchor="middle" fill="#888" font-size="9">insights</text>
+
+                    <rect x="160" y="80" width="90" height="50" rx="10" fill="rgba(168, 85, 247, 0.2)" stroke="#a855f7" stroke-width="2"/>
+                    <text x="205" y="105" text-anchor="middle" fill="#a855f7" font-size="11" font-weight="600">Pattern</text>
+                    <text x="205" y="120" text-anchor="middle" fill="#888" font-size="9">observed</text>
+
+                    <rect x="290" y="80" width="90" height="50" rx="10" fill="rgba(34, 197, 94, 0.2)" stroke="#22c55e" stroke-width="2"/>
+                    <text x="335" y="105" text-anchor="middle" fill="#22c55e" font-size="11" font-weight="600">Evidence</text>
+                    <text x="335" y="120" text-anchor="middle" fill="#888" font-size="9">3+ times</text>
+
+                    <rect x="160" y="160" width="130" height="50" rx="10" fill="rgba(59, 130, 246, 0.2)" stroke="#3b82f6" stroke-width="2"/>
+                    <text x="225" y="185" text-anchor="middle" fill="#3b82f6" font-size="11" font-weight="600">learnings.md</text>
+                    <text x="225" y="200" text-anchor="middle" fill="#888" font-size="9">rules change</text>
+
+                    <!-- Arrows -->
+                    <path d="M 120 105 L 150 105" stroke="#60a5fa" stroke-width="2" fill="none" marker-end="url(#arrow-blue)" class="loop-arrow"/>
+                    <text x="135" y="95" text-anchor="middle" fill="#60a5fa" font-size="9">(+)</text>
+
+                    <path d="M 250 105 L 280 105" stroke="#a855f7" stroke-width="2" fill="none" marker-end="url(#arrow-purple)" class="loop-arrow"/>
+                    <text x="265" y="95" text-anchor="middle" fill="#a855f7" font-size="9">(+)</text>
+
+                    <path d="M 335 130 Q 335 155 300 170" stroke="#22c55e" stroke-width="2" fill="none" marker-end="url(#arrow-green2)" class="loop-arrow"/>
+                    <text x="325" y="152" text-anchor="middle" fill="#22c55e" font-size="9">(+)</text>
+
+                    <path d="M 160 175 Q 75 175 75 140" stroke="#3b82f6" stroke-width="2" fill="none" marker-end="url(#arrow-blue2)" class="loop-arrow"/>
+                    <text x="105" y="168" text-anchor="middle" fill="#3b82f6" font-size="9">(+)</text>
+
+                    <defs>
+                        <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#60a5fa"/>
+                        </marker>
+                        <marker id="arrow-purple" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#a855f7"/>
+                        </marker>
+                        <marker id="arrow-green2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#22c55e"/>
+                        </marker>
+                        <marker id="arrow-blue2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#3b82f6"/>
+                        </marker>
+                    </defs>
+                </svg>
+
+                <div class="components">
+                    <div class="component">
+                        <div class="icon">📝</div>
+                        <div class="name">/retrospective</div>
+                        <div class="role">Captures patterns</div>
+                    </div>
+                    <div class="component">
+                        <div class="icon">📚</div>
+                        <div class="name">learnings.md</div>
+                        <div class="role">Stores rules</div>
+                    </div>
+                    <div class="component">
+                        <div class="icon">🔎</div>
+                        <div class="name">/reflect</div>
+                        <div class="role">Surfaces rules</div>
+                    </div>
+                </div>
+
+                <div class="loop-explanation">
+                    <h4>How it works</h4>
+                    <p>Sessions generate insights → Patterns are observed → Evidence accumulates (3+ threshold) → Rules are created/changed in learnings.md → Future sessions have better rules. The loop <strong>questions and changes the rules themselves</strong>.</p>
+                    <span class="cadence">⏱️ Days to weeks (pattern accumulation)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Triple Loop -->
+        <div class="loop-container" id="triple-loop">
+            <div class="loop-card triple">
+                <h2>🌀 Triple-Loop Learning [R]</h2>
+                <p class="question">"How do we decide what's right?"</p>
+
+                <svg class="loop-svg" viewBox="0 0 500 250">
+                    <!-- Nodes -->
+                    <rect x="30" y="90" width="100" height="50" rx="10" fill="rgba(244, 114, 182, 0.2)" stroke="#f472b6" stroke-width="2"/>
+                    <text x="80" y="115" text-anchor="middle" fill="#f472b6" font-size="11" font-weight="600">Learning</text>
+                    <text x="80" y="130" text-anchor="middle" fill="#888" font-size="9">System</text>
+
+                    <rect x="180" y="90" width="100" height="50" rx="10" fill="rgba(139, 92, 246, 0.2)" stroke="#8b5cf6" stroke-width="2"/>
+                    <text x="230" y="115" text-anchor="middle" fill="#8b5cf6" font-size="11" font-weight="600">/insights</text>
+                    <text x="230" y="130" text-anchor="middle" fill="#888" font-size="9">monthly</text>
+
+                    <rect x="330" y="90" width="100" height="50" rx="10" fill="rgba(236, 72, 153, 0.2)" stroke="#ec4899" stroke-width="2"/>
+                    <text x="380" y="115" text-anchor="middle" fill="#ec4899" font-size="11" font-weight="600">Analysis</text>
+                    <text x="380" y="130" text-anchor="middle" fill="#888" font-size="9">system health</text>
+
+                    <rect x="280" y="180" width="100" height="50" rx="10" fill="rgba(251, 146, 60, 0.2)" stroke="#fb923c" stroke-width="2"/>
+                    <text x="330" y="205" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="600">Hot Patterns</text>
+                    <text x="330" y="220" text-anchor="middle" fill="#888" font-size="9">promote/demote</text>
+
+                    <rect x="100" y="180" width="120" height="50" rx="10" fill="rgba(168, 85, 247, 0.2)" stroke="#a855f7" stroke-width="2"/>
+                    <text x="160" y="205" text-anchor="middle" fill="#a855f7" font-size="11" font-weight="600">CLAUDE.md</text>
+                    <text x="160" y="220" text-anchor="middle" fill="#888" font-size="9">philosophy evolves</text>
+
+                    <!-- Arrows -->
+                    <path d="M 130 115 L 170 115" stroke="#f472b6" stroke-width="2" fill="none" marker-end="url(#arrow-pink)" class="loop-arrow"/>
+                    <text x="150" y="105" text-anchor="middle" fill="#f472b6" font-size="9">(+)</text>
+
+                    <path d="M 280 115 L 320 115" stroke="#8b5cf6" stroke-width="2" fill="none" marker-end="url(#arrow-violet)" class="loop-arrow"/>
+                    <text x="300" y="105" text-anchor="middle" fill="#8b5cf6" font-size="9">(+)</text>
+
+                    <path d="M 380 140 Q 380 165 390 180" stroke="#ec4899" stroke-width="2" fill="none" marker-end="url(#arrow-rose)" class="loop-arrow"/>
+                    <text x="395" y="162" text-anchor="middle" fill="#ec4899" font-size="9">(+)</text>
+
+                    <path d="M 280 205 L 230 205" stroke="#fb923c" stroke-width="2" fill="none" marker-end="url(#arrow-orange)" class="loop-arrow"/>
+                    <text x="255" y="195" text-anchor="middle" fill="#fb923c" font-size="9">(+)</text>
+
+                    <path d="M 110 195 Q 70 195 70 150" stroke="#a855f7" stroke-width="2" fill="none" marker-end="url(#arrow-purple2)" class="loop-arrow"/>
+                    <text x="80" y="175" text-anchor="middle" fill="#a855f7" font-size="9">(+)</text>
+
+                    <defs>
+                        <marker id="arrow-pink" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#f472b6"/>
+                        </marker>
+                        <marker id="arrow-violet" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#8b5cf6"/>
+                        </marker>
+                        <marker id="arrow-rose" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#ec4899"/>
+                        </marker>
+                        <marker id="arrow-orange" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#fb923c"/>
+                        </marker>
+                        <marker id="arrow-purple2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#a855f7"/>
+                        </marker>
+                    </defs>
+                </svg>
+
+                <div class="components">
+                    <div class="component">
+                        <div class="icon">📊</div>
+                        <div class="name">/insights</div>
+                        <div class="role">Analyzes system</div>
+                    </div>
+                    <div class="component">
+                        <div class="icon">🔥</div>
+                        <div class="name">Hot Patterns</div>
+                        <div class="role">Promotes/demotes</div>
+                    </div>
+                    <div class="component">
+                        <div class="icon">📜</div>
+                        <div class="name">CLAUDE.md</div>
+                        <div class="role">Philosophy evolves</div>
+                    </div>
+                </div>
+
+                <div class="loop-explanation">
+                    <h4>How it works</h4>
+                    <p>The learning system generates data → /insights analyzes the system itself → Hot Patterns get promoted/demoted → CLAUDE.md evolves → The learning system changes how it learns. The loop <strong>questions the learning process itself</strong>.</p>
+                    <span class="cadence">⏱️ Monthly (/insights cadence)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nested View -->
+        <div class="loop-container" id="nested-loop">
+            <div class="loop-card" style="border-color: #667eea;">
+                <h2 style="color: #667eea;">🎯 The Nested Loops</h2>
+                <p class="question">Each loop operates at a different timescale and depth</p>
+
+                <div class="nested-container">
+                    <div class="nested-ring outer" onclick="showLoop('triple')">
+                        <span class="ring-label triple">TRIPLE: Learn How to Learn</span>
+                        <span class="ring-cadence">Monthly</span>
+                        <div class="nested-ring middle" onclick="event.stopPropagation(); showLoop('double')">
+                            <span class="ring-label double">DOUBLE: Change Rules</span>
+                            <span class="ring-cadence">Days-Weeks</span>
+                            <div class="nested-ring inner" onclick="event.stopPropagation(); showLoop('single')">
+                                <div class="inner-text">
+                                    <strong>SINGLE</strong><br>
+                                    Fix Errors<br>
+                                    <span style="font-size: 0.6rem; color: #888;">Minutes</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="loop-explanation">
+                    <h4>Why three loops matter</h4>
+                    <p><strong>Single-loop</strong> keeps you moving (fix immediate friction).<br>
+                    <strong>Double-loop</strong> makes you smarter (build better rules).<br>
+                    <strong>Triple-loop</strong> makes the system smarter (evolve how you learn).</p>
+                    <p style="margin-top: 15px;">Most systems only have single-loop. Adding double-loop creates compounding. Adding triple-loop creates <em>meta-compounding</em> — the learning system learns how to learn.</p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            Built with <a href="#">/html-prototyping</a> · Argyris/Schön Learning Loops
+        </footer>
+    </div>
+
+    <script>
+        function showLoop(loop) {
+            // Hide all containers
+            document.querySelectorAll('.loop-container').forEach(c => c.classList.remove('active'));
+            // Show selected
+            document.getElementById(loop + '-loop').classList.add('active');
+
+            // Update tabs
+            document.querySelectorAll('.loop-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.loop-tab.${loop}`).classList.add('active');
+        }
+
+        // Easter egg: clicking the nested rings shows that loop
+        document.querySelectorAll('.nested-ring').forEach(ring => {
+            ring.addEventListener('mouseenter', function() {
+                this.style.boxShadow = `0 0 20px ${getComputedStyle(this).borderColor}`;
+            });
+            ring.addEventListener('mouseleave', function() {
+                this.style.boxShadow = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
