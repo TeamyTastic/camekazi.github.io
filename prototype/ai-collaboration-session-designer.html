@@ -970,7 +970,15 @@ const storage = {
       <div class="role-ai yes">AI: yes</div>
     </div>
   </div>
-  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:4px;"><strong>The handoff:</strong> Navigator describes <em>what</em> &rarr; AI suggests <em>how</em> &rarr; Driver executes &rarr; Red Team challenges the result.</p>
+    <div class="flow" style="margin-top:18px; margin-bottom:8px;">
+      <div class="flow-step" style="background:var(--light-blue); border:1.5px solid var(--primary); font-weight:600; color:var(--primary);">Navigator<br><span style="font-weight:400; font-size:11px;">describes <em>what</em></span></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step" style="background:#f0f0f0; border:1.5px solid var(--border);">AI<br><span style="font-weight:400; font-size:11px;">suggests <em>how</em></span></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step" style="background:var(--light-blue); border:1.5px solid var(--primary); font-weight:600; color:var(--primary);">Driver<br><span style="font-weight:400; font-size:11px;">executes</span></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step" style="background:#fff0f0; border:1.5px solid var(--red); font-weight:600; color:var(--red);">Red Team<br><span style="font-weight:400; font-size:11px;">challenges</span></div>
+    </div>
 
   <h2>Optional advanced roles <span style="font-size:13px; font-weight:400; color:var(--ink-dim);">(add when ready)</span></h2>
   <p style="font-size:13px; color:var(--ink-dim); margin-bottom:14px;">Once the team is comfortable with the basics, layer in additional roles as needed.</p>
@@ -990,91 +998,29 @@ const storage = {
       <div class="role-desc">Stays on mission, prevents AI tangents. "Is this still solving our problem?"</div>
       <div class="role-ai partial">AI: partial</div>
     </div>
-  </div>
-
-  <h2>Should have role <span style="font-size:13px; font-weight:400; color:var(--ink-dim);">(if opted in)</span></h2>
-  <div class="role-grid stagger">
     <div class="role-card" style="border-left: 4px solid var(--teal);">
-      <div class="role-name">Session Recorder</div>
+      <div class="role-name">Session Recorder <span style="font-size:11px; font-weight:500; color:var(--teal);">recommended</span></div>
       <div class="role-desc">Transcribes session for post-session AI analysis. Captures decisions, questions, and blockers. See <strong>Setup</strong> tab for reflection prompts.</div>
       <div class="role-ai yes">AI: yes</div>
     </div>
   </div>
+    <div class="table-wrap" style="margin-top:16px;">
+      <table>
+        <tr><th>Role</th><th>Add when&hellip;</th></tr>
+        <tr><td><strong>Facilitator</strong></td><td>Rotations feel chaotic or time runs away</td></tr>
+        <tr><td><strong>Subject Matter Expert</strong></td><td>You're stuck on domain questions the AI can't answer</td></tr>
+        <tr><td><strong>Outcome Keeper</strong></td><td>Sessions drift from the original goal</td></tr>
+        <tr><td><strong>Session Recorder</strong></td><td>You want to learn about <em>how</em> you collaborate, not just what you built</td></tr>
+      </table>
+    </div>
 
-  <h2>AI task models</h2>
-  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:14px;">Start with <strong>augmentation</strong> (AI assists human work). Graduate to <strong>automation</strong> (AI handles tasks) as trust builds.</p>
-  <div class="table-wrap">
-    <table>
-      <tr><th>Mode</th><th>What AI does</th><th>Examples</th></tr>
-      <tr><td><strong>Augmentation</strong></td><td>AI enhances human work &mdash; suggests, explains, reviews</td><td>Debugging suggestions, refactoring ideas, explaining legacy code</td></tr>
-      <tr><td><strong>Automation</strong></td><td>AI handles task entirely &mdash; human reviews output</td><td>Code generation, test writing, documentation drafts</td></tr>
-    </table>
-  </div>
-
-  <h2>AI integration models</h2>
-  <div class="table-wrap">
-    <table>
-      <tr><th>Model</th><th>Who does what</th><th>Best for</th></tr>
-      <tr><td><strong>Copilot</strong></td><td>Driver uses AI suggestions, group validates</td><td>Teams already comfortable collaborating</td></tr>
-      <tr><td><strong>Draft Generator</strong></td><td>AI writes first draft, group reviews/refines</td><td>New codebases, specs-heavy work</td></tr>
-      <tr><td><strong>Red Team</strong></td><td>Group writes, AI critiques</td><td>Learning, quality focus</td></tr>
-      <tr><td><strong>Observer</strong></td><td>Meta-AI watches session, surfaces patterns</td><td>"Another AI watching us using AI"</td></tr>
-    </table>
-  </div>
-
-  <h2>Classic ensemble roles</h2>
-  <div class="table-wrap">
-    <table>
-      <tr><th>Role</th><th>Function</th><th>Key rule</th></tr>
-      <tr><td><strong>Driver</strong></td><td>Hands on keyboard. Translates spoken ideas into code.</td><td>Doesn't decide what to create</td></tr>
-      <tr><td><strong>Navigator</strong></td><td>Strategic thinking. Describes next steps verbally.</td><td>Person with the idea navigates, doesn't drive</td></tr>
-      <tr><td><strong>Participant</strong></td><td>Contributes ideas, asks questions, researches.</td><td>Yield to less-privileged voices</td></tr>
-      <tr><td><strong>Researcher</strong></td><td>Finds docs, blog posts, code examples in parallel.</td><td>Share findings, don't hoard</td></tr>
-      <tr><td><strong>Facilitator</strong></td><td>Timer, rotation, breaks.</td><td>"Are we stuck?" is the key question</td></tr>
-    </table>
-  </div>
-
-  <hr class="divider">
-
-  <h2>Collaboration RPG</h2>
-  <p class="subtitle" style="margin-bottom:16px;">Willem Larsen's gamified experience. Earn XP by embodying role behaviours. Print the cards, bring to your next session.</p>
-
-  <div class="card" style="border-left: 4px solid var(--amber); background: var(--surface);">
-    <p style="font-size:13px; color:var(--ink-dim); margin-bottom:0;"><strong>Optional: Gamification for experienced teams.</strong> Start with the basics first (Quick Start &rarr; Roles &rarr; Setup). Once your team is comfortable with the core workflow, these RPG cards add depth and fun. They're not required for a great first session.</p>
-  </div>
-
-  <h3>Level 1 &mdash; Core</h3>
-  <div class="role-grid stagger">
-    <div class="role-card"><div class="role-level lvl-1">Level 1</div><div class="role-name">Driver</div><div class="role-desc">Ask clarifying questions about typing. Use new keyboard shortcuts. Type something you disagree with. Ignore non-Navigator instructions.</div></div>
-    <div class="role-card"><div class="role-level lvl-1">Level 1</div><div class="role-name">Navigator</div><div class="role-desc">Request ideas from the group. Filter suggestions and direct Driver precisely. Communicate high-level intent. Follow TDD cycle.</div></div>
-    <div class="role-card"><div class="role-level lvl-1">Level 1</div><div class="role-name">Participant</div><div class="role-desc">Yield to less-privileged voices. Contribute ideas. Ask questions until understanding is reached. Listen attentively.</div></div>
-  </div>
-
-  <h3>Level 2 &mdash; Support</h3>
-  <div class="role-grid stagger">
-    <div class="role-card"><div class="role-level lvl-2">Level 2</div><div class="role-name">Researcher</div><div class="role-desc">Share relevant documentation. Find blog insights. Locate coding forum solutions.</div></div>
-    <div class="role-card"><div class="role-level lvl-2">Level 2</div><div class="role-name">Sponsor</div><div class="role-desc">Amplify underheard perspectives. Support least-privileged contributors. Recognise moments of excellence.</div></div>
-    <div class="role-card"><div class="role-level lvl-2">Level 2</div><div class="role-name">Rear Admiral</div><div class="role-desc">Offer Navigator guidance privately. Provide minimal cues. Guide at highest abstraction level.</div></div>
-  </div>
-
-  <h3>Level 3 &mdash; Quality</h3>
-  <div class="role-grid stagger">
-    <div class="role-card"><div class="role-level lvl-3">Level 3</div><div class="role-name">Automationist</div><div class="role-desc">Identify repeated tool tasks. Notice repeated processes. Recognise boilerplate. Suggest automation.</div></div>
-    <div class="role-card"><div class="role-level lvl-3">Level 3</div><div class="role-name">Nose</div><div class="role-desc">Flag long lines, complex conditionals, duplication. Name unnamed things. Propose improvements.</div></div>
-    <div class="role-card"><div class="role-level lvl-3">Level 3</div><div class="role-name">Archivist</div><div class="role-desc">Record alternatives visibly. Document ideas on whiteboard. Display current task. Capture decisions.</div></div>
-  </div>
-
-  <h3>Level 4 &mdash; Culture</h3>
-  <div class="role-grid stagger">
-    <div class="role-card"><div class="role-level lvl-4">Level 4</div><div class="role-name">Conductor</div><div class="role-desc">Combine ideas (discard the first). Elicit quiet members. Make ridiculous proposals. Defer to junior voices.</div></div>
-    <div class="role-card"><div class="role-level lvl-4">Level 4</div><div class="role-name">Traffic Cop</div><div class="role-desc">Propose new agreements. Alert to process violations. Support adherence. Identify outdated agreements.</div></div>
-    <div class="role-card"><div class="role-level lvl-4">Level 4</div><div class="role-name">Dr. Feel Good</div><div class="role-desc">Express appreciation (SBI model). Share joy. Acknowledge happiness. Retrospect positive moments.</div></div>
-    <div class="role-card"><div class="role-level lvl-4">Level 4</div><div class="role-name">Major Pain</div><div class="role-desc">Articulate difficulties. Demonstrate empathy. Surface ignored pain points. Call retrospectives on pain.</div></div>
-  </div>
-
-  <hr class="divider">
-  <p><strong>First rule:</strong> Treat each other with Kindness, Consideration, and Respect at all times.</p>
-  <a href="https://github.com/willemlarsen/mobprogrammingrpg" target="_blank" class="btn btn-ghost" style="margin-top:12px;">Get Printable Cards &rarr;</a>
+    <hr class="divider">
+    <div class="card" style="border-left: 4px solid var(--amber); background: var(--surface);">
+      <h3 style="margin-top:0;">Collaboration RPG <span style="font-size:13px; font-weight:400; color:var(--ink-dim);">(optional gamification)</span></h3>
+      <p style="font-size:13px; margin-bottom:10px;">Willem Larsen's gamified mob programming cards — earn XP by embodying role behaviours across 4 levels (Core, Support, Quality, Culture). Great for experienced teams who want to deepen their practice.</p>
+      <p style="font-size:13px; color:var(--ink-dim); margin-bottom:10px;"><strong>First rule:</strong> Treat each other with Kindness, Consideration, and Respect at all times.</p>
+      <a href="https://github.com/willemlarsen/mobprogrammingrpg" target="_blank" class="btn btn-ghost">Get Printable Cards &rarr;</a>
+    </div>
 </div>
 
 <!-- ═══════════ SETUP ═══════════ -->
@@ -1100,6 +1046,27 @@ const storage = {
       </table>
     </div>
     <p style="font-size:13px; color:var(--ink-dim); margin-top:12px; margin-bottom:0;"><strong>Example opening prompt:</strong> "We follow these standards: [paste]. Please adhere throughout this session and flag any deviations."</p>
+  </div>
+
+  <h2>AI task models</h2>
+  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:14px;">Start with <strong>augmentation</strong> (AI assists human work). Graduate to <strong>automation</strong> (AI handles tasks) as trust builds.</p>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Mode</th><th>What AI does</th><th>Examples</th></tr>
+      <tr><td><strong>Augmentation</strong></td><td>AI enhances human work &mdash; suggests, explains, reviews</td><td>Debugging suggestions, refactoring ideas, explaining legacy code</td></tr>
+      <tr><td><strong>Automation</strong></td><td>AI handles task entirely &mdash; human reviews output</td><td>Code generation, test writing, documentation drafts</td></tr>
+    </table>
+  </div>
+
+  <h2>AI integration models</h2>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Model</th><th>Who does what</th><th>Best for</th></tr>
+      <tr><td><strong>Copilot</strong></td><td>Driver uses AI suggestions, group validates</td><td>Teams already comfortable collaborating</td></tr>
+      <tr><td><strong>Draft Generator</strong></td><td>AI writes first draft, group reviews/refines</td><td>New codebases, specs-heavy work</td></tr>
+      <tr><td><strong>Red Team</strong></td><td>Group writes, AI critiques</td><td>Learning, quality focus</td></tr>
+      <tr><td><strong>Observer</strong></td><td>Meta-AI watches session, surfaces patterns</td><td>"Another AI watching us using AI"</td></tr>
+    </table>
   </div>
 
   <h2>Session recording &amp; transcript analysis <span style="font-size:13px; font-weight:400; color:var(--ink-dim);">(if opted in)</span></h2>
