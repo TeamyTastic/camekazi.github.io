@@ -1,1330 +1,1659 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>MOB — AI-Collaborative Session Designer</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<style>
-:root {
-  --cream: #f5f0e8;
-  --ink: #1a1a1a;
-  --ink-dim: #6b6b6b;
-  --ink-faint: #a0a0a0;
-  --paper: #fffcf5;
-  --warm: #e8dfd0;
-  --accent: #c2410c;
-  --accent-light: #fed7aa;
-  --accent-glow: rgba(194, 65, 12, 0.12);
-  --teal: #0d9488;
-  --teal-light: #ccfbf1;
-  --green: #16a34a;
-  --green-light: #dcfce7;
-  --amber: #d97706;
-  --amber-light: #fef3c7;
-  --red: #dc2626;
-  --red-light: #fecaca;
-  --violet: #7c3aed;
-  --violet-light: #ede9fe;
-  --surface: #ffffff;
-  --border: rgba(0,0,0,0.08);
-  --radius: 12px;
-  --radius-sm: 8px;
-  --serif: 'Instrument Serif', Georgia, serif;
-  --sans: 'DM Sans', -apple-system, sans-serif;
-  --mono: 'JetBrains Mono', monospace;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
-  --shadow-lg: 0 12px 40px rgba(0,0,0,0.1);
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Six Survival Characters — A System Diagnostic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f1114;
+            --surface: #181b20;
+            --surface-raised: #1f2329;
+            --surface-hover: #262b33;
+            --border: #2a2f38;
+            --border-light: #353b46;
+            --ink: #e8e6e1;
+            --ink-muted: #9a9690;
+            --ink-dim: #5e5a54;
+            --accent-gold: #c9a84c;
+            --accent-gold-dim: rgba(201, 168, 76, 0.15);
+            --accent-gold-glow: rgba(201, 168, 76, 0.08);
+            --hero-red: #c75450;
+            --hero-red-dim: rgba(199, 84, 80, 0.12);
+            --ironist-teal: #4ca6a0;
+            --ironist-teal-dim: rgba(76, 166, 160, 0.12);
+            --game-amber: #c9a84c;
+            --game-amber-dim: rgba(201, 168, 76, 0.12);
+            --role-slate: #7a8ba8;
+            --role-slate-dim: rgba(122, 139, 168, 0.12);
+            --exhaust-ember: #a0604a;
+            --exhaust-ember-dim: rgba(160, 96, 74, 0.12);
+            --confused-violet: #8a72b0;
+            --confused-violet-dim: rgba(138, 114, 176, 0.12);
+            --font-serif: 'Instrument Serif', Georgia, serif;
+            --font-sans: 'DM Sans', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: var(--sans);
-  background: var(--cream);
-  color: var(--ink);
-  min-height: 100vh;
-  overflow-x: hidden;
-  font-size: 15px;
-  line-height: 1.65;
-  /* subtle grain */
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-}
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-::selection { background: var(--accent-light); color: var(--ink); }
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            font-family: var(--font-sans);
+            font-size: 16px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
 
-/* ── Navigation ── */
-.nav {
-  position: sticky; top: 0; z-index: 100;
-  background: rgba(245, 240, 232, 0.92);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-  padding: 10px 20px;
-  display: flex; align-items: center; gap: 6px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-.nav::-webkit-scrollbar { display: none; }
-.nav-brand {
-  font-family: var(--serif);
-  font-size: 22px;
-  color: var(--accent);
-  margin-right: 12px;
-  flex-shrink: 0;
-  letter-spacing: -0.5px;
-}
-.nav-tab {
-  padding: 7px 16px;
-  border-radius: 24px;
-  font-size: 13px; font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--ink-dim);
-  transition: all 0.25s ease;
-  min-height: 44px;
-  display: flex; align-items: center;
-}
-.nav-tab:hover { color: var(--ink); background: rgba(0,0,0,0.04); }
-.nav-tab.active {
-  background: var(--ink);
-  color: var(--cream);
-  font-weight: 600;
-}
+        /* === HEADER === */
+        .header {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 24px 20px;
+            text-align: center;
+        }
 
-/* ── Layout ── */
-.section {
-  display: none;
-  padding: 40px 24px 120px;
-  max-width: 780px;
-  margin: 0 auto;
-  animation: fadeUp 0.4s ease;
-}
-.section.active { display: block; }
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+        .header-eyebrow {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--accent-gold);
+            margin-bottom: 20px;
+        }
 
-/* ── Typography ── */
-h1 {
-  font-family: var(--serif);
-  font-size: 42px;
-  font-weight: 400;
-  line-height: 1.15;
-  margin-bottom: 8px;
-  letter-spacing: -0.5px;
-}
-h2 {
-  font-family: var(--serif);
-  font-size: 26px;
-  font-weight: 400;
-  margin: 40px 0 16px;
-  color: var(--ink);
-  line-height: 1.2;
-}
-h3 {
-  font-size: 16px;
-  font-weight: 600;
-  margin: 24px 0 8px;
-  letter-spacing: -0.2px;
-}
-.subtitle {
-  color: var(--ink-dim);
-  font-size: 16px;
-  margin-bottom: 32px;
-  max-width: 540px;
-}
-p { margin-bottom: 14px; }
-strong { font-weight: 600; }
-code {
-  font-family: var(--mono);
-  font-size: 13px;
-  background: rgba(0,0,0,0.05);
-  padding: 2px 6px;
-  border-radius: 4px;
-}
+        .header h1 {
+            font-family: var(--font-serif);
+            font-size: clamp(32px, 6vw, 52px);
+            font-weight: 400;
+            line-height: 1.15;
+            color: var(--ink);
+            margin-bottom: 28px;
+        }
 
-/* ── Hero card ── */
-.hero-card {
-  background: var(--surface);
-  border-radius: 16px;
-  padding: 32px;
-  margin-bottom: 32px;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-md);
-  position: relative;
-  overflow: hidden;
-}
-.hero-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--accent), var(--teal));
-}
-.hero-quote {
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: 22px;
-  line-height: 1.45;
-  color: var(--ink);
-  margin-bottom: 12px;
-}
-.hero-attribution {
-  font-size: 13px;
-  color: var(--ink-faint);
-}
+        .header h1 em {
+            font-style: italic;
+            color: var(--accent-gold);
+        }
 
-/* ── Cards ── */
-.card {
-  background: var(--surface);
-  border-radius: var(--radius);
-  padding: 24px;
-  margin-bottom: 16px;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
-  transition: all 0.25s ease;
-}
-.card:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
-}
+        .reframe {
+            max-width: 680px;
+            margin: 0 auto 16px;
+            padding: 24px 28px;
+            background: var(--accent-gold-glow);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 8px;
+            font-size: 16px;
+            line-height: 1.7;
+            color: var(--ink-muted);
+        }
 
-/* ── Tables ── */
-.table-wrap { overflow-x: auto; margin: 16px 0 24px; border-radius: var(--radius); border: 1px solid var(--border); }
-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-th {
-  text-align: left; padding: 12px 16px;
-  background: var(--cream);
-  font-weight: 600; font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--ink-dim);
-  border-bottom: 2px solid var(--border);
-}
-td {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
-  vertical-align: top;
-  background: var(--surface);
-}
-tr:last-child td { border-bottom: none; }
-tr:hover td { background: var(--accent-glow); }
+        .reframe strong {
+            color: var(--ink);
+            font-weight: 500;
+        }
 
-/* ── Role Cards ── */
-.role-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  gap: 14px;
-  margin: 16px 0 28px;
-}
-.role-card {
-  background: var(--surface);
-  border-radius: var(--radius);
-  padding: 20px;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-.role-card::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0;
-  width: 4px; height: 100%;
-  background: var(--accent);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-.role-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-lg);
-}
-.role-card:hover::after { opacity: 1; }
-.role-name {
-  font-family: var(--serif);
-  font-size: 20px;
-  margin-bottom: 2px;
-}
-.role-level {
-  font-size: 10px; font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  margin-bottom: 10px;
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 4px;
-}
-.lvl-1 { background: var(--accent-light); color: var(--accent); }
-.lvl-2 { background: var(--teal-light); color: var(--teal); }
-.lvl-3 { background: var(--amber-light); color: var(--amber); }
-.lvl-4 { background: var(--violet-light); color: var(--violet); }
-.role-desc { font-size: 13px; color: var(--ink-dim); line-height: 1.6; }
-.role-ai {
-  display: inline-block; font-size: 11px; font-weight: 600;
-  padding: 3px 10px; border-radius: 12px; margin-top: 10px;
-}
-.role-ai.yes { background: var(--green-light); color: var(--green); }
-.role-ai.partial { background: var(--amber-light); color: var(--amber); }
-.role-ai.no { background: var(--red-light); color: var(--red); }
+        .header-sub {
+            font-size: 15px;
+            color: var(--ink-muted);
+            max-width: 580px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
 
-/* ── Working Timer ── */
-.timer-container {
-  background: var(--surface);
-  border-radius: 16px;
-  padding: 32px;
-  text-align: center;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-md);
-  margin: 20px 0 32px;
-}
-.timer-display {
-  font-family: var(--mono);
-  font-size: 72px;
-  font-weight: 600;
-  color: var(--ink);
-  margin: 16px 0;
-  letter-spacing: -2px;
-  transition: color 0.3s;
-}
-.timer-display.warning { color: var(--amber); }
-.timer-display.critical { color: var(--red); animation: pulse 1s ease infinite; }
-@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
-.timer-label {
-  font-family: var(--serif);
-  font-size: 18px;
-  color: var(--ink-dim);
-  margin-bottom: 4px;
-}
-.timer-driver {
-  font-size: 14px;
-  color: var(--accent);
-  font-weight: 600;
-  margin-bottom: 20px;
-}
-.timer-controls { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-.timer-presets { display: flex; gap: 6px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
-.timer-preset {
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 12px; font-weight: 600;
-  cursor: pointer;
-  border: 1px solid var(--border);
-  background: var(--cream);
-  color: var(--ink-dim);
-  transition: all 0.2s;
-  min-height: 44px;
-  display: flex; align-items: center;
-}
-.timer-preset:hover, .timer-preset.active { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+        /* === AXES LEGEND === */
+        .axes-legend {
+            max-width: 900px;
+            margin: 40px auto 0;
+            padding: 0 24px;
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
 
-/* ── Progression chart ── */
-.progression {
-  display: flex; gap: 6px; align-items: end;
-  margin: 20px 0;
-  height: 100px;
-  padding: 0 4px;
-}
-.prog-bar {
-  flex: 1;
-  border-radius: 8px 8px 0 0;
-  display: flex; flex-direction: column;
-  justify-content: end; align-items: center;
-  padding: 8px 4px;
-  font-size: 13px; font-weight: 600;
-  color: var(--surface);
-  transition: all 0.4s ease;
-  cursor: pointer;
-  min-height: 30px;
-}
-.prog-bar span {
-  font-size: 10px; font-weight: 500;
-  opacity: 0.8;
-  margin-top: 4px;
-  text-align: center;
-}
+        .axis-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 14px 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            flex: 1;
+            min-width: 260px;
+            max-width: 420px;
+        }
 
-/* ── Even/Over ── */
-.eo-grid {
-  display: flex; flex-direction: column; gap: 0;
-}
-.eo-row {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 0;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border);
-  transition: background 0.2s ease;
-}
-.eo-row:last-child { border-bottom: none; }
-.eo-row:hover { background: rgba(194, 65, 12, 0.03); }
-.eo-even {
-  font-family: 'Instrument Serif', Georgia, serif;
-  font-size: 20px; font-weight: 400;
-  text-align: right;
-  color: var(--ink);
-  padding-right: 16px;
-  line-height: 1.2;
-}
-.eo-divider {
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-  padding: 0 8px;
-}
-.eo-divider-word {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px; font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: var(--accent);
-  opacity: 0.7;
-}
-.eo-divider-line {
-  width: 1px; height: 18px;
-  background: var(--accent);
-  opacity: 0.25;
-}
-.eo-over {
-  font-size: 14px;
-  color: var(--ink-dim);
-  padding-left: 16px;
-  line-height: 1.3;
-}
-.eo-wrapper {
-  background: var(--surface);
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  overflow: hidden;
-}
-.eo-header {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  padding: 10px 20px 8px;
-  border-bottom: 1px solid var(--border);
-  background: var(--cream);
-}
-.eo-header-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px; font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--ink-faint);
-}
-.eo-header-label:first-child { text-align: right; padding-right: 24px; }
-.eo-header-label:last-child { padding-left: 24px; }
-.eo-footer {
-  padding: 10px 20px;
-  border-top: 1px solid var(--border);
-  background: var(--cream);
-  font-size: 11px;
-  color: var(--ink-faint);
-  text-align: center;
-  font-style: italic;
-}
+        .axis-label .axis-icon {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: var(--accent-gold);
+            white-space: nowrap;
+            padding-top: 2px;
+        }
 
-/* ── Experiment ── */
-.input-group { margin-bottom: 18px; }
-.input-group label {
-  display: block;
-  font-size: 11px; font-weight: 700;
-  color: var(--ink-dim);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 6px;
-}
-.input-group input, .input-group textarea {
-  width: 100%;
-  background: var(--cream);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 12px 16px;
-  color: var(--ink);
-  font-size: 15px;
-  font-family: var(--sans);
-  outline: none;
-  transition: all 0.25s;
-}
-.input-group input:focus, .input-group textarea:focus {
-  border-color: var(--accent);
-  background: var(--surface);
-  box-shadow: 0 0 0 3px var(--accent-glow);
-}
-.input-group input::placeholder, .input-group textarea::placeholder {
-  color: var(--ink-faint);
-}
-textarea { resize: vertical; min-height: 80px; }
+        .axis-label .axis-text {
+            font-size: 13px;
+            color: var(--ink-muted);
+            line-height: 1.55;
+        }
 
-.check-row {
-  display: flex; align-items: center; gap: 14px;
-  padding: 14px 18px;
-  background: var(--surface);
-  border-radius: var(--radius-sm);
-  margin-bottom: 8px;
-  cursor: pointer;
-  border: 1px solid var(--border);
-  transition: all 0.25s;
-  min-height: 44px;
-}
-.check-row:hover { background: var(--cream); }
-.check-icon {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  border: 2px solid var(--ink-faint);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px; font-weight: 700;
-  transition: all 0.3s;
-  flex-shrink: 0;
-}
-.check-row.passed .check-icon {
-  border-color: var(--green);
-  background: var(--green-light);
-  color: var(--green);
-}
-.check-row.failed .check-icon {
-  border-color: var(--red);
-  background: var(--red-light);
-  color: var(--red);
-}
-.check-row.passed { border-color: rgba(22,163,74,0.2); }
-.check-row.failed { border-color: rgba(220,38,38,0.2); }
-.check-label { font-weight: 600; font-size: 15px; }
-.check-question { font-size: 13px; color: var(--ink-dim); }
+        .axis-label .axis-text strong {
+            color: var(--ink);
+            font-weight: 500;
+            display: block;
+            margin-bottom: 2px;
+        }
 
-.verdict {
-  text-align: center;
-  padding: 24px;
-  border-radius: var(--radius);
-  font-size: 18px; font-weight: 700;
-  margin-top: 20px;
-  transition: all 0.4s;
-  font-family: var(--serif);
-}
-.verdict.safe { background: var(--green-light); color: var(--green); border: 2px solid rgba(22,163,74,0.3); }
-.verdict.unsafe { background: var(--red-light); color: var(--red); border: 2px solid rgba(220,38,38,0.3); }
-.verdict.pending { background: var(--cream); color: var(--ink-faint); border: 2px solid var(--border); }
+        /* === THE MAP === */
+        .map-container {
+            max-width: 960px;
+            margin: 40px auto 0;
+            padding: 0 24px;
+        }
 
-.hypothesis-out {
-  font-family: var(--serif);
-  font-size: 18px;
-  line-height: 1.7;
-  padding: 28px;
-  background: var(--surface);
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
-  position: relative;
-}
-.hypothesis-out .copy-btn {
-  position: absolute; top: 12px; right: 12px;
-  padding: 6px 12px;
-  font-size: 11px;
-  cursor: pointer;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--cream);
-  color: var(--ink-dim);
-  font-weight: 600;
-  transition: all 0.2s;
-}
-.hypothesis-out .copy-btn:hover { background: var(--ink); color: var(--cream); }
+        .map {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            min-height: 480px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
 
-/* ── Flowchart ── */
-.flow {
-  display: flex; align-items: center; gap: 8px;
-  flex-wrap: wrap;
-  margin: 20px 0;
-}
-.flow-step {
-  padding: 10px 18px;
-  background: var(--surface);
-  border-radius: var(--radius-sm);
-  font-size: 13px; font-weight: 600;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
-}
-.flow-arrow { color: var(--accent); font-size: 20px; font-weight: 300; }
+        /* Grid lines */
+        .map::before {
+            content: '';
+            position: absolute;
+            left: 33.33%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: var(--border);
+        }
+        .map::after {
+            content: '';
+            position: absolute;
+            left: 66.66%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: var(--border);
+        }
 
-/* ── Blockquote ── */
-blockquote {
-  border-left: 3px solid var(--accent);
-  padding: 16px 20px;
-  margin: 20px 0;
-  background: var(--surface);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: 17px;
-  line-height: 1.6;
-  color: var(--ink);
-  box-shadow: var(--shadow-sm);
-}
-blockquote cite {
-  display: block;
-  font-style: normal;
-  font-family: var(--sans);
-  font-size: 12px;
-  color: var(--ink-faint);
-  margin-top: 8px;
-}
+        .map-midline {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border);
+        }
 
-/* ── Links ── */
-.link-card {
-  display: flex; gap: 14px;
-  padding: 14px 18px;
-  background: var(--surface);
-  border-radius: var(--radius-sm);
-  margin-bottom: 8px;
-  text-decoration: none;
-  color: var(--ink);
-  border: 1px solid var(--border);
-  transition: all 0.25s;
-  align-items: center;
-}
-.link-card:hover {
-  border-color: var(--accent);
-  box-shadow: var(--shadow-md);
-  transform: translateX(4px);
-}
-.link-tag {
-  font-size: 9px; font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 12px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.tag-foundation { background: var(--accent-light); color: var(--accent); }
-.tag-ai { background: var(--teal-light); color: var(--teal); }
-.tag-game { background: var(--amber-light); color: var(--amber); }
-.tag-strategy { background: var(--green-light); color: var(--green); }
-.link-info { flex: 1; min-width: 0; }
-.link-title { font-weight: 600; font-size: 14px; }
-.link-url { font-size: 11px; color: var(--ink-faint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
+        /* Axis labels on map */
+        .map-y-label {
+            position: absolute;
+            left: 10px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            writing-mode: vertical-lr;
+            transform: rotate(180deg);
+            color: var(--ink-dim);
+            z-index: 2;
+        }
+        .map-y-top { top: 14px; }
+        .map-y-bottom { bottom: 14px; }
 
-/* ── Buttons ── */
-.btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 12px 24px;
-  border-radius: var(--radius-sm);
-  font-size: 14px; font-weight: 600;
-  cursor: pointer;
-  border: none;
-  transition: all 0.25s;
-  font-family: var(--sans);
-  min-height: 44px;
-}
-.btn-primary {
-  background: var(--ink);
-  color: var(--cream);
-}
-.btn-primary:hover { background: #333; transform: translateY(-1px); box-shadow: var(--shadow-md); }
-.btn-accent {
-  background: var(--accent);
-  color: white;
-}
-.btn-accent:hover { background: #a33a0a; transform: translateY(-1px); }
-.btn-ghost {
-  background: transparent;
-  color: var(--ink);
-  border: 1.5px solid var(--ink);
-}
-.btn-ghost:hover { background: var(--ink); color: var(--cream); }
+        .map-x-label {
+            position: absolute;
+            bottom: 10px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--ink-dim);
+            z-index: 2;
+        }
+        .map-x-left { left: 12%; transform: translateX(-50%); }
+        .map-x-mid { left: 50%; transform: translateX(-50%); }
+        .map-x-right { left: 83%; transform: translateX(-50%); }
 
-/* ── Divider ── */
-.divider {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 36px 0;
-}
+        /* Zone labels */
+        .zone-label {
+            position: absolute;
+            font-family: var(--font-mono);
+            font-size: 9px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--ink-dim);
+            opacity: 0.5;
+            z-index: 1;
+        }
 
-/* ── Stagger animation ── */
-.stagger > * {
-  opacity: 0;
-  animation: fadeUp 0.4s ease forwards;
-}
-.stagger > *:nth-child(1) { animation-delay: 0.05s; }
-.stagger > *:nth-child(2) { animation-delay: 0.1s; }
-.stagger > *:nth-child(3) { animation-delay: 0.15s; }
-.stagger > *:nth-child(4) { animation-delay: 0.2s; }
-.stagger > *:nth-child(5) { animation-delay: 0.25s; }
-.stagger > *:nth-child(6) { animation-delay: 0.3s; }
-.stagger > *:nth-child(7) { animation-delay: 0.35s; }
-.stagger > *:nth-child(8) { animation-delay: 0.4s; }
+        .zone-top-left { top: 12px; left: 5%; }
+        .zone-bottom-mid { bottom: 34px; left: 38%; }
+        .zone-right { top: 45%; right: 4%; transform: translateY(-50%); }
 
-@media (max-width: 640px) {
-  h1 { font-size: 30px; }
-  h2 { font-size: 22px; }
-  .hero-quote { font-size: 18px; }
-  .role-grid { grid-template-columns: 1fr; }
-  .eo-even { font-size: 16px; padding-right: 10px; }
-  .eo-over { font-size: 12px; padding-left: 10px; }
-  .eo-row { padding: 12px 14px; }
-  .eo-header { padding: 8px 14px 6px; }
-  .eo-header-label:first-child { padding-right: 18px; }
-  .eo-header-label:last-child { padding-left: 18px; }
-  .timer-display { font-size: 52px; }
-  .section { padding: 28px 16px 100px; }
-  .hero-card { padding: 24px; }
-}
+        /* Character nodes */
+        .node {
+            position: absolute;
+            cursor: pointer;
+            z-index: 10;
+            transition: transform 0.2s ease, z-index 0s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .node:hover, .node.active {
+            transform: scale(1.08);
+            z-index: 20;
+        }
 
-/* Safe localStorage wrapper */
-</style>
-<script>
-const storage = {
-  get: (k) => { try { return localStorage.getItem(k); } catch(e) { return null; } },
-  set: (k, v) => { try { localStorage.setItem(k, v); } catch(e) {} },
-  remove: (k) => { try { localStorage.removeItem(k); } catch(e) {} }
-};
-</script>
+        .node-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 14px 16px 10px;
+            border-radius: 10px;
+            border: 1.5px solid;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            min-width: 120px;
+            text-align: center;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .node-icon {
+            font-size: 24px;
+            line-height: 1;
+        }
+
+        .node-name {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: 0.3px;
+            line-height: 1.3;
+        }
+
+        .node-quote {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 10.5px;
+            line-height: 1.4;
+            opacity: 0.7;
+            max-width: 140px;
+        }
+
+        /* Node colors */
+        .node-hero .node-inner { background: var(--hero-red-dim); border-color: rgba(199,84,80,0.35); color: var(--hero-red); }
+        .node-hero:hover .node-inner, .node-hero.active .node-inner { border-color: var(--hero-red); box-shadow: 0 0 24px rgba(199,84,80,0.15); }
+        .node-hero .node-name { color: #e07a77; }
+
+        .node-ironist .node-inner { background: var(--ironist-teal-dim); border-color: rgba(76,166,160,0.35); color: var(--ironist-teal); }
+        .node-ironist:hover .node-inner, .node-ironist.active .node-inner { border-color: var(--ironist-teal); box-shadow: 0 0 24px rgba(76,166,160,0.15); }
+        .node-ironist .node-name { color: #6dc4be; }
+
+        .node-game .node-inner { background: var(--game-amber-dim); border-color: rgba(201,168,76,0.35); color: var(--game-amber); }
+        .node-game:hover .node-inner, .node-game.active .node-inner { border-color: var(--game-amber); box-shadow: 0 0 24px rgba(201,168,76,0.15); }
+        .node-game .node-name { color: #dfc06e; }
+
+        .node-role .node-inner { background: var(--role-slate-dim); border-color: rgba(122,139,168,0.35); color: var(--role-slate); }
+        .node-role:hover .node-inner, .node-role.active .node-inner { border-color: var(--role-slate); box-shadow: 0 0 24px rgba(122,139,168,0.15); }
+        .node-role .node-name { color: #9aabc6; }
+
+        .node-exhaust .node-inner { background: var(--exhaust-ember-dim); border-color: rgba(160,96,74,0.35); color: var(--exhaust-ember); }
+        .node-exhaust:hover .node-inner, .node-exhaust.active .node-inner { border-color: var(--exhaust-ember); box-shadow: 0 0 24px rgba(160,96,74,0.15); }
+        .node-exhaust .node-name { color: #c48068; }
+
+        .node-confused .node-inner { background: var(--confused-violet-dim); border-color: rgba(138,114,176,0.35); color: var(--confused-violet); }
+        .node-confused:hover .node-inner, .node-confused.active .node-inner { border-color: var(--confused-violet); box-shadow: 0 0 24px rgba(138,114,176,0.15); }
+        .node-confused .node-name { color: #a690c8; }
+
+        /* Node positions */
+        .node-hero { top: 10%; left: 4%; }
+        .node-ironist { top: 22%; left: 18%; }
+        .node-game { top: 58%; left: 28%; }
+        .node-role { top: 62%; left: 46%; }
+        .node-exhaust { top: 8%; left: 68%; }
+        .node-confused { top: 52%; left: 72%; }
+
+        /* === DETAIL PANEL === */
+        .detail-panel {
+            display: none;
+            max-width: 900px;
+            margin: 24px auto 0;
+            padding: 0 24px;
+            animation: slideIn 0.25s ease;
+        }
+        .detail-panel.visible { display: block; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .detail-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            position: relative;
+        }
+
+        .detail-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: var(--surface-hover);
+            border-radius: 6px;
+            color: var(--ink-muted);
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s;
+        }
+        .detail-close:hover { background: var(--border); }
+
+        .detail-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 6px;
+        }
+
+        .detail-icon { font-size: 28px; }
+
+        .detail-name {
+            font-family: var(--font-serif);
+            font-size: 24px;
+            font-weight: 400;
+        }
+
+        .detail-motto {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 15px;
+            color: var(--ink-muted);
+            margin-bottom: 20px;
+            padding-left: 42px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .detail-section {
+            padding: 16px;
+            background: var(--surface-raised);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .detail-section h4 {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--ink-dim);
+            margin-bottom: 8px;
+        }
+
+        .detail-section p, .detail-section li {
+            font-size: 14.5px;
+            line-height: 1.65;
+            color: var(--ink-muted);
+        }
+
+        .detail-section ul {
+            list-style: none;
+            padding: 0;
+        }
+        .detail-section ul li {
+            padding-left: 14px;
+            position: relative;
+            margin-bottom: 4px;
+        }
+        .detail-section ul li::before {
+            content: '—';
+            position: absolute;
+            left: 0;
+            color: var(--ink-dim);
+        }
+
+        .detail-section .meeting-tell {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 15px;
+            color: var(--ink);
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 6px;
+            border-left: 2px solid var(--border-light);
+        }
+
+        .detail-full-width {
+            grid-column: 1 / -1;
+        }
+
+        .threshold-track {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+
+        .threshold-step {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            padding: 3px 8px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 4px;
+            color: var(--ink-muted);
+        }
+
+        .threshold-arrow {
+            color: var(--ink-dim);
+            font-size: 11px;
+        }
+
+        /* === ORGANISATIONAL PHYSICS === */
+        .section {
+            max-width: 900px;
+            margin: 56px auto 0;
+            padding: 0 24px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .section-num {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: var(--accent-gold);
+        }
+
+        .section h2 {
+            font-family: var(--font-serif);
+            font-size: 28px;
+            font-weight: 400;
+        }
+
+        .section-sub {
+            font-size: 15px;
+            color: var(--ink-muted);
+            margin-bottom: 24px;
+            max-width: 680px;
+            line-height: 1.65;
+        }
+
+        .physics-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        .physics-card {
+            padding: 22px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            transition: border-color 0.2s;
+        }
+        .physics-card:hover {
+            border-color: var(--border-light);
+        }
+
+        .physics-card h3 {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .physics-card .physics-q {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 13.5px;
+            color: var(--ink-muted);
+            margin-bottom: 10px;
+        }
+
+        .physics-card p {
+            font-size: 14px;
+            color: var(--ink-dim);
+            line-height: 1.65;
+        }
+
+        /* === RUN / SERVE / CHANGE === */
+        .rsc-intro {
+            font-size: 14.5px;
+            color: var(--ink-muted);
+            line-height: 1.7;
+            max-width: 700px;
+            margin-bottom: 32px;
+        }
+        .rsc-intro strong { color: var(--ink); font-weight: 500; }
+
+        .rsc-columns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0;
+            margin-bottom: 32px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .rsc-col {
+            padding: 24px 22px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            position: relative;
+        }
+        .rsc-col:last-child { border-right: none; }
+
+        .rsc-col-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .rsc-badge {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+        .rsc-badge-run { background: rgba(86, 170, 110, 0.15); color: #56aa6e; }
+        .rsc-badge-serve { background: rgba(106, 140, 200, 0.15); color: #6a8cc8; }
+        .rsc-badge-change { background: rgba(200, 140, 86, 0.15); color: #c88c56; }
+
+        .rsc-col h4 {
+            font-family: var(--font-serif);
+            font-size: 20px;
+            font-weight: 400;
+        }
+        .rsc-col-run h4 { color: #6bc488; }
+        .rsc-col-serve h4 { color: #82a4d8; }
+        .rsc-col-change h4 { color: #d8a470; }
+
+        .rsc-defn {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 14px;
+            color: var(--ink-muted);
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .rsc-detail {
+            font-size: 13px;
+            color: var(--ink-dim);
+            line-height: 1.65;
+            margin-bottom: 14px;
+        }
+
+        .rsc-examples {
+            font-size: 12px;
+            color: var(--ink-dim);
+            line-height: 1.55;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 6px;
+            border-left: 2px solid var(--border);
+        }
+        .rsc-col-run .rsc-examples { border-left-color: rgba(86,170,110,0.4); }
+        .rsc-col-serve .rsc-examples { border-left-color: rgba(106,140,200,0.4); }
+        .rsc-col-change .rsc-examples { border-left-color: rgba(200,140,86,0.4); }
+
+        /* Fractal bars */
+        .fractal-section {
+            margin-bottom: 32px;
+        }
+        .fractal-section h3 {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+        .fractal-sub {
+            font-size: 13px;
+            color: var(--ink-dim);
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .fractal-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 10px;
+        }
+
+        .fractal-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--ink-muted);
+            width: 130px;
+            flex-shrink: 0;
+            text-align: right;
+        }
+
+        .fractal-bar-wrap {
+            flex: 1;
+            display: flex;
+            height: 28px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+
+        .fractal-seg {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: flex 0.4s ease;
+        }
+        .fractal-seg-run { background: rgba(86,170,110,0.2); color: #6bc488; }
+        .fractal-seg-serve { background: rgba(106,140,200,0.2); color: #82a4d8; }
+        .fractal-seg-change { background: rgba(200,140,86,0.2); color: #d8a470; }
+
+        .fractal-note {
+            font-size: 11px;
+            color: var(--ink-dim);
+            margin-left: 144px;
+            margin-top: -4px;
+            margin-bottom: 8px;
+            font-style: italic;
+        }
+
+        /* Misallocation cards */
+        .misalloc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .misalloc-card {
+            padding: 16px 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .misalloc-card h4 {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--ink);
+        }
+
+        .misalloc-card p {
+            font-size: 12.5px;
+            color: var(--ink-muted);
+            line-height: 1.55;
+        }
+
+        .misalloc-card .misalloc-signal {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 0.5px;
+            color: var(--ink-dim);
+            margin-top: 8px;
+        }
+
+        /* RSC → Character connection */
+        .rsc-char-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        .rsc-char-table th {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--ink-dim);
+            text-align: left;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .rsc-char-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(42,47,56,0.5);
+            color: var(--ink-muted);
+            vertical-align: top;
+            line-height: 1.5;
+        }
+
+        .rsc-char-table tr:last-child td { border-bottom: none; }
+
+        .rsc-char-table .char-name-cell {
+            font-weight: 700;
+            font-size: 12.5px;
+            white-space: nowrap;
+        }
+
+        .rsc-key-quote {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 15px;
+            color: var(--ink-muted);
+            padding: 20px 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-top: 24px;
+            text-align: center;
+            line-height: 1.6;
+        }
+        .rsc-key-quote strong { color: var(--ink); font-weight: 500; }
+
+        @media (max-width: 700px) {
+            .rsc-columns { grid-template-columns: 1fr; }
+            .rsc-col { border-right: none; border-bottom: 1px solid var(--border); }
+            .rsc-col:last-child { border-bottom: none; }
+            .fractal-row { flex-direction: column; align-items: stretch; gap: 4px; }
+            .fractal-label { text-align: left; width: auto; }
+            .fractal-note { margin-left: 0; }
+            .misalloc-grid { grid-template-columns: 1fr; }
+            .rsc-char-table { font-size: 12px; }
+            .rsc-char-table th, .rsc-char-table td { padding: 8px; }
+        }
+
+        /* === DIAGNOSTIC QUESTIONS === */
+        .diagnostic-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .diagnostic-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 16px 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .diagnostic-item:hover { background: var(--surface-raised); }
+        .diagnostic-item.checked { border-color: var(--accent-gold); background: var(--accent-gold-glow); }
+
+        .diagnostic-check {
+            width: 20px;
+            height: 20px;
+            border: 1.5px solid var(--border-light);
+            border-radius: 4px;
+            flex-shrink: 0;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            font-size: 12px;
+            color: transparent;
+        }
+        .diagnostic-item.checked .diagnostic-check {
+            border-color: var(--accent-gold);
+            background: var(--accent-gold-dim);
+            color: var(--accent-gold);
+        }
+
+        .diagnostic-q {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 16px;
+            color: var(--ink);
+            line-height: 1.55;
+        }
+
+        .diagnostic-reveal {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--ink-dim);
+            margin-top: 4px;
+            letter-spacing: 0.3px;
+        }
+
+        .litmus-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--accent-gold);
+            margin: 28px 0 12px;
+        }
+
+        /* === WARNING SIGNS === */
+        .warning-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 12px;
+        }
+
+        .warning-card {
+            padding: 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            border-left: 3px solid;
+        }
+
+        .warning-card h4 {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .warning-card p {
+            font-size: 14px;
+            color: var(--ink-muted);
+            line-height: 1.6;
+        }
+
+        .warning-card.w-hero { border-left-color: var(--hero-red); }
+        .warning-card.w-hero h4 { color: #e07a77; }
+        .warning-card.w-role { border-left-color: var(--role-slate); }
+        .warning-card.w-role h4 { color: #9aabc6; }
+        .warning-card.w-exhaust { border-left-color: var(--exhaust-ember); }
+        .warning-card.w-exhaust h4 { color: #c48068; }
+        .warning-card.w-ironist { border-left-color: var(--ironist-teal); }
+        .warning-card.w-ironist h4 { color: #6dc4be; }
+        .warning-card.w-game { border-left-color: var(--game-amber); }
+        .warning-card.w-game h4 { color: #dfc06e; }
+        .warning-card.w-confused { border-left-color: var(--confused-violet); }
+        .warning-card.w-confused h4 { color: #a690c8; }
+
+        /* === FOOTER === */
+        .footer {
+            max-width: 900px;
+            margin: 64px auto 0;
+            padding: 28px 24px 48px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .footer p {
+            font-size: 12px;
+            color: var(--ink-dim);
+            line-height: 1.7;
+        }
+
+        .footer a {
+            color: var(--accent-gold);
+            text-decoration: none;
+        }
+        .footer a:hover { text-decoration: underline; }
+
+        /* === MOBILE === */
+        @media (max-width: 700px) {
+            .header { padding: 40px 16px 16px; }
+            .reframe { padding: 18px 20px; }
+            .axes-legend { flex-direction: column; padding: 0 16px; }
+            .axis-label { max-width: 100%; }
+
+            .map-container { padding: 0 16px; }
+            .map {
+                aspect-ratio: auto;
+                min-height: 560px;
+                height: 620px;
+            }
+
+            .node-inner { min-width: 100px; padding: 10px 12px 8px; }
+            .node-name { font-size: 11px; }
+            .node-quote { font-size: 9.5px; max-width: 110px; }
+            .node-icon { font-size: 20px; }
+
+            .node-hero { top: 4%; left: 2%; }
+            .node-ironist { top: 20%; left: 16%; }
+            .node-game { top: 56%; left: 22%; }
+            .node-role { top: 72%; left: 42%; }
+            .node-exhaust { top: 4%; left: 64%; }
+            .node-confused { top: 50%; left: 66%; }
+
+            .detail-grid { grid-template-columns: 1fr; }
+            .detail-card { padding: 20px; }
+            .detail-motto { padding-left: 0; }
+
+            .section { margin-top: 40px; }
+            .physics-cards { grid-template-columns: 1fr; }
+            .warning-grid { grid-template-columns: 1fr; }
+
+            .map-x-label, .map-y-label, .zone-label { display: none; }
+        }
+    </style>
 </head>
 <body>
 
-<nav class="nav">
-  <div class="nav-brand">mob</div>
-  <div class="nav-tab active" data-tab="overview">Overview</div>
-  <div class="nav-tab" data-tab="roles">Roles</div>
-  <div class="nav-tab" data-tab="setup">Setup</div>
-  <div class="nav-tab" data-tab="timer">Timer</div>
-  <div class="nav-tab" data-tab="experiment">Experiment</div>
-  <div class="nav-tab" data-tab="rpg">RPG</div>
-  <div class="nav-tab" data-tab="links">Links</div>
-</nav>
+<div class="header">
+    <div class="header-eyebrow">Organisational Diagnostic</div>
+    <h1>The Six Survival Characters of <em>Organisational Incoherence</em></h1>
 
-<!-- ═══════════ OVERVIEW ═══════════ -->
-<div class="section active" id="overview">
-  <div class="stagger">
-    <h1>AI-Collaborative<br>Mob Programming</h1>
-    <p class="subtitle">Whole team. Same thing. Same time. Same computer. With AI. A structured ritual for shared understanding.</p>
-
-    <div class="hero-card">
-      <div class="hero-quote">"For an idea to go from your head into the computer, it MUST go through someone else's hands."</div>
-      <div class="hero-attribution">Llewellyn Falco &mdash; The foundational constraint that makes mob programming a learning activity, not just a coding activity.</div>
+    <div class="reframe">
+        <strong>These aren't personalities. They're diagnostics.</strong><br>
+        The question is not "how do we coach them?" but<br>
+        <strong>"What kind of system are we running that makes these roles the most rational way to survive?"</strong>
     </div>
 
-    <h2>The business why</h2>
-    <div class="flow">
-      <div class="flow-step">Mob with AI</div>
-      <div class="flow-arrow">&rarr;</div>
-      <div class="flow-step">Shared understanding</div>
-      <div class="flow-arrow">&rarr;</div>
-      <div class="flow-step">Break silos</div>
-      <div class="flow-arrow">&rarr;</div>
-      <div class="flow-step">Maintain more apps (4&rarr;8+)</div>
-      <div class="flow-arrow">&rarr;</div>
-      <div class="flow-step" style="border-color:var(--green); color:var(--green); font-weight:700;">Revenue diversification</div>
-    </div>
-
-    <blockquote>"If you've got the ability to keep ten of those apps in play, suddenly you've got a team able to maintain half a million ARR."<cite>Paul Cutting, Upscale BU</cite></blockquote>
-
-    <p>Not just for "new shiny stuff" &mdash; high value for <strong>legacy maintenance</strong> and <strong>bug fixes</strong> where context has drifted.</p>
-
-    <h2>The AI literacy why</h2>
-    <p style="font-size:13px; color:var(--ink-dim); margin-bottom:14px;">Gartner (Carlton Sapp, 2025): enterprises need Human-AI Collaboration Curricula with 6 domains. Mob programming delivers all 6 by design.</p>
-    <div class="table-wrap">
-      <table>
-        <tr><th>Gartner domain</th><th>How mob delivers it</th></tr>
-        <tr><td><strong>Workflow integration</strong></td><td>Learning embedded in real work &mdash; not a separate training day</td></tr>
-        <tr><td><strong>Collaborative outcomes</strong></td><td>Tickets resolved, ramp-up time, shared understanding &mdash; all measurable</td></tr>
-        <tr><td><strong>Supervision &amp; observability</strong></td><td>Whole team watches AI output &mdash; humans-in-the-loop by default</td></tr>
-        <tr><td><strong>Knowledge expansion</strong></td><td>Every rotation transfers AI prompting patterns between people</td></tr>
-        <tr><td><strong>Role-based upskilling</strong></td><td>RPG levels + 5 AI-adapted roles = structured progression paths</td></tr>
-        <tr><td><strong>Executive AI governance</strong></td><td>Red Team role explicitly critiques AI output; deliberateness over impulsiveness</td></tr>
-      </table>
-    </div>
-    <blockquote>"Human-AI collaboration curricula must be deployed the same way cybersecurity awareness training is &mdash; as a shared, measurable competency tied to business outcomes."<cite>Gartner, Build Human-AI Collaboration Curricula (2025)</cite></blockquote>
-    <p style="font-size:13px; color:var(--ink-dim);">Gartner recommends <strong>tiered learning journeys</strong> (multiple paths to same standard), <strong>hands-on training</strong> (hackathons, AI labs), and <strong>embedding learning into daily workflows</strong>. Mob programming is all three at once.</p>
-
-    <hr class="divider">
-
-    <h2>Even/over framing</h2>
-    <p style="font-size:13px; color:var(--ink-dim); margin-bottom:18px;">When these are in tension, the left side wins &mdash; but acknowledge the cost on the right. Both sides are valuable; this is a priority declaration, not a judgment.</p>
-
-    <div class="eo-wrapper">
-      <div class="eo-header">
-        <span class="eo-header-label">Prioritise</span>
-        <span></span>
-        <span class="eo-header-label">Acknowledge cost</span>
-      </div>
-      <div class="eo-grid">
-        <div class="eo-row"><div class="eo-even">Shared understanding</div><div class="eo-divider"><div class="eo-divider-line"></div><div class="eo-divider-word">even over</div><div class="eo-divider-line"></div></div><div class="eo-over">Individual speed</div></div>
-        <div class="eo-row"><div class="eo-even">Exploration</div><div class="eo-divider"><div class="eo-divider-line"></div><div class="eo-divider-word">even over</div><div class="eo-divider-line"></div></div><div class="eo-over">Execution</div></div>
-        <div class="eo-row"><div class="eo-even">Deliberateness</div><div class="eo-divider"><div class="eo-divider-line"></div><div class="eo-divider-word">even over</div><div class="eo-divider-line"></div></div><div class="eo-over">Velocity</div></div>
-        <div class="eo-row"><div class="eo-even">Multiple perspectives</div><div class="eo-divider"><div class="eo-divider-line"></div><div class="eo-divider-word">even over</div><div class="eo-divider-line"></div></div><div class="eo-over">Single ownership</div></div>
-        <div class="eo-row"><div class="eo-even">Learning</div><div class="eo-divider"><div class="eo-divider-line"></div><div class="eo-divider-word">even over</div><div class="eo-divider-line"></div></div><div class="eo-over">Pure output</div></div>
-      </div>
-      <div class="eo-footer">Source: Even/Over Statements &mdash; Jurriaan Kamer / The Ready</div>
-    </div>
-
-    <hr class="divider">
-
-    <h2>Evidence from the field</h2>
-    <div class="card">
-      <h3>Crisp (Sweden) &mdash; Daily 3hr sessions</h3>
-      <p>AI as "superintelligent advisor &mdash; always available, never tired." Eliminated code reviews, removed key-person dependencies, reduced technical debt.</p>
-      <p><strong>"We tried splitting up to hit a deadline, but reintegration was painful. We're faster together."</strong></p>
-    </div>
-    <div class="card">
-      <h3>Atlassian &mdash; Define &rarr; Spec &rarr; Generate &rarr; Review &rarr; Iterate</h3>
-      <p>2&ndash;4 developers with rotating facilitator. Features in 1&ndash;2 days vs typical week. AI draft accuracy: ~50% &rarr; ~80% by project end.</p>
-    </div>
-  </div>
+    <p class="header-sub">
+        When structure, rules and values don't line up, people don't just cope — they adapt.
+        And those adaptations harden into recognisable survival patterns.
+        Click a character to read the pattern.
+    </p>
 </div>
 
-<!-- ═══════════ ROLES ═══════════ -->
-<div class="section" id="roles">
-  <h1>Roles</h1>
-  <p class="subtitle">5 roles for AI-collaborative sessions. Minimum 2 humans &mdash; AI augments, doesn't replace the social learning.</p>
-
-  <h2>AI-adapted roles</h2>
-  <div class="role-grid stagger">
-    <div class="role-card">
-      <div class="role-name">Driver</div>
-      <div class="role-desc">Types prompts, presses buttons. Does NOT decide what to create &mdash; only implements what the Navigator describes.</div>
-      <div class="role-ai no">Human only</div>
+<div class="axes-legend">
+    <div class="axis-label">
+        <span class="axis-icon">Y-AXIS</span>
+        <div class="axis-text">
+            <strong>Contact with Reality</strong>
+            High = sees the work, the risk, the truth.
+            Low = sees the story, the signals, the official reality.
+        </div>
     </div>
-    <div class="role-card">
-      <div class="role-name">Facilitator</div>
-      <div class="role-desc">Runs timer, tracks rotation, calls breaks. Key question: "Are we stuck?"</div>
-      <div class="role-ai partial">AI: partial</div>
+    <div class="axis-label">
+        <span class="axis-icon">X-AXIS</span>
+        <div class="axis-text">
+            <strong>Survival Strategy</strong>
+            Fight = try to change the system or defend truth.
+            Fit = adapt, play the rules. Freeze/Flee = withdraw, detach.
+        </div>
     </div>
-    <div class="role-card">
-      <div class="role-name">Subject Matter Expert</div>
-      <div class="role-desc">Brings business context the AI lacks. Domain knowledge, user stories, edge cases.</div>
-      <div class="role-ai no">Human only</div>
-    </div>
-    <div class="role-card">
-      <div class="role-name">Red Team</div>
-      <div class="role-desc">Critiques output, pokes holes, challenges assumptions. "What could go wrong?"</div>
-      <div class="role-ai yes">AI: yes</div>
-    </div>
-    <div class="role-card">
-      <div class="role-name">Outcome Keeper</div>
-      <div class="role-desc">Stays on mission, prevents AI tangents. "Is this still solving our problem?"</div>
-      <div class="role-ai partial">AI: partial</div>
-    </div>
-  </div>
-
-  <h2>AI integration models</h2>
-  <div class="table-wrap">
-    <table>
-      <tr><th>Model</th><th>Who does what</th><th>Best for</th></tr>
-      <tr><td><strong>Copilot</strong></td><td>Driver uses AI suggestions, mob validates</td><td>Teams already comfortable mobbing</td></tr>
-      <tr><td><strong>Draft Generator</strong></td><td>AI writes first draft, mob reviews/refines</td><td>New codebases, specs-heavy work</td></tr>
-      <tr><td><strong>Red Team</strong></td><td>Mob writes, AI critiques</td><td>Learning, quality focus</td></tr>
-      <tr><td><strong>Observer</strong></td><td>Meta-AI watches mob, surfaces patterns</td><td>"Another AI watching us using AI"</td></tr>
-    </table>
-  </div>
-
-  <h2>Classic mob roles</h2>
-  <div class="table-wrap">
-    <table>
-      <tr><th>Role</th><th>Function</th><th>Key rule</th></tr>
-      <tr><td><strong>Driver</strong></td><td>Hands on keyboard. Translates spoken ideas into code.</td><td>Doesn't decide what to create</td></tr>
-      <tr><td><strong>Navigator</strong></td><td>Strategic thinking. Describes next steps verbally.</td><td>Person with the idea navigates, doesn't drive</td></tr>
-      <tr><td><strong>Mobber</strong></td><td>Contributes ideas, asks questions, researches.</td><td>Yield to less-privileged voices</td></tr>
-      <tr><td><strong>Researcher</strong></td><td>Finds docs, blog posts, code examples in parallel.</td><td>Share findings, don't hoard</td></tr>
-      <tr><td><strong>Facilitator</strong></td><td>Timer, rotation, breaks.</td><td>"Are we stuck?" is the key question</td></tr>
-    </table>
-  </div>
 </div>
 
-<!-- ═══════════ SETUP ═══════════ -->
-<div class="section" id="setup">
-  <h1>Session Setup</h1>
-  <p class="subtitle">Practical setup &mdash; physical, remote, cadence, ground rules.</p>
+<!-- === THE MAP === -->
+<div class="map-container">
+    <div class="map" id="map">
+        <div class="map-midline"></div>
 
-  <h2>Timer progression</h2>
-  <div class="progression">
-    <div class="prog-bar" style="height:32%; background: linear-gradient(to top, var(--accent), #f97316);" onclick="setTimer(300)">4-5m<span>First session</span></div>
-    <div class="prog-bar" style="height:55%; background: linear-gradient(to top, var(--accent), #ea580c);" onclick="setTimer(600)">7-10m<span>Week 1-2</span></div>
-    <div class="prog-bar" style="height:80%; background: linear-gradient(to top, var(--teal), #0d9488);" onclick="setTimer(900)">10-15m<span>Established</span></div>
-    <div class="prog-bar" style="height:100%; background: linear-gradient(to top, var(--green), #16a34a);">Natural<span>Experienced</span></div>
-  </div>
-  <p style="font-size:13px; color:var(--ink-dim);">When the timer feels too short, you're at the right length. Click a bar to set the timer.</p>
+        <span class="map-y-label map-y-top">High contact</span>
+        <span class="map-y-label map-y-bottom">Low contact</span>
+        <span class="map-x-label map-x-left">Fight</span>
+        <span class="map-x-label map-x-mid">Fit</span>
+        <span class="map-x-label map-x-right">Freeze / Flee</span>
 
-  <h2>Cadence options</h2>
-  <div class="table-wrap">
-    <table>
-      <tr><th>Model</th><th>Schedule</th><th>Best for</th></tr>
-      <tr><td><strong>Full-time mob</strong></td><td>09:00&ndash;12:00 + 13:00&ndash;16:00 daily</td><td>Dedicated product teams (Crisp)</td></tr>
-      <tr><td><strong>Standing slot</strong></td><td>1&ndash;2 hours, 2&ndash;3x/week</td><td>Teams adopting gradually</td></tr>
-      <tr><td><strong>Experiment sprint</strong></td><td>1 week intensive</td><td>Proving the concept</td></tr>
-      <tr><td><strong>Ad-hoc</strong></td><td>Called for specific problems</td><td>Bug fixes, legacy ramp-up</td></tr>
-    </table>
-  </div>
+        <span class="zone-label zone-top-left">high contact + fight</span>
+        <span class="zone-label zone-bottom-mid">low contact + fit</span>
+        <span class="zone-label zone-right">triggered, not chosen</span>
 
-  <h2>Remote git handover</h2>
-  <div class="flow">
-    <div class="flow-step" style="font-family:var(--mono); font-size:12px;">mob start</div>
-    <div class="flow-arrow">&rarr;</div>
-    <div class="flow-step">Work (10-15 min)</div>
-    <div class="flow-arrow">&rarr;</div>
-    <div class="flow-step" style="font-family:var(--mono); font-size:12px;">mob next</div>
-    <div class="flow-arrow">&rarr;</div>
-    <div class="flow-step">Next driver pulls</div>
-    <div class="flow-arrow">&rarr;</div>
-    <div class="flow-step">Repeat&hellip;</div>
-    <div class="flow-arrow">&rarr;</div>
-    <div class="flow-step" style="font-family:var(--mono); font-size:12px; border-color:var(--green); color:var(--green);">mob done</div>
-  </div>
-  <p style="font-size:14px;">WIP commits to a <code>mob-session</code> branch. Don't worry about commit messages mid-session. Squash at end.</p>
+        <!-- Naive Hero -->
+        <div class="node node-hero" data-char="hero" onclick="showDetail('hero')">
+            <div class="node-inner">
+                <span class="node-icon">&#9876;</span>
+                <span class="node-name">The Naive Hero</span>
+                <span class="node-quote">"If I just tell the truth clearly enough..."</span>
+            </div>
+        </div>
 
-  <h2>Ground rules &amp; psychological safety</h2>
-  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:14px;">Ground rules aren't bureaucracy &mdash; they're the <strong>safety infrastructure</strong> that makes real challenge possible. Without them, people self-censor. With them, people speak up.</p>
+        <!-- Third-Way Ironist -->
+        <div class="node node-ironist" data-char="ironist" onclick="showDetail('ironist')">
+            <div class="node-inner">
+                <span class="node-icon">&#9883;</span>
+                <span class="node-name">The Third-Way Ironist</span>
+                <span class="node-quote">"I see the theatre. I also see the work."</span>
+            </div>
+        </div>
 
-  <h3 style="margin-top:20px; font-size:15px; color:var(--accent);">The foundation: Kindness, Consideration, Respect</h3>
-  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:10px;">Woody Zuill's core principle. Sounds obvious &mdash; but explicitly stating it changes behaviour. People who aren't naturally inclined to these quickly improve when the whole group commits.</p>
-  <div class="table-wrap">
-    <table>
-      <tr><th>Value</th><th>In practice</th><th>Observable signal</th></tr>
-      <tr><td><strong>Kindness</strong></td><td>Concern for your mob &mdash; check in, notice when someone goes quiet</td><td>People name difficulty without being asked</td></tr>
-      <tr><td><strong>Respect</strong></td><td>Disagree with <em>ideas</em>, never attack <em>people</em></td><td>"I see it differently" not "that's wrong"</td></tr>
-      <tr><td><strong>Consideration</strong></td><td>Actively listen &mdash; let ideas finish before responding</td><td>People build on each other's suggestions</td></tr>
-    </table>
-  </div>
+        <!-- Ambitious Game-Player -->
+        <div class="node node-game" data-char="game" onclick="showDetail('game')">
+            <div class="node-inner">
+                <span class="node-icon">&#9812;</span>
+                <span class="node-name">The Ambitious<br>Game-Player</span>
+                <span class="node-quote">"If legitimacy is the currency..."</span>
+            </div>
+        </div>
 
-  <h3 style="margin-top:24px; font-size:15px; color:var(--accent);">Working agreements</h3>
-  <div class="table-wrap">
-    <table>
-      <tr><th>Agreement</th><th>Why it builds safety</th></tr>
-      <tr><td><strong>"Yes, and&hellip;"</strong></td><td>Build on what came before. No deleting and starting over when you take the keyboard.</td></tr>
-      <tr><td><strong>Strong-style navigation</strong></td><td>"For an idea to go from your head to the computer, it must go through someone else's hands." Decouples ego from execution.</td></tr>
-      <tr><td><strong>No devices</strong></td><td>Full attention = full belonging. Announce before session so people don't bring laptops.</td></tr>
-      <tr><td><strong>Debate in code, not in the abstract</strong></td><td>Two approaches? Try both. Data decides, not hierarchy. Removes "who's right" pressure.</td></tr>
-      <tr><td><strong>Chatham House Rule</strong></td><td>What's said in the mob stays in the mob. Mistakes are learning, not ammunition.</td></tr>
-      <tr><td><strong>Deliberateness over impulsiveness</strong></td><td>"Read the AI output together before we hit accept." Prevents reflexive shipping.</td></tr>
-    </table>
-  </div>
+        <!-- Adaptive Role-Actor -->
+        <div class="node node-role" data-char="role" onclick="showDetail('role')">
+            <div class="node-inner">
+                <span class="node-icon">&#127917;</span>
+                <span class="node-name">The Adaptive<br>Role-Actor</span>
+                <span class="node-quote">"Tell me what success looks like..."</span>
+            </div>
+        </div>
 
-  <h3 style="margin-top:24px; font-size:15px; color:var(--accent);">AI-specific safety additions</h3>
-  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:10px;">AI introduces new psychological risks &mdash; people feel exposed when they don't know how to prompt, or embarrassed when AI produces something better than they could.</p>
-  <div class="table-wrap">
-    <table>
-      <tr><th>Agreement</th><th>The risk it addresses</th></tr>
-      <tr><td><strong>"No such thing as a bad prompt"</strong></td><td>Prompt shame &mdash; people won't experiment if they fear looking foolish</td></tr>
-      <tr><td><strong>Read output aloud together</strong></td><td>Prevents one person silently deciding if AI output is "good enough"</td></tr>
-      <tr><td><strong>Everyone gets a turn prompting</strong></td><td>AI-confident people dominate; novices never learn the feel of it</td></tr>
-      <tr><td><strong>"The AI is wrong until proven right"</strong></td><td>Removes authority bias &mdash; nobody defers to AI just because it sounds confident</td></tr>
-      <tr><td><strong>Name what you don't know</strong></td><td>AI makes knowledge gaps visible &mdash; normalise saying "I don't understand this output"</td></tr>
-    </table>
-  </div>
+        <!-- Emotionally Exhausted -->
+        <div class="node node-exhaust" data-char="exhaust" onclick="showDetail('exhaust')">
+            <div class="node-inner">
+                <span class="node-icon">&#9790;</span>
+                <span class="node-name">The Emotionally<br>Exhausted</span>
+                <span class="node-quote">"I can't carry another ounce of this."</span>
+            </div>
+        </div>
 
-  <h3 style="margin-top:24px; font-size:15px; color:var(--accent);">Facilitator: calibrating safety in real-time</h3>
-  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:10px;">Safety isn't a checkbox &mdash; it's a live reading. Watch for these signals and adjust.</p>
-  <div class="table-wrap">
-    <table>
-      <tr><th style="width:40%;">Shutdown signal</th><th style="width:60%;">Facilitator response</th></tr>
-      <tr><td>Silence after rotation &mdash; new driver freezes</td><td>Navigator: use <strong>Intention &rarr; Location &rarr; Details</strong> ("We want to add a test. Open the test file. Type&hellip;")</td></tr>
-      <tr><td>"Yes, but&hellip;" responses increasing</td><td>Name it: "I notice we're in 'yes but' mode &mdash; let's try the idea for 5 minutes and then evaluate"</td></tr>
-      <tr><td>One person hasn't spoken for 10+ minutes</td><td>"[Name], what are you seeing that we might be missing?"</td></tr>
-      <tr><td>Defensive body language after AI critique</td><td>"Remember: we're debugging the prompt, not the person who wrote it"</td></tr>
-      <tr><td>Someone apologises for a "bad" prompt</td><td>"That prompt taught us what the AI needs &mdash; that's exactly how this works"</td></tr>
-      <tr><td>Group defers to the most senior person</td><td>Rotate so junior person navigates next; enforce strong-style strictly</td></tr>
-    </table>
-  </div>
-  <blockquote>"Truth without safety creates trauma, not transformation. Safety doesn't eliminate discomfort &mdash; it <em>enables</em> it."<cite>Psychological Safety Calibration principle</cite></blockquote>
-  <p style="font-size:13px; color:var(--ink-dim);">For deeper assessment: rate the group on <strong>Attitudes</strong> (openness to challenge), <strong>Behaviours</strong> (do actions match stated values?), and <strong>Context</strong> (does the org reward truth-telling or peace-keeping?) on a 1&ndash;5 scale. Average above 3.5 = tread carefully with challenge intensity.</p>
-
-  <hr class="divider">
-
-  <h2>Mob as enabling constraints</h2>
-  <p>John Cutler: <em>"The thoughtful design and deployment of constraints is a superpower."</em> Every mob practice is a <strong>deliberately designed boundary</strong> that drives creativity rather than restricting it.</p>
-  <div class="table-wrap">
-    <table>
-      <tr><th>Mob constraint</th><th>Enabling intent</th><th>Risk if misapplied</th></tr>
-      <tr><td><strong>Rotation timer</strong></td><td>Forces knowledge transfer through handover discomfort</td><td>Becomes performative &mdash; rotating without actually sharing context</td></tr>
-      <tr><td><strong>Strong-style</strong></td><td>"Ideas must go through someone else's hands" &mdash; prevents solo hero mode</td><td>Driver becomes passive typist; Navigator micromanages keystrokes</td></tr>
-      <tr><td><strong>Single computer</strong></td><td>Eliminates multitasking; forces shared attention</td><td>Boredom/disengagement when mobber role feels passive</td></tr>
-      <tr><td><strong>No backlogs of ideas</strong></td><td>Present-moment focus; decide what matters NOW</td><td>Valuable observations lost because no capture mechanism</td></tr>
-      <tr><td><strong>8-week experiment horizon</strong></td><td>Long enough to build skill, short enough to evaluate</td><td>Killed at week 2 because "it feels slower" (see Kamer Tip 6)</td></tr>
-    </table>
-  </div>
-  <blockquote>"Same constraint, dramatically different results. Context determines whether a deadline is a creative forcing function or a performative metric."<cite>John Cutler, TBM 386</cite></blockquote>
-  <p style="font-size:13px; color:var(--ink-dim);">Cutler's 4 signs of well-designed constraints: <strong>Clarity</strong> (easy to understand), <strong>Tension</strong> (requires ongoing judgment), <strong>Full-loop</strong> (connects back to learning), <strong>Active engagement</strong> (not bureaucratic hoops).</p>
-
-  <hr class="divider">
-
-  <h2>Warning stickers</h2>
-  <p>At session start, ask each participant: <strong>"What's your known risk in this kind of session?"</strong> Public self-declaration builds vulnerability and gives the group permission to name patterns when they appear.</p>
-  <div class="table-wrap">
-    <table>
-      <tr><th>Risk</th><th>Antidote</th><th>Why it matters for safety</th></tr>
-      <tr><td>Analysis paralysis</td><td>"We decide in 5 minutes"</td><td>Perfectionism shuts others out &mdash; speed creates space</td></tr>
-      <tr><td>Impatience / wants to build</td><td>"Let's read the output together"</td><td>Rushing skips shared understanding</td></tr>
-      <tr><td>Dominates keyboard</td><td>Timer enforces driver swap</td><td>Structure protects what social pressure can't</td></tr>
-      <tr><td>Goes quiet / defers</td><td>"What are you seeing?"</td><td>Silence ≠ agreement; draw out dissent gently</td></tr>
-      <tr><td>Prompt perfectionism</td><td>"Just try it &mdash; we'll iterate"</td><td>Fear of "bad" prompts prevents learning</td></tr>
-      <tr><td>AI authority bias</td><td>"What would <em>we</em> do without the AI?"</td><td>Group must maintain independent judgment</td></tr>
-    </table>
-  </div>
-  <p style="font-size:13px; color:var(--ink-dim); margin-top:10px;"><strong>Facilitator tip</strong>: Emotions in mob sessions are data, not problems. Use this quick read &mdash; <em>Happy</em> (needs met), <em>Frustrated</em> (blocked), <em>Bored</em> (not contributing enough), <em>Anxious</em> (exposed), <em>Confused</em> (pace too fast). Name the emotion, address the need.</p>
-</div>
-
-<!-- ═══════════ TIMER ═══════════ -->
-<div class="section" id="timer">
-  <h1>Mob Timer</h1>
-  <p class="subtitle">A working rotation timer. Add your team, set the duration, hit start.</p>
-
-  <div class="timer-container">
-    <div class="timer-label">Time remaining</div>
-    <div class="timer-display" id="timer-display">10:00</div>
-    <div class="timer-driver" id="timer-driver-label">Add team members below</div>
-    <div class="timer-controls">
-      <button class="btn btn-accent" id="timer-start" onclick="startTimer()">Start</button>
-      <button class="btn btn-ghost" onclick="pauseTimer()">Pause</button>
-      <button class="btn btn-ghost" onclick="resetTimer()">Reset</button>
-      <button class="btn btn-primary" onclick="nextDriver()">Next Driver &rarr;</button>
+        <!-- Cognitively Confused -->
+        <div class="node node-confused" data-char="confused" onclick="showDetail('confused')">
+            <div class="node-inner">
+                <span class="node-icon">&#10070;</span>
+                <span class="node-name">The Cognitively<br>Confused</span>
+                <span class="node-quote">"I can't tell what's real anymore."</span>
+            </div>
+        </div>
     </div>
-    <div class="timer-presets">
-      <div class="timer-preset" onclick="setTimer(240)">4 min</div>
-      <div class="timer-preset" onclick="setTimer(300)">5 min</div>
-      <div class="timer-preset active" onclick="setTimer(600)">10 min</div>
-      <div class="timer-preset" onclick="setTimer(900)">15 min</div>
+</div>
+
+<!-- === DETAIL PANEL === -->
+<div class="detail-panel" id="detailPanel"></div>
+
+<!-- === RUN / SERVE / CHANGE === -->
+<div class="section">
+    <div class="section-header">
+        <span class="section-num">02</span>
+        <h2>Run, Serve, Change</h2>
     </div>
-  </div>
 
-  <h2>Team</h2>
-  <div style="display:flex; gap:8px; margin-bottom:16px;">
-    <input type="text" id="new-member" placeholder="Add a name&hellip;" style="flex:1; background:var(--cream); border:1.5px solid var(--border); border-radius:var(--radius-sm); padding:12px 16px; font-size:15px; font-family:var(--sans); color:var(--ink); outline:none; min-height:44px;" onkeydown="if(event.key==='Enter')addMember()">
-    <button class="btn btn-primary" onclick="addMember()">Add</button>
-  </div>
-  <div id="team-list" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+    <div class="rsc-intro">
+        Every organisation carries three kinds of work simultaneously. Not as departments or projects — as <strong>loads that sit on every role, at every level</strong>. When the architecture doesn't make these loads visible and governable, they leak into heroics, invisible glue work, and evening emails. That's where the characters come from.
+    </div>
+
+    <div class="rsc-columns">
+        <div class="rsc-col rsc-col-run">
+            <div class="rsc-col-header">
+                <span class="rsc-badge rsc-badge-run">Run</span>
+                <h4>Keep it going</h4>
+            </div>
+            <div class="rsc-defn">Keeping the current system operational.</div>
+            <div class="rsc-detail">Execution of existing processes, meeting regulatory requirements, delivering today's work, managing P&L, handling customer service and compliance. The work the system is designed to do.</div>
+            <div class="rsc-examples">
+                Daily/weekly cycles &middot; Process execution &middot; Reporting &middot; Compliance &middot; Customer delivery &middot; Firefighting
+            </div>
+        </div>
+
+        <div class="rsc-col rsc-col-serve">
+            <div class="rsc-col-header">
+                <span class="rsc-badge rsc-badge-serve">Serve</span>
+                <h4>Stitch it together</h4>
+            </div>
+            <div class="rsc-defn">Horizontal integration across silos.</div>
+            <div class="rsc-detail">Connecting markets and functions, standardising practices, sharing innovations, reducing duplication, translating global directives into local reality. The invisible glue work that keeps a complex organisation from fragmenting.</div>
+            <div class="rsc-examples">
+                Cross-functional coordination &middot; Relationship repair &middot; Translation &middot; De-escalation &middot; Smoothing handovers &middot; "Human middleware"
+            </div>
+        </div>
+
+        <div class="rsc-col rsc-col-change">
+            <div class="rsc-col-header">
+                <span class="rsc-badge rsc-badge-change">Change</span>
+                <h4>Redesign it</h4>
+            </div>
+            <div class="rsc-defn">Altering the system itself.</div>
+            <div class="rsc-detail">Redesigning structures, practices, and constraints. Experimenting with new models. Deciding what legacy processes die. Shifting organisational architecture. The work that makes the future different from the present.</div>
+            <div class="rsc-examples">
+                Experimentation &middot; Architecture redesign &middot; New capabilities &middot; Killing legacy &middot; Sponsoring safe-to-fail probes
+            </div>
+        </div>
+    </div>
+
+    <!-- Fractal allocation -->
+    <div class="fractal-section">
+        <h3>The Fractal Pattern</h3>
+        <div class="fractal-sub">Every level carries all three loads — but the proportions shift. The higher the role, the more of its value should come from development, not just delivery. When everyone operates at 80–90% Run, there is no structural carrier for Serve or Change.</div>
+
+        <div class="fractal-row">
+            <span class="fractal-label">Frontline leader</span>
+            <div class="fractal-bar-wrap">
+                <div class="fractal-seg fractal-seg-run" style="flex:85">85% Run</div>
+                <div class="fractal-seg fractal-seg-serve" style="flex:10">10%</div>
+                <div class="fractal-seg fractal-seg-change" style="flex:5">5%</div>
+            </div>
+        </div>
+        <div class="fractal-note">Master craft. Team rhythms. Local problem-solving.</div>
+
+        <div class="fractal-row">
+            <span class="fractal-label">Country / regional head</span>
+            <div class="fractal-bar-wrap">
+                <div class="fractal-seg fractal-seg-run" style="flex:60">60% Run</div>
+                <div class="fractal-seg fractal-seg-serve" style="flex:30">30% Serve</div>
+                <div class="fractal-seg fractal-seg-change" style="flex:10">10%</div>
+            </div>
+        </div>
+        <div class="fractal-note">Move from hero to designer. Solve problems systemically, not just locally.</div>
+
+        <div class="fractal-row">
+            <span class="fractal-label">System architect</span>
+            <div class="fractal-bar-wrap">
+                <div class="fractal-seg fractal-seg-run" style="flex:40">40% Run</div>
+                <div class="fractal-seg fractal-seg-serve" style="flex:30">30% Serve</div>
+                <div class="fractal-seg fractal-seg-change" style="flex:30">30% Change</div>
+            </div>
+        </div>
+        <div class="fractal-note">Read the system. Redistribute complexity. Sponsor experiments. Evolve architecture.</div>
+    </div>
+
+    <!-- Misallocation consequences -->
+    <div class="fractal-section">
+        <h3>When the Load Is Misallocated</h3>
+        <div class="fractal-sub">Different misallocations produce different character distributions.</div>
+
+        <div class="misalloc-grid">
+            <div class="misalloc-card">
+                <h4>Run dominance everywhere</h4>
+                <p>Everyone at 80–90% Run. Prevents systemic learning. Burns out complexity carriers. Serve and Change work done invisibly in evenings — or not at all.</p>
+                <div class="misalloc-signal">Produces &rarr; Exhausted, Confused, Heroes burning out</div>
+            </div>
+            <div class="misalloc-card">
+                <h4>Unrecognised Serve work</h4>
+                <p>People solving cross-functional problems informally receive no credit. The system can't replicate their solutions. Their work is invisible to the performance regime.</p>
+                <div class="misalloc-signal">Produces &rarr; Exhausted (carrying invisible load), Role-Actors (learning not to bother)</div>
+            </div>
+            <div class="misalloc-card">
+                <h4>Change without support</h4>
+                <p>Experiments fail silently. No pathway from "local hack" to "regional pattern" to "standard." Innovation becomes theatre because there's no carrier to move it.</p>
+                <div class="misalloc-signal">Produces &rarr; Heroes (pushing change by willpower), Game-Players (narrating change without doing it)</div>
+            </div>
+            <div class="misalloc-card">
+                <h4>All three dumped on same people</h4>
+                <p>Run the operational load, Serve everyone by absorbing coordination, AND Change by trying to correct the system. That's not leadership development — that's a recipe for Stretch &rarr; Tangle &rarr; Break.</p>
+                <div class="misalloc-signal">Produces &rarr; Heroes collapsing into Exhausted</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How RSC maps to characters -->
+    <div class="fractal-section">
+        <h3>How the Characters Carry the Load</h3>
+        <div class="fractal-sub">Each character has a distinctive distortion pattern in how they carry Run, Serve, and Change.</div>
+
+        <div style="overflow-x:auto; border: 1px solid var(--border); border-radius: 10px; background: var(--surface);">
+            <table class="rsc-char-table">
+                <thead>
+                    <tr>
+                        <th>Character</th>
+                        <th>Run</th>
+                        <th>Serve</th>
+                        <th>Change</th>
+                        <th>The Distortion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="char-name-cell" style="color:#e07a77">Naive Hero</td>
+                        <td>Trapped in Run legitimacy rituals</td>
+                        <td>Absorbs coordination for everyone</td>
+                        <td>Tries to force through willpower</td>
+                        <td>Does all three at once — by voice alone, without carriers</td>
+                    </tr>
+                    <tr>
+                        <td class="char-name-cell" style="color:#6dc4be">Third-Way Ironist</td>
+                        <td>Minimum viable control</td>
+                        <td>Makes integration explicit</td>
+                        <td>Redesigns carriers, not just content</td>
+                        <td>Treats R/S/C as a design map, not categories of people</td>
+                    </tr>
+                    <tr>
+                        <td class="char-name-cell" style="color:#dfc06e">Game-Player</td>
+                        <td>Runs "transformations" as legitimacy projects</td>
+                        <td>Manages stakeholders</td>
+                        <td>Adds initiatives without removing load</td>
+                        <td>Looks like Change but carriers don't move — the org "transforms" permanently while becoming less capable</td>
+                    </tr>
+                    <tr>
+                        <td class="char-name-cell" style="color:#9aabc6">Role-Actor</td>
+                        <td>Produces the artefacts</td>
+                        <td>Mediates and smooths</td>
+                        <td>Narrates transformation</td>
+                        <td>Constant internal translation loop. Their success becomes evidence the system "works" — preventing architectural fix</td>
+                    </tr>
+                    <tr>
+                        <td class="char-name-cell" style="color:#c48068">Exhausted</td>
+                        <td>Constant compliance</td>
+                        <td>Carrying Serve far beyond role</td>
+                        <td>Another demand layered on top</td>
+                        <td>The "human middleware" between incompatible systems. Serve is where moral injury accumulates</td>
+                    </tr>
+                    <tr>
+                        <td class="char-name-cell" style="color:#a690c8">Confused</td>
+                        <td>Heavy reporting ("prove delivery")</td>
+                        <td>Informal reconciliation</td>
+                        <td>Layered on top without clarity</td>
+                        <td>Cannot tell which kind of work they're doing or which will be rewarded. Oscillates endlessly.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="rsc-key-quote">
+        "Your role is not just a job. It's a <strong>developmental container</strong>. If we don't treat it that way, we're wasting both you and the system."<br>
+        <span style="font-size:12px;color:var(--ink-dim);font-style:normal">— Hierarchy as spine, not ladder</span>
+    </div>
 </div>
 
-<!-- ═══════════ EXPERIMENT ═══════════ -->
-<div class="section" id="experiment">
-  <h1>Experiment Designer</h1>
-  <p class="subtitle">Build a hypothesis, run the safe-to-try check, decide whether to proceed.</p>
+<!-- === ORGANISATIONAL PHYSICS === -->
+<div class="section">
+    <div class="section-header">
+        <span class="section-num">03</span>
+        <h2>Organisational Physics</h2>
+    </div>
+    <p class="section-sub">Three structural conditions manufacture the characters. Different answers produce different casts — and predict the plot.</p>
 
-  <div class="hero-card">
-    <div class="hero-quote">"Do a radical thing at a non-radical scale."</div>
-    <div class="hero-attribution">Aaron Dignan, The Ready &mdash; Don't create a 1-hour meeting-free zone. Eliminate all meetings for 2 weeks. Experience the change fully before judging it.</div>
-  </div>
-
-  <h2>Kamer's 8 tips for experiments</h2>
-  <div class="table-wrap">
-    <table>
-      <tr><th>#</th><th>Tip</th><th>Applied to mob programming</th></tr>
-      <tr><td><strong>1</strong></td><td><strong>The test comes from you</strong> &mdash; genuine passion, not assigned</td><td>Champion volunteers, don't conscript</td></tr>
-      <tr><td><strong>2</strong></td><td><strong>Define the desired effect</strong> &mdash; concrete, measurable</td><td>"Resolve first ticket in &lt;2 hours"</td></tr>
-      <tr><td><strong>3</strong></td><td><strong>Be bold</strong> &mdash; radical thing, non-radical scale</td><td>Full mob week, not a timid 1-hour trial</td></tr>
-      <tr><td><strong>4</strong></td><td><strong>One thing at a time</strong> &mdash; change one variable</td><td>Mob OR new AI tool. Not both simultaneously</td></tr>
-      <tr><td><strong>5</strong></td><td><strong>Right time horizon</strong> &mdash; 8 weeks ideal, 16 max</td><td>2&ndash;3 sprint cycles to build real skill</td></tr>
-      <tr><td><strong>6</strong></td><td><strong>Don't kill it early</strong> &mdash; persist past discomfort</td><td>3 sessions is too few. Commit to 8+</td></tr>
-      <tr><td><strong>7</strong></td><td><strong>Retrospect regularly</strong> &mdash; monthly learnings</td><td>End-of-session retro + monthly pattern review</td></tr>
-      <tr><td><strong>8</strong></td><td><strong>Expect frustration</strong> &mdash; 2 steps forward, 1 back</td><td>"Why is this slower?" is normal at first</td></tr>
-    </table>
-  </div>
-
-  <h3>The T-shape model</h3>
-  <p>From Rodney Evans at The Ready: teach <strong>one universal practice</strong> across all teams (the bar of the T &mdash; e.g. retrospectives). Let a <strong>smaller adventurous group</strong> experiment widely (the stem of the T). That pioneering group becomes the organizational model.</p>
-
-  <blockquote>"Start with an adventurous group already doing things differently &mdash; not a group stuck in dysfunction. It will be more inspiring."<cite>Jurriaan Kamer, The Ready</cite></blockquote>
-
-  <hr class="divider">
-
-  <h2>Hypothesis builder</h2>
-  <div class="card" style="box-shadow:none; border:1.5px solid var(--border);">
-    <div class="input-group"><label>We believe that&hellip;</label><input type="text" id="exp-practice" placeholder="e.g. mob collaboration on maintenance tasks"></div>
-    <div class="input-group"><label>Applied to&hellip;</label><input type="text" id="exp-context" placeholder="e.g. apps untouched for 3+ months"></div>
-    <div class="input-group"><label>Will result in&hellip;</label><input type="text" id="exp-outcome" placeholder="e.g. 50% reduction in ramp-up time"></div>
-    <div class="input-group"><label>Because&hellip;</label><textarea id="exp-reasoning" placeholder="e.g. real-time collaboration eliminates handoff delays and creates shared context quicker"></textarea></div>
-    <div class="input-group"><label>We'll know it's TRUE when&hellip;</label><input type="text" id="exp-true" placeholder="e.g. team resolves first ticket in < 2 hours"></div>
-    <div class="input-group"><label>We'll know it's FALSE when&hellip;</label><input type="text" id="exp-false" placeholder="e.g. ramp-up time is same as solo work"></div>
-    <button class="btn btn-accent" onclick="generateHypothesis()" style="margin-top:8px;">Generate Statement</button>
-  </div>
-
-  <div id="hypothesis-output" style="display:none; margin-top:20px;"></div>
-
-  <p style="margin-top:16px; font-size:13px; color:var(--ink-dim);"><strong>Track it</strong>: Use the <a href="https://teamytastic.github.io/camekazi.github.io/gist/?1d1c0f86d462f101afcebdba737a4f19/mvi-experiment.html" target="_blank" style="color:var(--accent); font-weight:600;">MVI Experiment Designer</a> to design experiments with hypothesis, safe-to-try checks, and tracking.</p>
-
-  <h2>Safe-to-try check</h2>
-  <p style="margin-bottom:16px;">Click each test to toggle pass/fail. All 5 must pass.</p>
-
-  <div id="safe-checks">
-    <div class="check-row" onclick="toggleCheck(this)" data-state="pending"><div class="check-icon"></div><div><div class="check-label">Reversible</div><div class="check-question">Can we undo this if it fails?</div></div></div>
-    <div class="check-row" onclick="toggleCheck(this)" data-state="pending"><div class="check-icon"></div><div><div class="check-label">Bounded</div><div class="check-question">Is the blast radius small?</div></div></div>
-    <div class="check-row" onclick="toggleCheck(this)" data-state="pending"><div class="check-icon"></div><div><div class="check-label">Observable</div><div class="check-question">Can we see if it's working?</div></div></div>
-    <div class="check-row" onclick="toggleCheck(this)" data-state="pending"><div class="check-icon"></div><div><div class="check-label">Resourced</div><div class="check-question">Do we have what we need?</div></div></div>
-    <div class="check-row" onclick="toggleCheck(this)" data-state="pending"><div class="check-icon"></div><div><div class="check-label">Consensual</div><div class="check-question">Does anyone have a fundamental objection?</div></div></div>
-  </div>
-  <div id="verdict" class="verdict pending">Complete the checks above</div>
+    <div class="physics-cards">
+        <div class="physics-card">
+            <h3>Structural Load</h3>
+            <p class="physics-q">Where does Run, Serve, Change actually sit?</p>
+            <p>Beyond the org chart — who is actually carrying operational delivery, relationship maintenance, and transformation work? Where is it leaking into heroics and invisible glue? Redraw the org in three colours: estimate actual weekly percentages for each person.</p>
+        </div>
+        <div class="physics-card">
+            <h3>Regulatory Grammar</h3>
+            <p class="physics-q">What gets rewarded — truth, theatre, caution, speed, obedience?</p>
+            <p>The real incentive architecture. Not what the values deck says — what behaviour actually gets promoted, punished, and ignored. Bell curves that force a fixed percentage into "needs improvement." Promotion criteria that reward narrow visibility over systemic impact.</p>
+        </div>
+        <div class="physics-card">
+            <h3>Moral Universe</h3>
+            <p class="physics-q">Who benefits when the system "performs well"? Who absorbs harm?</p>
+            <p>Every organisation has a moral project, spoken or not. When the system runs "as designed," whose upside flows to one layer? Whose downside absorbs the strain? Who carries the hidden complexity — and at what personal cost?</p>
+        </div>
+    </div>
 </div>
 
-<!-- ═══════════ RPG ═══════════ -->
-<div class="section" id="rpg">
-  <h1>Mob Programming RPG</h1>
-  <p class="subtitle">Willem Larsen's gamified mob experience. Earn XP by embodying role behaviours. Print the cards, bring to your next session.</p>
+<!-- === DIAGNOSTIC QUESTIONS === -->
+<div class="section">
+    <div class="section-header">
+        <span class="section-num">04</span>
+        <h2>Diagnostic Questions</h2>
+    </div>
+    <p class="section-sub">Walk through these to read your system. Check the ones that produce an uncomfortable answer.</p>
 
-  <h2>Level 1 &mdash; Core</h2>
-  <div class="role-grid stagger">
-    <div class="role-card"><div class="role-level lvl-1">Level 1</div><div class="role-name">Driver</div><div class="role-desc">Ask clarifying questions about typing. Use new keyboard shortcuts. Type something you disagree with. Ignore non-Navigator instructions.</div></div>
-    <div class="role-card"><div class="role-level lvl-1">Level 1</div><div class="role-name">Navigator</div><div class="role-desc">Request ideas from the mob. Filter suggestions and direct Driver precisely. Communicate high-level intent. Follow TDD cycle.</div></div>
-    <div class="role-card"><div class="role-level lvl-1">Level 1</div><div class="role-name">Mobber</div><div class="role-desc">Yield to less-privileged voices. Contribute ideas. Ask questions until understanding is reached. Listen attentively.</div></div>
-  </div>
+    <ul class="diagnostic-list" id="diagnosticList">
+        <li class="diagnostic-item" onclick="toggleCheck(this)">
+            <span class="diagnostic-check">&#10003;</span>
+            <div>
+                <div class="diagnostic-q">"If I asked someone here to surface an uncomfortable truth, what would happen?"</div>
+                <div class="diagnostic-reveal">reveals &rarr; safety to speak</div>
+            </div>
+        </li>
+        <li class="diagnostic-item" onclick="toggleCheck(this)">
+            <span class="diagnostic-check">&#10003;</span>
+            <div>
+                <div class="diagnostic-q">"Where does the real load sit — and who's invisibly carrying it?"</div>
+                <div class="diagnostic-reveal">reveals &rarr; hidden Serve work</div>
+            </div>
+        </li>
+        <li class="diagnostic-item" onclick="toggleCheck(this)">
+            <span class="diagnostic-check">&#10003;</span>
+            <div>
+                <div class="diagnostic-q">"What behaviours get punished first?"</div>
+                <div class="diagnostic-reveal">reveals &rarr; true regulatory grammar</div>
+            </div>
+        </li>
+        <li class="diagnostic-item" onclick="toggleCheck(this)">
+            <span class="diagnostic-check">&#10003;</span>
+            <div>
+                <div class="diagnostic-q">"Who are the people privately holding the system together?"</div>
+                <div class="diagnostic-reveal">reveals &rarr; human middleware</div>
+            </div>
+        </li>
+        <li class="diagnostic-item" onclick="toggleCheck(this)">
+            <span class="diagnostic-check">&#10003;</span>
+            <div>
+                <div class="diagnostic-q">"Which characters dominate here — and what does that tell us about the architecture?"</div>
+                <div class="diagnostic-reveal">reveals &rarr; system signature</div>
+            </div>
+        </li>
+    </ul>
 
-  <h2>Level 2 &mdash; Support</h2>
-  <div class="role-grid stagger">
-    <div class="role-card"><div class="role-level lvl-2">Level 2</div><div class="role-name">Researcher</div><div class="role-desc">Share relevant documentation. Find blog insights. Locate coding forum solutions.</div></div>
-    <div class="role-card"><div class="role-level lvl-2">Level 2</div><div class="role-name">Sponsor</div><div class="role-desc">Amplify underheard perspectives. Support least-privileged contributors. Recognise moments of excellence.</div></div>
-    <div class="role-card"><div class="role-level lvl-2">Level 2</div><div class="role-name">Rear Admiral</div><div class="role-desc">Offer Navigator guidance privately. Provide minimal cues. Guide at highest abstraction level.</div></div>
-  </div>
+    <div class="litmus-label">The Litmus Test (Axion-Aligned)</div>
 
-  <h2>Level 3 &mdash; Quality</h2>
-  <div class="role-grid stagger">
-    <div class="role-card"><div class="role-level lvl-3">Level 3</div><div class="role-name">Automationist</div><div class="role-desc">Identify repeated tool tasks. Notice repeated processes. Recognise boilerplate. Suggest automation.</div></div>
-    <div class="role-card"><div class="role-level lvl-3">Level 3</div><div class="role-name">Nose</div><div class="role-desc">Flag long lines, complex conditionals, duplication. Name unnamed things. Propose improvements.</div></div>
-    <div class="role-card"><div class="role-level lvl-3">Level 3</div><div class="role-name">Archivist</div><div class="role-desc">Record alternatives visibly. Document ideas on whiteboard. Display current task. Capture decisions.</div></div>
-  </div>
-
-  <h2>Level 4 &mdash; Culture</h2>
-  <div class="role-grid stagger">
-    <div class="role-card"><div class="role-level lvl-4">Level 4</div><div class="role-name">Conductor</div><div class="role-desc">Combine ideas (discard the first). Elicit quiet members. Make ridiculous proposals. Defer to junior voices.</div></div>
-    <div class="role-card"><div class="role-level lvl-4">Level 4</div><div class="role-name">Traffic Cop</div><div class="role-desc">Propose new agreements. Alert to process violations. Support adherence. Identify outdated agreements.</div></div>
-    <div class="role-card"><div class="role-level lvl-4">Level 4</div><div class="role-name">Dr. Feel Good</div><div class="role-desc">Express appreciation (SBI model). Share joy. Acknowledge happiness. Retrospect positive moments.</div></div>
-    <div class="role-card"><div class="role-level lvl-4">Level 4</div><div class="role-name">Major Pain</div><div class="role-desc">Articulate difficulties. Demonstrate empathy. Surface ignored pain points. Call retrospectives on pain.</div></div>
-  </div>
-
-  <hr class="divider">
-  <p><strong>First rule:</strong> Treat each other with Kindness, Consideration, and Respect at all times.</p>
-  <a href="https://github.com/willemlarsen/mobprogrammingrpg" target="_blank" class="btn btn-ghost" style="margin-top:12px;">Get Printable Cards &rarr;</a>
+    <ul class="diagnostic-list">
+        <li class="diagnostic-item" onclick="toggleCheck(this)">
+            <span class="diagnostic-check">&#10003;</span>
+            <div>
+                <div class="diagnostic-q">"Who can fix a $500 problem?"</div>
+                <div class="diagnostic-reveal">reveals &rarr; decision rights reality</div>
+            </div>
+        </li>
+        <li class="diagnostic-item" onclick="toggleCheck(this)">
+            <span class="diagnostic-check">&#10003;</span>
+            <div>
+                <div class="diagnostic-q">"What work dies in meetings?"</div>
+                <div class="diagnostic-reveal">reveals &rarr; where energy leaks</div>
+            </div>
+        </li>
+        <li class="diagnostic-item" onclick="toggleCheck(this)">
+            <span class="diagnostic-check">&#10003;</span>
+            <div>
+                <div class="diagnostic-q">"What behaviour gets punished first?"</div>
+                <div class="diagnostic-reveal">reveals &rarr; true regulatory grammar</div>
+            </div>
+        </li>
+        <li class="diagnostic-item" onclick="toggleCheck(this)">
+            <span class="diagnostic-check">&#10003;</span>
+            <div>
+                <div class="diagnostic-q">"What must people hide to get the job done?"</div>
+                <div class="diagnostic-reveal">reveals &rarr; shadow work &amp; moral universe</div>
+            </div>
+        </li>
+    </ul>
 </div>
 
-<!-- ═══════════ LINKS ═══════════ -->
-<div class="section" id="links">
-  <h1>Reference Library</h1>
-  <p class="subtitle">19 curated URLs &mdash; foundational practice, AI integration, gamification, experimentation strategy.</p>
+<!-- === WARNING SIGNS === -->
+<div class="section">
+    <div class="section-header">
+        <span class="section-num">05</span>
+        <h2>Warning Signs by Character Distribution</h2>
+    </div>
+    <p class="section-sub">Count the characters in your system. The dominant cast tells you the plot.</p>
 
-  <h2>Foundational</h2>
-  <a class="link-card" href="https://mobprogramming.org/mob-programming-basics/" target="_blank"><div class="link-tag tag-foundation">Foundation</div><div class="link-info"><div class="link-title">Mob Programming Basics &mdash; Woody Zuill</div><div class="link-url">mobprogramming.org</div></div></a>
-  <a class="link-card" href="https://www.remotemobprogramming.org/" target="_blank"><div class="link-tag tag-foundation">Foundation</div><div class="link-info"><div class="link-title">Remote Mob Programming &mdash; Git handover + mob CLI</div><div class="link-url">remotemobprogramming.org</div></div></a>
-  <a class="link-card" href="https://woodyzuill.com/" target="_blank"><div class="link-tag tag-foundation">Foundation</div><div class="link-info"><div class="link-title">Woody Zuill &mdash; Talks, Workshops, Blog</div><div class="link-url">woodyzuill.com</div></div></a>
-  <a class="link-card" href="https://www.agilealliance.org/wp-content/uploads/2015/12/ExperienceReport.2014.Zuill_.pdf" target="_blank"><div class="link-tag tag-foundation">Foundation</div><div class="link-info"><div class="link-title">Agile Alliance Experience Report (PDF)</div><div class="link-url">agilealliance.org</div></div></a>
-  <a class="link-card" href="https://martinfowler.com/articles/on-pair-programming.html" target="_blank"><div class="link-tag tag-foundation">Foundation</div><div class="link-info"><div class="link-title">On Pair Programming &mdash; Martin Fowler (strong-style section)</div><div class="link-url">martinfowler.com</div></div></a>
-  <a class="link-card" href="https://medium.com/@maaret.pyhajarvi/the-driver-navigator-in-strong-style-pairing-2df0ecb4f657" target="_blank"><div class="link-tag tag-foundation">Foundation</div><div class="link-info"><div class="link-title">Strong-Style Driver-Navigator &mdash; Maaret Pyhajarvi</div><div class="link-url">medium.com</div></div></a>
-  <a class="link-card" href="https://ensembleprogramming.xyz/" target="_blank"><div class="link-tag tag-foundation">Foundation</div><div class="link-info"><div class="link-title">Ensemble Programming Guidebook &mdash; Maaret Pyhajarvi (book)</div><div class="link-url">ensembleprogramming.xyz</div></div></a>
+    <div class="warning-grid">
+        <div class="warning-card w-hero">
+            <h4>Heroes proliferating</h4>
+            <p>System rewarding truth-telling but not supporting it. Heroes burn bright — then burn out.</p>
+        </div>
+        <div class="warning-card w-role">
+            <h4>Role-Actors dominant</h4>
+            <p>Appearance over reality in the regulatory grammar. The system is being held together by invisible translation labour.</p>
+        </div>
+        <div class="warning-card w-exhaust">
+            <h4>Exhausted everywhere</h4>
+            <p>Invisible Serve work not recognised. Load is being outsourced into nervous systems. The system's truth sensors are going quiet.</p>
+        </div>
+        <div class="warning-card w-ironist">
+            <h4>No Ironists remaining</h4>
+            <p>System has expelled or exhausted its redesigners. Nobody left who can see the theatre AND change the carriers.</p>
+        </div>
+        <div class="warning-card w-game">
+            <h4>Game-Players rising</h4>
+            <p>Legitimacy signals divorced from reality. The system is selecting for performance of competence over actual competence.</p>
+        </div>
+        <div class="warning-card w-confused">
+            <h4>Confused people everywhere</h4>
+            <p>Incoherent grammar — contradictory demands without resolution. Strategy isn't being implemented, it's being locally survived.</p>
+        </div>
+    </div>
+</div>
 
-  <h2>AI + Mob</h2>
-  <a class="link-card" href="https://blog.crisp.se/2025/06/02/michaelgothe/mob-programming-with-ai-inside-a-high-performing-teams-journey" target="_blank"><div class="link-tag tag-ai">AI + Mob</div><div class="link-info"><div class="link-title">Mob Programming with AI &mdash; Crisp (Sweden)</div><div class="link-url">blog.crisp.se &mdash; Daily 3hr sessions, "faster together"</div></div></a>
-  <a class="link-card" href="https://www.atlassian.com/blog/atlassian-engineering/mobbing-with-ai" target="_blank"><div class="link-tag tag-ai">AI + Mob</div><div class="link-info"><div class="link-title">Mobbing with AI &mdash; Atlassian</div><div class="link-url">atlassian.com &mdash; Define/Spec/Generate/Review/Iterate</div></div></a>
-
-  <h2>Gamification &amp; Facilitation</h2>
-  <a class="link-card" href="https://github.com/willemlarsen/mobprogrammingrpg" target="_blank"><div class="link-tag tag-game">Game</div><div class="link-info"><div class="link-title">Mob Programming RPG &mdash; Willem Larsen</div><div class="link-url">github.com &mdash; 4 levels, printable role cards with XP</div></div></a>
-  <a class="link-card" href="https://github.com/willemlarsen/mobprogrammingrpg/blob/master/rpg_roles_plain_text.md" target="_blank"><div class="link-tag tag-game">Game</div><div class="link-info"><div class="link-title">RPG Role Descriptions &mdash; All levels</div><div class="link-url">github.com &mdash; Driver through Dr. Feel Good</div></div></a>
-  <a class="link-card" href="https://jay.bazuzi.com/Mobbing-Pattern-Language/" target="_blank"><div class="link-tag tag-game">Patterns</div><div class="link-info"><div class="link-title">Mobbing Pattern Language &mdash; Jay Bazuzi</div><div class="link-url">jay.bazuzi.com</div></div></a>
-  <a class="link-card" href="https://kata-log.rocks/ensemble-programming" target="_blank"><div class="link-tag tag-game">Practice</div><div class="link-info"><div class="link-title">Ensemble Programming Kata</div><div class="link-url">kata-log.rocks</div></div></a>
-
-  <h2>Experimentation (Strategy)</h2>
-  <a class="link-card" href="https://teamytastic.github.io/camekazi.github.io/gist/?1d1c0f86d462f101afcebdba737a4f19/mvi-experiment.html" target="_blank"><div class="link-tag tag-strategy">Template</div><div class="link-info"><div class="link-title">MVI Experiment Designer</div><div class="link-url">Interactive tool &mdash; Design experiments with hypothesis, safe-to-try checks, and tracking</div></div></a>
-  <a class="link-card" href="https://open.substack.com/pub/strategyinpraxis/p/the-first-one-about-experimentation" target="_blank"><div class="link-tag tag-strategy">Strategy</div><div class="link-info"><div class="link-title">JP Castlin &mdash; Experimentation Part 1</div><div class="link-url">strategyinpraxis.substack.com</div></div></a>
-  <a class="link-card" href="https://open.substack.com/pub/strategyinpraxis/p/the-second-one-about-experimentation" target="_blank"><div class="link-tag tag-strategy">Strategy</div><div class="link-info"><div class="link-title">JP Castlin &mdash; Experimentation Part 2</div><div class="link-url">strategyinpraxis.substack.com</div></div></a>
-  <a class="link-card" href="https://open.substack.com/pub/strategyinpraxis/p/the-third-one-about-experimentation" target="_blank"><div class="link-tag tag-strategy">Strategy</div><div class="link-info"><div class="link-title">JP Castlin &mdash; Experimentation Part 3</div><div class="link-url">strategyinpraxis.substack.com</div></div></a>
-  <a class="link-card" href="https://cutlefish.substack.com/p/tbm-386-understanding-enabling-constraints" target="_blank"><div class="link-tag tag-strategy">Strategy</div><div class="link-info"><div class="link-title">Understanding Enabling Constraints &mdash; John Cutler (TBM 386)</div><div class="link-url">cutlefish.substack.com &mdash; Constraints that drive creativity, not restrict it</div></div></a>
-  <a class="link-card" href="https://www.chriscorrigan.com/parkinglot/escaping-confusion/" target="_blank"><div class="link-tag tag-strategy">Strategy</div><div class="link-info"><div class="link-title">Escaping Confusion &mdash; Chris Corrigan (safe-to-fail)</div><div class="link-url">chriscorrigan.com</div></div></a>
-  <a class="link-card" href="https://medium.com/the-ready/change-through-experimentation-978429cb99fa" target="_blank"><div class="link-tag tag-strategy">Strategy</div><div class="link-info"><div class="link-title">Changing Your Organization Through Experimentation &mdash; Jurriaan Kamer / The Ready</div><div class="link-url">medium.com &mdash; 8 tips, T-shape scaling, safe-to-try framing</div></div></a>
+<!-- === FOOTER === -->
+<div class="footer">
+    <p>
+        Based on Richard Claydon, <em>"The Six Survival Characters of Organisational Incoherence,"</em><br>
+        <a href="https://richardclaydon.substack.com/" target="_blank" rel="noopener">Leadership, Rewritten</a>, 2025.
+        &nbsp;&middot;&nbsp; Diagnostic tool, not a personality model.
+    </p>
 </div>
 
 <script>
-// ── Tab navigation ──
-document.querySelectorAll('.nav-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    tab.classList.add('active');
-    const section = document.getElementById(tab.dataset.tab);
-    section.classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-});
-
-// ── Working Mob Timer ──
-let timerSeconds = 600;
-let timerRemaining = 600;
-let timerInterval = null;
-let timerRunning = false;
-let team = [];
-let currentDriverIndex = 0;
-
-function setTimer(seconds) {
-  timerSeconds = seconds;
-  timerRemaining = seconds;
-  timerRunning = false;
-  clearInterval(timerInterval);
-  updateTimerDisplay();
-  document.querySelectorAll('.timer-preset').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.timer-preset').forEach(p => {
-    if (parseInt(p.textContent) * 60 === seconds || p.textContent.trim() === (seconds/60) + ' min') p.classList.add('active');
-  });
-  document.getElementById('timer-start').textContent = 'Start';
-}
-
-function updateTimerDisplay() {
-  const mins = Math.floor(timerRemaining / 60);
-  const secs = timerRemaining % 60;
-  const display = document.getElementById('timer-display');
-  display.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
-  display.className = 'timer-display';
-  if (timerRemaining <= 30 && timerRemaining > 10) display.classList.add('warning');
-  if (timerRemaining <= 10) display.classList.add('critical');
-  updateDriverLabel();
-}
-
-function updateDriverLabel() {
-  const label = document.getElementById('timer-driver-label');
-  if (team.length === 0) {
-    label.textContent = 'Add team members below';
-  } else {
-    label.textContent = `Driving: ${team[currentDriverIndex % team.length]}`;
-  }
-}
-
-function startTimer() {
-  if (timerRunning) return;
-  timerRunning = true;
-  document.getElementById('timer-start').textContent = 'Running...';
-  timerInterval = setInterval(() => {
-    timerRemaining--;
-    if (timerRemaining <= 0) {
-      clearInterval(timerInterval);
-      timerRunning = false;
-      document.getElementById('timer-start').textContent = 'Start';
-      // Audio alert — two short beeps
-      try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        [0, 0.25].forEach(delay => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.connect(gain); gain.connect(ctx.destination);
-          osc.frequency.value = 880;
-          osc.type = 'sine';
-          gain.gain.setValueAtTime(0.3, ctx.currentTime + delay);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.2);
-          osc.start(ctx.currentTime + delay);
-          osc.stop(ctx.currentTime + delay + 0.2);
-        });
-      } catch(e) {}
-      timerRemaining = 0;
+const characters = {
+    hero: {
+        icon: '&#9876;',
+        name: 'The Naive Hero',
+        color: 'hero',
+        motto: '"If I just tell the truth clearly enough, the system will change."',
+        sections: [
+            {
+                title: 'What They See',
+                content: '<p>Still believes the organisation is basically moral — not sentimentally, but structurally. Assumes that if leaders could only see what is happening, the system would correct itself. They believe truth has intrinsic authority.</p>'
+            },
+            {
+                title: 'Meeting Tell',
+                content: '<div class="meeting-tell">"We\'re green on paper, but customers are screaming."</div><div class="meeting-tell" style="margin-top:8px">"The metric is stable because we\'ve stopped reporting the incidents."</div>'
+            },
+            {
+                title: 'What the System Does to Them',
+                content: '<ul><li>Legitimacy is not awarded for truth — it\'s awarded for performance signals</li><li>Load doesn\'t move because someone cares — it moves because carriers change</li><li>The system protects itself before it protects reality</li></ul><p style="margin-top:8px">Their truth doesn\'t land as "help." It lands as "instability." They get labelled: <em>negative, not strategic, not a team player, too intense, difficult.</em></p>'
+            },
+            {
+                title: 'Threshold Pattern',
+                content: '<div class="threshold-track"><span class="threshold-step">Stretch</span><span class="threshold-arrow">&rarr;</span><span class="threshold-step">Tangle</span><span class="threshold-arrow">&rarr;</span><span class="threshold-step" style="background:rgba(199,84,80,0.15)">Break</span></div><p style="margin-top:8px;font-size:12.5px;color:var(--ink-dim)">"I can fix this if I push harder" &rarr; "Why are they resisting the truth?" &rarr; blow-up or collapse</p>'
+            },
+            {
+                title: 'Hidden Gift',
+                content: '<p>First honest sensor in a decaying system. Detects reality early. Names problems while they\'re still reversible. Keeps moral gravity alive in rooms drifting into theatre.</p>',
+            },
+            {
+                title: 'Failure Mode',
+                content: '<p><strong>Mistakes moral clarity for structural power.</strong> Assumes "saying the right thing" will change the carriers. But carriers don\'t change through truth alone — they change through redesign of legitimacy, load, and grammar.</p>'
+            }
+        ]
+    },
+    ironist: {
+        icon: '&#9883;',
+        name: 'The Third-Way Ironist',
+        color: 'ironist',
+        motto: '"I see the theatre. I also see the work. I\'ll redesign the carriers."',
+        sections: [
+            {
+                title: 'What They See',
+                content: '<p>Can see the system\'s theatre without being seduced by it. Can see the system\'s harm without collapsing into despair. Speaks the language of legitimacy without becoming a Game-Player. Honours reality without becoming a Naive Hero. <em>Double-seeing</em> — ironic in the classical sense.</p>'
+            },
+            {
+                title: 'Meeting Tell',
+                content: '<div class="meeting-tell">"What would we stop doing if we were serious about this?"</div><div class="meeting-tell" style="margin-top:8px">"What is the work this dashboard is a proxy for?"</div>'
+            },
+            {
+                title: 'Signature Moves',
+                content: '<ul><li>Doesn\'t fight the dashboard — <strong>changes the meeting that worships it</strong></li><li>Doesn\'t demand "more empowerment" — <strong>removes a central approval loop</strong></li><li>Doesn\'t ask for cultural change — <strong>redesigns the workflow so desired behaviour is easiest</strong></li></ul>'
+            },
+            {
+                title: 'Optimises For',
+                content: '<ul><li><strong>Load coherence</strong> — Run/Serve/Change is explicit and governable</li><li><strong>Grammar coherence</strong> — metrics, incentives, governance aligned enough for judgment without self-betrayal</li><li><strong>Moral coherence</strong> — purpose as real constraint, not branding</li></ul>'
+            },
+            {
+                title: 'Hidden Gift',
+                content: '<p>Creates islands of sane coherence — teams that run cleaner, fewer dashboards, more actual work, tighter rhythms, people who feel safer and more capable.</p>'
+            },
+            {
+                title: 'Failure Mode',
+                content: '<p>Islands are fragile. As soon as the Ironist loses positional capital — moves role, gets restructured, loses protection — the sea returns. The confusion tax reasserts itself. <strong>Relying on rare leaders for coherence is not a design strategy.</strong></p>'
+            }
+        ]
+    },
+    game: {
+        icon: '&#9812;',
+        name: 'The Ambitious Game-Player',
+        color: 'game',
+        motto: '"If legitimacy is the currency, I\'ll become rich."',
+        sections: [
+            {
+                title: 'What They See',
+                content: '<p>Not always immoral. Not always cruel. Often charming, smart, genuinely hardworking. But they\'ve made a clean internal decision: <strong>success is measured by winning the system\'s legitimacy game, not by changing the system\'s reality.</strong></p>'
+            },
+            {
+                title: 'Meeting Tell',
+                content: '<div class="meeting-tell">"We\'ve got a watch-out, but it\'s under control."</div><div class="meeting-tell" style="margin-top:8px">"We\'ll take it offline and come back with a plan."</div>'
+            },
+            {
+                title: 'How the Architecture Creates Them',
+                content: '<ul><li>Legitimacy allocated through <strong>performance signals</strong> — targets, scorecards, rankings</li><li>Truth is punished subtly — candour becomes "poor stakeholder management"</li><li>Complexity managed through <strong>theatre</strong> — reporting intensity substitutes for redesign</li></ul>'
+            },
+            {
+                title: 'Their Key Move',
+                content: '<p>Converts truth into narrative without explicitly lying. Not "How will this affect the work?" but <strong>"How will this be received?"</strong></p>'
+            },
+            {
+                title: 'Hidden Gift',
+                content: '<p>Can create momentum. Can simplify narratives. Can mobilise attention. In crisis, those skills matter. The issue is not capability — it\'s <strong>orientation</strong>.</p>'
+            },
+            {
+                title: 'Failure Mode',
+                content: '<p><strong>Industrialises the Confusion Tax.</strong> More reporting, more escalation rituals, more status meetings, more KPI negotiation, more "managing stakeholders" — less actual work. They don\'t just play the game. They expand the playing field.</p>'
+            }
+        ]
+    },
+    role: {
+        icon: '&#127917;',
+        name: 'The Adaptive Role-Actor',
+        color: 'role',
+        motto: '"Tell me what success looks like in this room — and I\'ll become it."',
+        sections: [
+            {
+                title: 'What They See',
+                content: '<p>What cognitive confusion turns into when a capable person decides they can\'t afford to keep searching for coherence. They stop asking "What is true?" and start asking <strong>"What is rewarded?"</strong> Not cynical — pragmatic. Often the ones who keep a decaying system functioning.</p>'
+            },
+            {
+                title: 'Meeting Tell',
+                content: '<p style="font-size:13px;color:var(--ink-muted)">Speaks different dialects to different audiences fluently:</p><ul><li>With executives: outcomes, confidence, controllability</li><li>With frontline: constraints, reality, workarounds</li><li>With Risk: exposure, controls, mitigation</li><li>With HR: values, culture, capability</li></ul>'
+            },
+            {
+                title: 'How the Architecture Creates Them',
+                content: '<ul><li>The system is incoherent — trade-offs unresolved, metrics conflict</li><li>Legitimacy is performative — being <em>seen</em> as competent matters more than being correct</li><li>Punishment is real — speak too plainly and you\'re "difficult"</li></ul>'
+            },
+            {
+                title: 'The Trap',
+                content: '<p>The organisation depends on their adaptability <strong>instead of fixing the architecture</strong>. Their success becomes evidence the system "works" when it\'s being held together by invisible labour.</p>'
+            },
+            {
+                title: 'Hidden Gift',
+                content: '<p>Potential bridge-builders. Redesign the carriers — clarify decisions, align metrics — and Role-Actors often become your best integrators. They already understand the interfaces. <strong>One architectural shift from genuine post-managerial leaders.</strong></p>'
+            },
+            {
+                title: 'Failure Mode',
+                content: '<p>Gradual moral erosion. Stops telling the truth to protect people. Starts protecting people to avoid telling the truth. When the system asks them to betray their own compass — role-acting either hardens into game-playing, or cracks open into ironist-level clarity.</p>'
+            }
+        ]
+    },
+    exhaust: {
+        icon: '&#9790;',
+        name: 'The Emotionally Exhausted',
+        color: 'exhaust',
+        motto: '"I can\'t carry another ounce of this."',
+        sections: [
+            {
+                title: 'What They See',
+                content: '<p>What happens when someone stays in contact with reality for too long without structural support. Often former Heroes or burnt-out Zealots. Not because they stopped caring — because they cared in a system that <strong>punished caring with extra load</strong>.</p>'
+            },
+            {
+                title: 'Meeting Tell',
+                content: '<div class="meeting-tell">Present physically, absent internally. Speaks less. Volunteers less. Stops pushing back. Sometimes performs competence on the surface — but with no surplus. No generosity. No buffer. The light has gone.</div>'
+            },
+            {
+                title: 'How the Architecture Creates Them',
+                content: '<ul><li><strong>Serve work becomes invisible</strong> — relationship repair, translation, de-escalation treated as "soft stuff"</li><li><strong>Run work is over-measured</strong> — pushed into reporting and control rituals</li><li><strong>Change work becomes theatre</strong> — more initiatives without removing load</li></ul><p style="margin-top:8px">The org doesn\'t just exhaust people by asking too much. It exhausts them by <strong>refusing to name what they are already doing as work</strong>.</p>'
+            },
+            {
+                title: 'Threshold Pattern',
+                content: '<div class="threshold-track"><span class="threshold-step">Stretch</span><span class="threshold-arrow">&rarr;</span><span class="threshold-step">Tangle</span><span class="threshold-arrow">&rarr;</span><span class="threshold-step">Drift</span><span class="threshold-arrow">&rarr;</span><span class="threshold-step" style="background:rgba(160,96,74,0.2)">Break</span></div><p style="margin-top:8px;font-size:12.5px;color:var(--ink-dim)">"I\'ll push through" &rarr; "I\'m stuck between impossible demands" &rarr; "Why am I even doing this?" &rarr; shutdown</p>'
+            },
+            {
+                title: 'Hidden Gift — System Signal',
+                content: '<p>If you have exhausted people, you are not looking at an individual problem. You are looking at: <strong>misallocated load, invisible Serve work, incoherent grammar, or a moral universe extracting from the same people repeatedly.</strong> They are living evidence your architecture is outsourcing complexity into nervous systems.</p>'
+            },
+            {
+                title: 'Failure Mode',
+                content: '<p>When exhausted people stop speaking, the system loses its truth sensors. Everything looks greener. The dashboard improves. The theatre gets smoother. <strong>And then the load moves to someone else</strong> — often to whoever becomes the next Cognitively Confused.</p>'
+            }
+        ]
+    },
+    confused: {
+        icon: '&#10070;',
+        name: 'The Cognitively Confused',
+        color: 'confused',
+        motto: '"I can\'t tell what\'s real anymore — or what \'good\' even means."',
+        sections: [
+            {
+                title: 'What They See',
+                content: '<p>The signature symptom of the Confusion Tax. Rarely incompetent — often highly capable, conscientious, and eager to do right. That\'s part of the tragedy: they are exactly the kind of person you want, and <strong>the architecture makes them feel stupid</strong>.</p>'
+            },
+            {
+                title: 'Meeting Tell',
+                content: '<div class="meeting-tell">"Just to clarify... which metric are we prioritising this week?"</div><div class="meeting-tell" style="margin-top:8px">"If we escalate, does anything actually change?"</div>'
+            },
+            {
+                title: 'How the Architecture Creates Them',
+                content: '<ul><li><strong>Competing scoreboards</strong> — Finance, Ops, Risk, Strategy, HR all "right" but system never resolves trade-offs</li><li><strong>Metric drift</strong> — measures change faster than work can adapt</li><li><strong>Escalation without resolution</strong> — problems raised but never structurally solved</li><li><strong>Double binds</strong> — "Be innovative but don\'t fail" / "Move fast but follow process"</li></ul>'
+            },
+            {
+                title: 'The Core Insight',
+                content: '<p><strong>Confusion is not lack of intelligence. It is rational adaptation to unstable meaning.</strong> They are trying to reconcile contradictory signals until sensemaking fragments. They start tasks, stop tasks, reframe tasks, report tasks. They look busy. The system is busy. Nothing moves.</p>'
+            },
+            {
+                title: 'Hidden Gift',
+                content: '<p>Early detectors of incoherence. When enough people are confused, your strategy isn\'t being "implemented" — it\'s being <strong>reinterpreted locally into whatever can be survived</strong>.</p>'
+            },
+            {
+                title: 'Failure Mode',
+                content: '<p>Resolves into one of two adaptations: <strong>passive compliance</strong> (do what you\'re told, don\'t think too hard) or <strong>role-acting</strong> (stop trying to find a stable reality, start performing the role the system rewards).</p>'
+            }
+        ]
     }
-    updateTimerDisplay();
-  }, 1000);
+};
+
+function showDetail(charId) {
+    const char = characters[charId];
+    const panel = document.getElementById('detailPanel');
+
+    // Toggle active states on nodes
+    document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
+    const activeNode = document.querySelector(`.node-${charId}`);
+    if (activeNode) activeNode.classList.add('active');
+
+    let sectionsHtml = char.sections.map((s, i) => {
+        const fullWidth = i === char.sections.length - 1 && char.sections.length % 2 !== 0;
+        return `<div class="detail-section ${fullWidth ? 'detail-full-width' : ''}">
+            <h4>${s.title}</h4>
+            ${s.content}
+        </div>`;
+    }).join('');
+
+    panel.innerHTML = `
+        <div class="detail-card" style="border-color: var(--${char.color === 'hero' ? 'hero-red' : char.color === 'ironist' ? 'ironist-teal' : char.color === 'game' ? 'game-amber' : char.color === 'role' ? 'role-slate' : char.color === 'exhaust' ? 'exhaust-ember' : 'confused-violet'});">
+            <button class="detail-close" onclick="hideDetail()" aria-label="Close">&times;</button>
+            <div class="detail-header">
+                <span class="detail-icon">${char.icon}</span>
+                <span class="detail-name" style="color: var(--${char.color === 'hero' ? 'hero-red' : char.color === 'ironist' ? 'ironist-teal' : char.color === 'game' ? 'game-amber' : char.color === 'role' ? 'role-slate' : char.color === 'exhaust' ? 'exhaust-ember' : 'confused-violet'})">${char.name}</span>
+            </div>
+            <div class="detail-motto">${char.motto}</div>
+            <div class="detail-grid">${sectionsHtml}</div>
+        </div>
+    `;
+
+    panel.classList.add('visible');
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-function pauseTimer() {
-  clearInterval(timerInterval);
-  timerRunning = false;
-  document.getElementById('timer-start').textContent = 'Start';
+function hideDetail() {
+    const panel = document.getElementById('detailPanel');
+    panel.classList.remove('visible');
+    document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
 }
 
-function resetTimer() {
-  clearInterval(timerInterval);
-  timerRunning = false;
-  timerRemaining = timerSeconds;
-  updateTimerDisplay();
-  document.getElementById('timer-start').textContent = 'Start';
-}
-
-function nextDriver() {
-  currentDriverIndex = (currentDriverIndex + 1) % Math.max(team.length, 1);
-  resetTimer();
-  updateDriverLabel();
-  // Subtle haptic-like flash
-  const display = document.getElementById('timer-display');
-  display.style.transition = 'none';
-  display.style.color = 'var(--accent)';
-  setTimeout(() => { display.style.transition = 'color 0.5s'; display.style.color = ''; }, 50);
-}
-
-function addMember() {
-  const input = document.getElementById('new-member');
-  const name = input.value.trim();
-  if (!name) return;
-  team.push(name);
-  input.value = '';
-  renderTeam();
-  updateDriverLabel();
-}
-
-function removeMember(index) {
-  team.splice(index, 1);
-  if (currentDriverIndex >= team.length) currentDriverIndex = 0;
-  renderTeam();
-  updateDriverLabel();
-}
-
-function renderTeam() {
-  const list = document.getElementById('team-list');
-  list.innerHTML = team.map((name, i) => `
-    <div style="display:inline-flex; align-items:center; gap:6px; padding:8px 14px; background:${i === currentDriverIndex % team.length ? 'var(--accent-light)' : 'var(--surface)'}; border:1px solid var(--border); border-radius:20px; font-size:14px; font-weight:${i === currentDriverIndex % team.length ? '700' : '500'}; cursor:pointer; min-height:44px;" onclick="removeMember(${i})" title="Click to remove">
-      ${i === currentDriverIndex % team.length ? '<span style="color:var(--accent);">&bull;</span>' : ''}${name} <span style="color:var(--ink-faint); font-size:12px;">&times;</span>
-    </div>
-  `).join('');
-}
-
-updateTimerDisplay();
-
-// ── Hypothesis generator ──
-function generateHypothesis() {
-  const v = id => document.getElementById(id).value;
-  const practice = v('exp-practice') || '[mob practice]';
-  const context = v('exp-context') || '[specific context]';
-  const outcome = v('exp-outcome') || '[measurable outcome]';
-  const reasoning = v('exp-reasoning') || '[reasoning]';
-  const trueSignal = v('exp-true') || '[observable signal]';
-  const falseSignal = v('exp-false') || '[observable signal]';
-
-  const text = `We believe that ${practice}\napplied to ${context}\nwill result in ${outcome}\nbecause ${reasoning}.\n\nWe will know this is TRUE when ${trueSignal}.\nWe will know this is FALSE when ${falseSignal}.`;
-
-  const output = document.getElementById('hypothesis-output');
-  output.style.display = 'block';
-  output.innerHTML = `<div class="hypothesis-out">
-    <button class="copy-btn" onclick="copyHypothesis()">Copy</button>
-    <p>We believe that <strong>${practice}</strong></p>
-    <p>applied to <strong>${context}</strong></p>
-    <p>will result in <strong>${outcome}</strong></p>
-    <p>because <em>${reasoning}</em>.</p>
-    <br>
-    <p>We will know this is <span style="color:var(--green); font-weight:600;">TRUE</span> when ${trueSignal}.</p>
-    <p>We will know this is <span style="color:var(--red); font-weight:600;">FALSE</span> when ${falseSignal}.</p>
-  </div>`;
-  output.dataset.text = text;
-  output.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
-
-function copyHypothesis() {
-  const text = document.getElementById('hypothesis-output').dataset.text;
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.querySelector('.copy-btn');
-    btn.textContent = 'Copied!';
-    setTimeout(() => btn.textContent = 'Copy', 1500);
-  });
-}
-
-// ── Safe-to-try checks ──
 function toggleCheck(el) {
-  const states = ['pending', 'passed', 'failed'];
-  const current = el.dataset.state;
-  const next = states[(states.indexOf(current) + 1) % 3];
-  el.dataset.state = next;
-  el.className = 'check-row ' + (next === 'pending' ? '' : next);
-  el.querySelector('.check-icon').textContent = next === 'passed' ? '\u2713' : next === 'failed' ? '\u2717' : '';
-  updateVerdict();
+    el.classList.toggle('checked');
 }
 
-function updateVerdict() {
-  const checks = document.querySelectorAll('.check-row');
-  let passed = 0, failed = 0, pending = 0;
-  checks.forEach(c => { const s = c.dataset.state; if (s==='passed') passed++; else if (s==='failed') failed++; else pending++; });
-  const v = document.getElementById('verdict');
-  if (pending > 0) { v.className = 'verdict pending'; v.textContent = `${passed}/5 checks complete \u2014 ${pending} remaining`; }
-  else if (failed > 0) { v.className = 'verdict unsafe'; v.textContent = `Not safe to try \u2014 ${failed} check(s) failed. Address before proceeding.`; }
-  else { v.className = 'verdict safe'; v.textContent = 'Safe to try \u2014 All 5 checks passed. Run the experiment.'; }
-}
+// Close detail on escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') hideDetail();
+});
 </script>
+
 </body>
 </html>

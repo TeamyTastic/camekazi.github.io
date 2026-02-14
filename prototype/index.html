@@ -7,30 +7,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0f1114;
-            --surface: #181b20;
-            --surface-raised: #1f2329;
-            --surface-hover: #262b33;
-            --border: #2a2f38;
-            --border-light: #353b46;
-            --ink: #e8e6e1;
-            --ink-muted: #9a9690;
-            --ink-dim: #5e5a54;
-            --accent-gold: #c9a84c;
-            --accent-gold-dim: rgba(201, 168, 76, 0.15);
-            --accent-gold-glow: rgba(201, 168, 76, 0.08);
-            --hero-red: #c75450;
-            --hero-red-dim: rgba(199, 84, 80, 0.12);
-            --ironist-teal: #4ca6a0;
-            --ironist-teal-dim: rgba(76, 166, 160, 0.12);
-            --game-amber: #c9a84c;
-            --game-amber-dim: rgba(201, 168, 76, 0.12);
-            --role-slate: #7a8ba8;
-            --role-slate-dim: rgba(122, 139, 168, 0.12);
-            --exhaust-ember: #a0604a;
-            --exhaust-ember-dim: rgba(160, 96, 74, 0.12);
-            --confused-violet: #8a72b0;
-            --confused-violet-dim: rgba(138, 114, 176, 0.12);
+            --bg: #faf9f7;
+            --surface: #ffffff;
+            --surface-raised: #f4f3f0;
+            --surface-hover: #eeedea;
+            --border: #ddd9d3;
+            --border-light: #c8c3bb;
+            --ink: #1a1a1a;
+            --ink-muted: #555048;
+            --ink-dim: #8a847c;
+            --accent-gold: #96772a;
+            --accent-gold-dim: rgba(150, 119, 42, 0.1);
+            --accent-gold-glow: rgba(150, 119, 42, 0.06);
+            --hero-red: #a83a36;
+            --hero-red-dim: rgba(168, 58, 54, 0.08);
+            --ironist-teal: #2e7f7a;
+            --ironist-teal-dim: rgba(46, 127, 122, 0.07);
+            --game-amber: #96772a;
+            --game-amber-dim: rgba(150, 119, 42, 0.08);
+            --role-slate: #506888;
+            --role-slate-dim: rgba(80, 104, 136, 0.07);
+            --exhaust-ember: #8a4a34;
+            --exhaust-ember-dim: rgba(138, 74, 52, 0.07);
+            --confused-violet: #6a5290;
+            --confused-violet-dim: rgba(106, 82, 144, 0.07);
             --font-serif: 'Instrument Serif', Georgia, serif;
             --font-sans: 'DM Sans', -apple-system, sans-serif;
             --font-mono: 'JetBrains Mono', monospace;
@@ -294,29 +294,29 @@
         }
 
         /* Node colors */
-        .node-hero .node-inner { background: var(--hero-red-dim); border-color: rgba(199,84,80,0.35); color: var(--hero-red); }
-        .node-hero:hover .node-inner, .node-hero.active .node-inner { border-color: var(--hero-red); box-shadow: 0 0 24px rgba(199,84,80,0.15); }
-        .node-hero .node-name { color: #e07a77; }
+        .node-hero .node-inner { background: var(--hero-red-dim); border-color: rgba(168,58,54,0.25); color: var(--hero-red); }
+        .node-hero:hover .node-inner, .node-hero.active .node-inner { border-color: var(--hero-red); box-shadow: 0 4px 20px rgba(168,58,54,0.1); }
+        .node-hero .node-name { color: #a83a36; }
 
-        .node-ironist .node-inner { background: var(--ironist-teal-dim); border-color: rgba(76,166,160,0.35); color: var(--ironist-teal); }
-        .node-ironist:hover .node-inner, .node-ironist.active .node-inner { border-color: var(--ironist-teal); box-shadow: 0 0 24px rgba(76,166,160,0.15); }
-        .node-ironist .node-name { color: #6dc4be; }
+        .node-ironist .node-inner { background: var(--ironist-teal-dim); border-color: rgba(46,127,122,0.25); color: var(--ironist-teal); }
+        .node-ironist:hover .node-inner, .node-ironist.active .node-inner { border-color: var(--ironist-teal); box-shadow: 0 4px 20px rgba(46,127,122,0.1); }
+        .node-ironist .node-name { color: #2e7f7a; }
 
-        .node-game .node-inner { background: var(--game-amber-dim); border-color: rgba(201,168,76,0.35); color: var(--game-amber); }
-        .node-game:hover .node-inner, .node-game.active .node-inner { border-color: var(--game-amber); box-shadow: 0 0 24px rgba(201,168,76,0.15); }
-        .node-game .node-name { color: #dfc06e; }
+        .node-game .node-inner { background: var(--game-amber-dim); border-color: rgba(150,119,42,0.25); color: var(--game-amber); }
+        .node-game:hover .node-inner, .node-game.active .node-inner { border-color: var(--game-amber); box-shadow: 0 4px 20px rgba(150,119,42,0.1); }
+        .node-game .node-name { color: #96772a; }
 
-        .node-role .node-inner { background: var(--role-slate-dim); border-color: rgba(122,139,168,0.35); color: var(--role-slate); }
-        .node-role:hover .node-inner, .node-role.active .node-inner { border-color: var(--role-slate); box-shadow: 0 0 24px rgba(122,139,168,0.15); }
-        .node-role .node-name { color: #9aabc6; }
+        .node-role .node-inner { background: var(--role-slate-dim); border-color: rgba(80,104,136,0.25); color: var(--role-slate); }
+        .node-role:hover .node-inner, .node-role.active .node-inner { border-color: var(--role-slate); box-shadow: 0 4px 20px rgba(80,104,136,0.1); }
+        .node-role .node-name { color: #506888; }
 
-        .node-exhaust .node-inner { background: var(--exhaust-ember-dim); border-color: rgba(160,96,74,0.35); color: var(--exhaust-ember); }
-        .node-exhaust:hover .node-inner, .node-exhaust.active .node-inner { border-color: var(--exhaust-ember); box-shadow: 0 0 24px rgba(160,96,74,0.15); }
-        .node-exhaust .node-name { color: #c48068; }
+        .node-exhaust .node-inner { background: var(--exhaust-ember-dim); border-color: rgba(138,74,52,0.25); color: var(--exhaust-ember); }
+        .node-exhaust:hover .node-inner, .node-exhaust.active .node-inner { border-color: var(--exhaust-ember); box-shadow: 0 4px 20px rgba(138,74,52,0.1); }
+        .node-exhaust .node-name { color: #8a4a34; }
 
-        .node-confused .node-inner { background: var(--confused-violet-dim); border-color: rgba(138,114,176,0.35); color: var(--confused-violet); }
-        .node-confused:hover .node-inner, .node-confused.active .node-inner { border-color: var(--confused-violet); box-shadow: 0 0 24px rgba(138,114,176,0.15); }
-        .node-confused .node-name { color: #a690c8; }
+        .node-confused .node-inner { background: var(--confused-violet-dim); border-color: rgba(106,82,144,0.25); color: var(--confused-violet); }
+        .node-confused:hover .node-inner, .node-confused.active .node-inner { border-color: var(--confused-violet); box-shadow: 0 4px 20px rgba(106,82,144,0.1); }
+        .node-confused .node-name { color: #6a5290; }
 
         /* Node positions */
         .node-hero { top: 10%; left: 4%; }
@@ -442,7 +442,7 @@
             font-size: 15px;
             color: var(--ink);
             padding: 10px 14px;
-            background: rgba(255,255,255,0.03);
+            background: rgba(0,0,0,0.02);
             border-radius: 6px;
             border-left: 2px solid var(--border-light);
         }
@@ -463,7 +463,7 @@
             font-family: var(--font-mono);
             font-size: 11px;
             padding: 3px 8px;
-            background: rgba(255,255,255,0.04);
+            background: rgba(0,0,0,0.03);
             border-radius: 4px;
             color: var(--ink-muted);
         }
@@ -590,18 +590,18 @@
             padding: 3px 8px;
             border-radius: 4px;
         }
-        .rsc-badge-run { background: rgba(86, 170, 110, 0.15); color: #56aa6e; }
-        .rsc-badge-serve { background: rgba(106, 140, 200, 0.15); color: #6a8cc8; }
-        .rsc-badge-change { background: rgba(200, 140, 86, 0.15); color: #c88c56; }
+        .rsc-badge-run { background: rgba(45, 122, 74, 0.12); color: #2d7a4a; }
+        .rsc-badge-serve { background: rgba(58, 98, 152, 0.12); color: #3a6298; }
+        .rsc-badge-change { background: rgba(138, 96, 32, 0.12); color: #8a6020; }
 
         .rsc-col h4 {
             font-family: var(--font-serif);
             font-size: 20px;
             font-weight: 400;
         }
-        .rsc-col-run h4 { color: #6bc488; }
-        .rsc-col-serve h4 { color: #82a4d8; }
-        .rsc-col-change h4 { color: #d8a470; }
+        .rsc-col-run h4 { color: #2d7a4a; }
+        .rsc-col-serve h4 { color: #3a6298; }
+        .rsc-col-change h4 { color: #8a6020; }
 
         .rsc-defn {
             font-family: var(--font-serif);
@@ -624,7 +624,7 @@
             color: var(--ink-dim);
             line-height: 1.55;
             padding: 10px 12px;
-            background: rgba(255,255,255,0.02);
+            background: rgba(0,0,0,0.02);
             border-radius: 6px;
             border-left: 2px solid var(--border);
         }
@@ -685,9 +685,9 @@
             letter-spacing: 0.5px;
             transition: flex 0.4s ease;
         }
-        .fractal-seg-run { background: rgba(86,170,110,0.2); color: #6bc488; }
-        .fractal-seg-serve { background: rgba(106,140,200,0.2); color: #82a4d8; }
-        .fractal-seg-change { background: rgba(200,140,86,0.2); color: #d8a470; }
+        .fractal-seg-run { background: rgba(45,122,74,0.12); color: #2d7a4a; }
+        .fractal-seg-serve { background: rgba(58,98,152,0.12); color: #3a6298; }
+        .fractal-seg-change { background: rgba(138,96,32,0.12); color: #8a6020; }
 
         .fractal-note {
             font-size: 11px;
@@ -737,6 +737,7 @@
         /* RSC → Character connection */
         .rsc-char-table {
             width: 100%;
+            min-width: 620px;
             border-collapse: collapse;
             font-size: 13px;
             margin-top: 8px;
@@ -755,7 +756,7 @@
 
         .rsc-char-table td {
             padding: 10px 12px;
-            border-bottom: 1px solid rgba(42,47,56,0.5);
+            border-bottom: 1px solid var(--border);
             color: var(--ink-muted);
             vertical-align: top;
             line-height: 1.5;
@@ -891,17 +892,17 @@
         }
 
         .warning-card.w-hero { border-left-color: var(--hero-red); }
-        .warning-card.w-hero h4 { color: #e07a77; }
+        .warning-card.w-hero h4 { color: #a83a36; }
         .warning-card.w-role { border-left-color: var(--role-slate); }
-        .warning-card.w-role h4 { color: #9aabc6; }
+        .warning-card.w-role h4 { color: #506888; }
         .warning-card.w-exhaust { border-left-color: var(--exhaust-ember); }
-        .warning-card.w-exhaust h4 { color: #c48068; }
+        .warning-card.w-exhaust h4 { color: #8a4a34; }
         .warning-card.w-ironist { border-left-color: var(--ironist-teal); }
-        .warning-card.w-ironist h4 { color: #6dc4be; }
+        .warning-card.w-ironist h4 { color: #2e7f7a; }
         .warning-card.w-game { border-left-color: var(--game-amber); }
-        .warning-card.w-game h4 { color: #dfc06e; }
+        .warning-card.w-game h4 { color: #96772a; }
         .warning-card.w-confused { border-left-color: var(--confused-violet); }
-        .warning-card.w-confused h4 { color: #a690c8; }
+        .warning-card.w-confused h4 { color: #6a5290; }
 
         /* === FOOTER === */
         .footer {
@@ -924,6 +925,94 @@
         }
         .footer a:hover { text-decoration: underline; }
 
+        /* === MOBILE MAP (grouped cards) === */
+        .mobile-map { display: none; }
+
+        .mobile-zone {
+            margin-bottom: 20px;
+        }
+
+        .mobile-zone-header {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+            color: var(--ink-dim);
+            padding: 8px 0;
+            margin-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .mobile-zone-header .zone-arrow {
+            color: var(--accent-gold);
+            margin-right: 4px;
+        }
+
+        .mobile-node {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .mobile-node:active {
+            transform: scale(0.98);
+        }
+
+        .mobile-node-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+            width: 40px;
+            text-align: center;
+        }
+
+        .mobile-node-text {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .mobile-node-name {
+            font-family: var(--font-serif);
+            font-size: 17px;
+            font-weight: 400;
+            line-height: 1.2;
+            margin-bottom: 3px;
+        }
+
+        .mobile-node-quote {
+            font-size: 13px;
+            color: var(--ink-dim);
+            font-style: italic;
+            line-height: 1.4;
+        }
+
+        .mobile-node-chevron {
+            color: var(--ink-dim);
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        /* Mobile node color accents */
+        .mobile-node-hero { border-left: 3px solid var(--hero-red); }
+        .mobile-node-hero .mobile-node-name { color: var(--hero-red); }
+        .mobile-node-ironist { border-left: 3px solid var(--ironist-teal); }
+        .mobile-node-ironist .mobile-node-name { color: var(--ironist-teal); }
+        .mobile-node-game { border-left: 3px solid var(--game-amber); }
+        .mobile-node-game .mobile-node-name { color: var(--game-amber); }
+        .mobile-node-role { border-left: 3px solid var(--role-slate); }
+        .mobile-node-role .mobile-node-name { color: var(--role-slate); }
+        .mobile-node-exhaust { border-left: 3px solid var(--exhaust-ember); }
+        .mobile-node-exhaust .mobile-node-name { color: var(--exhaust-ember); }
+        .mobile-node-confused { border-left: 3px solid var(--confused-violet); }
+        .mobile-node-confused .mobile-node-name { color: var(--confused-violet); }
+
         /* === MOBILE === */
         @media (max-width: 700px) {
             .header { padding: 40px 16px 16px; }
@@ -931,24 +1020,9 @@
             .axes-legend { flex-direction: column; padding: 0 16px; }
             .axis-label { max-width: 100%; }
 
-            .map-container { padding: 0 16px; }
-            .map {
-                aspect-ratio: auto;
-                min-height: 560px;
-                height: 620px;
-            }
-
-            .node-inner { min-width: 100px; padding: 10px 12px 8px; }
-            .node-name { font-size: 11px; }
-            .node-quote { font-size: 9.5px; max-width: 110px; }
-            .node-icon { font-size: 20px; }
-
-            .node-hero { top: 4%; left: 2%; }
-            .node-ironist { top: 20%; left: 16%; }
-            .node-game { top: 56%; left: 22%; }
-            .node-role { top: 72%; left: 42%; }
-            .node-exhaust { top: 4%; left: 64%; }
-            .node-confused { top: 50%; left: 66%; }
+            /* Hide spatial map, show grouped cards */
+            .map-container { display: none; }
+            .mobile-map { display: block; max-width: 600px; margin: 24px auto 0; padding: 0 16px; }
 
             .detail-grid { grid-template-columns: 1fr; }
             .detail-card { padding: 20px; }
@@ -957,8 +1031,11 @@
             .section { margin-top: 40px; }
             .physics-cards { grid-template-columns: 1fr; }
             .warning-grid { grid-template-columns: 1fr; }
+            .misalloc-grid { grid-template-columns: 1fr; }
 
-            .map-x-label, .map-y-label, .zone-label { display: none; }
+            .rsc-columns { grid-template-columns: 1fr; }
+            .rsc-col { border-right: none; border-bottom: 1px solid var(--border); }
+            .rsc-col:last-child { border-bottom: none; }
         }
     </style>
 </head>
@@ -1067,6 +1144,69 @@
                 <span class="node-name">The Cognitively<br>Confused</span>
                 <span class="node-quote">"I can't tell what's real anymore."</span>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- === MOBILE MAP (grouped by quadrant) === -->
+<div class="mobile-map">
+    <div class="mobile-zone">
+        <div class="mobile-zone-header"><span class="zone-arrow">&uarr;</span> High Contact + Fight</div>
+        <div class="mobile-node mobile-node-hero" onclick="showDetail('hero')">
+            <span class="mobile-node-icon">&#9876;</span>
+            <div class="mobile-node-text">
+                <div class="mobile-node-name">The Naive Hero</div>
+                <div class="mobile-node-quote">"If I just tell the truth clearly enough..."</div>
+            </div>
+            <span class="mobile-node-chevron">&rsaquo;</span>
+        </div>
+        <div class="mobile-node mobile-node-ironist" onclick="showDetail('ironist')">
+            <span class="mobile-node-icon">&#9883;</span>
+            <div class="mobile-node-text">
+                <div class="mobile-node-name">The Third-Way Ironist</div>
+                <div class="mobile-node-quote">"I see the theatre. I also see the work."</div>
+            </div>
+            <span class="mobile-node-chevron">&rsaquo;</span>
+        </div>
+    </div>
+
+    <div class="mobile-zone">
+        <div class="mobile-zone-header"><span class="zone-arrow">&darr;</span> Low Contact + Fit</div>
+        <div class="mobile-node mobile-node-game" onclick="showDetail('game')">
+            <span class="mobile-node-icon">&#9812;</span>
+            <div class="mobile-node-text">
+                <div class="mobile-node-name">The Ambitious Game-Player</div>
+                <div class="mobile-node-quote">"If legitimacy is the currency..."</div>
+            </div>
+            <span class="mobile-node-chevron">&rsaquo;</span>
+        </div>
+        <div class="mobile-node mobile-node-role" onclick="showDetail('role')">
+            <span class="mobile-node-icon">&#127917;</span>
+            <div class="mobile-node-text">
+                <div class="mobile-node-name">The Adaptive Role-Actor</div>
+                <div class="mobile-node-quote">"Tell me what success looks like..."</div>
+            </div>
+            <span class="mobile-node-chevron">&rsaquo;</span>
+        </div>
+    </div>
+
+    <div class="mobile-zone">
+        <div class="mobile-zone-header"><span class="zone-arrow">&rarr;</span> Freeze / Flee</div>
+        <div class="mobile-node mobile-node-exhaust" onclick="showDetail('exhaust')">
+            <span class="mobile-node-icon">&#9790;</span>
+            <div class="mobile-node-text">
+                <div class="mobile-node-name">The Emotionally Exhausted</div>
+                <div class="mobile-node-quote">"I can't carry another ounce of this."</div>
+            </div>
+            <span class="mobile-node-chevron">&rsaquo;</span>
+        </div>
+        <div class="mobile-node mobile-node-confused" onclick="showDetail('confused')">
+            <span class="mobile-node-icon">&#10070;</span>
+            <div class="mobile-node-text">
+                <div class="mobile-node-name">The Cognitively Confused</div>
+                <div class="mobile-node-quote">"I can't tell what's real anymore."</div>
+            </div>
+            <span class="mobile-node-chevron">&rsaquo;</span>
         </div>
     </div>
 </div>
@@ -1407,6 +1547,9 @@
         Based on Richard Claydon, <em>"The Six Survival Characters of Organisational Incoherence,"</em><br>
         <a href="https://richardclaydon.substack.com/" target="_blank" rel="noopener">Leadership, Rewritten</a>, 2025.
         &nbsp;&middot;&nbsp; Diagnostic tool, not a personality model.
+    </p>
+    <p style="margin-top: 10px; font-size: 12px; opacity: 0.6;">
+        Created by ewancameron@gmail.com 🤖
     </p>
 </div>
 
