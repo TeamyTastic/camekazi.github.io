@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MOB — AI-Collaborative Session Designer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #f5f0e8;
+  --ink: #1a1a1a;
+  --ink-dim: #6b6b6b;
+  --ink-faint: #a0a0a0;
+  --paper: #fffcf5;
+  --warm: #e8dfd0;
+  --accent: #c2410c;
+  --accent-light: #fed7aa;
+  --accent-glow: rgba(194, 65, 12, 0.12);
+  --teal: #0d9488;
+  --teal-light: #ccfbf1;
+  --green: #16a34a;
+  --green-light: #dcfce7;
+  --amber: #d97706;
+  --amber-light: #fef3c7;
+  --red: #dc2626;
+  --red-light: #fecaca;
+  --violet: #7c3aed;
+  --violet-light: #ede9fe;
+  --surface: #ffffff;
+  --border: rgba(0,0,0,0.08);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --serif: 'Instrument Serif', Georgia, serif;
+  --sans: 'DM Sans', -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--sans);
+  background: var(--cream);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-size: 15px;
+  line-height: 1.65;
+  /* subtle grain */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+::selection { background: var(--accent-light); color: var(--ink); }
+
+/* ── Navigation ── */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(245, 240, 232, 0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 20px;
+  display: flex; align-items: center; gap: 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.nav::-webkit-scrollbar { display: none; }
+.nav-brand {
+  font-family: var(--serif);
+  font-size: 22px;
+  color: var(--accent);
+  margin-right: 12px;
+  flex-shrink: 0;
+  letter-spacing: -0.5px;
+}
+.nav-tab {
+  padding: 7px 16px;
+  border-radius: 24px;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink-dim);
+  transition: all 0.25s ease;
+  min-height: 44px;
+  display: flex; align-items: center;
+}
+.nav-tab:hover { color: var(--ink); background: rgba(0,0,0,0.04); }
+.nav-tab.active {
+  background: var(--ink);
+  color: var(--cream);
+  font-weight: 600;
+}
+
+/* ── Layout ── */
+.section {
+  display: none;
+  padding: 40px 24px 120px;
+  max-width: 780px;
+  margin: 0 auto;
+  animation: fadeUp 0.4s ease;
+}
+.section.active { display: block; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Typography ── */
+h1 {
+  font-family: var(--serif);
+  font-size: 42px;
+  font-weight: 400;
+  line-height: 1.15;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+h2 {
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 400;
+  margin: 40px 0 16px;
+  color: var(--ink);
+  line-height: 1.2;
+}
+h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 24px 0 8px;
+  letter-spacing: -0.2px;
+}
+.subtitle {
+  color: var(--ink-dim);
+  font-size: 16px;
+  margin-bottom: 32px;
+  max-width: 540px;
+}
+p { margin-bottom: 14px; }
+strong { font-weight: 600; }
+code {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: rgba(0,0,0,0.05);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* ── Hero card ── */
+.hero-card {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 32px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+.hero-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--teal));
+}
+.hero-quote {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 22px;
+  line-height: 1.45;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+.hero-attribution {
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+/* ── Cards ── */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.25s ease;
+}
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+/* ── Tables ── */
+.table-wrap { overflow-x: auto; margin: 16px 0 24px; border-radius: var(--radius); border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th {
+  text-align: left; padding: 12px 16px;
+  background: var(--cream);
+  font-weight: 600; font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--ink-dim);
+  border-bottom: 2px solid var(--border);
+}
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  background: var(--surface);
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--accent-glow); }
+
+/* ── Role Cards ── */
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 14px;
+  margin: 16px 0 28px;
+}
+.role-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 20px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.role-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px; height: 100%;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.role-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+.role-card:hover::after { opacity: 1; }
+.role-name {
+  font-family: var(--serif);
+  font-size: 20px;
+  margin-bottom: 2px;
+}
+.role-level {
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 10px;
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.lvl-1 { background: var(--accent-light); color: var(--accent); }
+.lvl-2 { background: var(--teal-light); color: var(--teal); }
+.lvl-3 { background: var(--amber-light); color: var(--amber); }
+.lvl-4 { background: var(--violet-light); color: var(--violet); }
+.role-desc { font-size: 13px; color: var(--ink-dim); line-height: 1.6; }
+.role-ai {
+  display: inline-block; font-size: 11px; font-weight: 600;
+  padding: 3px 10px; border-radius: 12px; margin-top: 10px;
+}
+.role-ai.yes { background: var(--green-light); color: var(--green); }
+.role-ai.partial { background: var(--amber-light); color: var(--amber); }
+.role-ai.no { background: var(--red-light); color: var(--red); }
+
+/* ── Working Timer ── */
+.timer-container {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  margin: 20px 0 32px;
+}
+.timer-display {
+  font-family: var(--mono);
+  font-size: 72px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 16px 0;
+  letter-spacing: -2px;
+  transition: color 0.3s;
+}
+.timer-display.warning { color: var(--amber); }
+.timer-display.critical { color: var(--red); animation: pulse 1s ease infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+.timer-label {
+  font-family: var(--serif);
+  font-size: 18px;
+  color: var(--ink-dim);
+  margin-bottom: 4px;
+}
+.timer-driver {
+  font-size: 14px;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+.timer-controls { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.timer-presets { display: flex; gap: 6px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+.timer-preset {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--cream);
+  color: var(--ink-dim);
+  transition: all 0.2s;
+  min-height: 44px;
+  display: flex; align-items: center;
+}
+.timer-preset:hover, .timer-preset.active { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+
+/* ── Progression chart ── */
+.progression {
+  display: flex; gap: 6px; align-items: end;
+  margin: 20px 0;
+  height: 100px;
+  padding: 0 4px;
+}
+.prog-bar {
+  flex: 1;
+  border-radius: 8px 8px 0 0;
+  display: flex; flex-direction: column;
+  justify-content: end; align-items: center;
+  padding: 8px 4px;
+  font-size: 13px; font-weight: 600;
+  color: var(--surface);
+  transition: all 0.4s ease;
+  cursor: pointer;
+  min-height: 30px;
+}
+.prog-bar span {
+  font-size: 10px; font-weight: 500;
+  opacity: 0.8;
+  margin-top: 4px;
+  text-align: center;
+}
+
+/* ── Even/Over ── */
+.eo-grid {
+  display: flex; flex-direction: column; gap: 0;
+}
+.eo-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.2s ease;
+}
+.eo-row:last-child { border-bottom: none; }
+.eo-row:hover { background: rgba(194, 65, 12, 0.03); }
+.eo-even {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 20px; font-weight: 400;
+  text-align: right;
+  color: var(--ink);
+  padding-right: 16px;
+  line-height: 1.2;
+}
+.eo-divider {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 0 8px;
+}
+.eo-divider-word {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent);
+  opacity: 0.7;
+}
+.eo-divider-line {
+  width: 1px; height: 18px;
+  background: var(--accent);
+  opacity: 0.25;
+}
+.eo-over {
+  font-size: 14px;
+  color: var(--ink-dim);
+  padding-left: 16px;
+  line-height: 1.3;
+}
+.eo-wrapper {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.eo-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  padding: 10px 20px 8px;
+  border-bottom: 1px solid var(--border);
+  background: var(--cream);
+}
+.eo-header-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--ink-faint);
+}
+.eo-header-label:first-child { text-align: right; padding-right: 24px; }
+.eo-header-label:last-child { padding-left: 24px; }
+.eo-footer {
+  padding: 10px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--cream);
+  font-size: 11px;
+  color: var(--ink-faint);
+  text-align: center;
+  font-style: italic;
+}
+
+/* ── Experiment ── */
+.input-group { margin-bottom: 18px; }
+.input-group label {
+  display: block;
+  font-size: 11px; font-weight: 700;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.input-group input, .input-group textarea {
+  width: 100%;
+  background: var(--cream);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  color: var(--ink);
+  font-size: 15px;
+  font-family: var(--sans);
+  outline: none;
+  transition: all 0.25s;
+}
+.input-group input:focus, .input-group textarea:focus {
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.input-group input::placeholder, .input-group textarea::placeholder {
+  color: var(--ink-faint);
+}
+textarea { resize: vertical; min-height: 80px; }
+
+.check-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: all 0.25s;
+  min-height: 44px;
+}
+.check-row:hover { background: var(--cream); }
+.check-icon {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--ink-faint);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700;
+  transition: all 0.3s;
+  flex-shrink: 0;
+}
+.check-row.passed .check-icon {
+  border-color: var(--green);
+  background: var(--green-light);
+  color: var(--green);
+}
+.check-row.failed .check-icon {
+  border-color: var(--red);
+  background: var(--red-light);
+  color: var(--red);
+}
+.check-row.passed { border-color: rgba(22,163,74,0.2); }
+.check-row.failed { border-color: rgba(220,38,38,0.2); }
+.check-label { font-weight: 600; font-size: 15px; }
+.check-question { font-size: 13px; color: var(--ink-dim); }
+
+.verdict {
+  text-align: center;
+  padding: 24px;
+  border-radius: var(--radius);
+  font-size: 18px; font-weight: 700;
+  margin-top: 20px;
+  transition: all 0.4s;
+  font-family: var(--serif);
+}
+.verdict.safe { background: var(--green-light); color: var(--green); border: 2px solid rgba(22,163,74,0.3); }
+.verdict.unsafe { background: var(--red-light); color: var(--red); border: 2px solid rgba(220,38,38,0.3); }
+.verdict.pending { background: var(--cream); color: var(--ink-faint); border: 2px solid var(--border); }
+
+.hypothesis-out {
+  font-family: var(--serif);
+  font-size: 18px;
+  line-height: 1.7;
+  padding: 28px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+.hypothesis-out .copy-btn {
+  position: absolute; top: 12px; right: 12px;
+  padding: 6px 12px;
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--cream);
+  color: var(--ink-dim);
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.hypothesis-out .copy-btn:hover { background: var(--ink); color: var(--cream); }
+
+/* ── Flowchart ── */
+.flow {
+  display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+.flow-step {
+  padding: 10px 18px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 600;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.flow-arrow { color: var(--accent); font-size: 20px; font-weight: 300; }
+
+/* ── Blockquote ── */
+blockquote {
+  border-left: 3px solid var(--accent);
+  padding: 16px 20px;
+  margin: 20px 0;
+  background: var(--surface);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ink);
+  box-shadow: var(--shadow-sm);
+}
+blockquote cite {
+  display: block;
+  font-style: normal;
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--ink-faint);
+  margin-top: 8px;
+}
+
+/* ── Links ── */
+.link-card {
+  display: flex; gap: 14px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  text-decoration: none;
+  color: var(--ink);
+  border: 1px solid var(--border);
+  transition: all 0.25s;
+  align-items: center;
+}
+.link-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateX(4px);
+}
+.link-tag {
+  font-size: 9px; font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.tag-foundation { background: var(--accent-light); color: var(--accent); }
+.tag-ai { background: var(--teal-light); color: var(--teal); }
+.tag-game { background: var(--amber-light); color: var(--amber); }
+.tag-strategy { background: var(--green-light); color: var(--green); }
+.link-info { flex: 1; min-width: 0; }
+.link-title { font-weight: 600; font-size: 14px; }
+.link-url { font-size: 11px; color: var(--ink-faint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.25s;
+  font-family: var(--sans);
+  min-height: 44px;
+}
+.btn-primary {
+  background: var(--ink);
+  color: var(--cream);
+}
+.btn-primary:hover { background: #333; transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-accent {
+  background: var(--accent);
+  color: white;
+}
+.btn-accent:hover { background: #a33a0a; transform: translateY(-1px); }
+.btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+}
+.btn-ghost:hover { background: var(--ink); color: var(--cream); }
+
+/* ── Divider ── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 36px 0;
+}
+
+/* ── Stagger animation ── */
+.stagger > * {
+  opacity: 0;
+  animation: fadeUp 0.4s ease forwards;
+}
+.stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger > *:nth-child(8) { animation-delay: 0.4s; }
+
+@media (max-width: 640px) {
+  h1 { font-size: 30px; }
+  h2 { font-size: 22px; }
+  .hero-quote { font-size: 18px; }
+  .role-grid { grid-template-columns: 1fr; }
+  .eo-even { font-size: 16px; padding-right: 10px; }
+  .eo-over { font-size: 12px; padding-left: 10px; }
+  .eo-row { padding: 12px 14px; }
+  .eo-header { padding: 8px 14px 6px; }
+  .eo-header-label:first-child { padding-right: 18px; }
+  .eo-header-label:last-child { padding-left: 18px; }
+  .timer-display { font-size: 52px; }
+  .section { padding: 28px 16px 100px; }
+  .hero-card { padding: 24px; }
+}
+
+/* Safe localStorage wrapper */
+</style>
+<script>
+const storage = {
+  get: (k) => { try { return localStorage.getItem(k); } catch(e) { return null; } },
+  set: (k, v) => { try { localStorage.setItem(k, v); } catch(e) {} },
+  remove: (k) => { try { localStorage.removeItem(k); } catch(e) {} }
+};
+</script>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">mob</div>
+  <div class="nav-tab active" data-tab="overview">Overview</div>
+  <div class="nav-tab" data-tab="roles">Roles</div>
+  <div class="nav-tab" data-tab="setup">Setup</div>
+  <div class="nav-tab" data-tab="timer">Timer</div>
+  <div class="nav-tab" data-tab="experiment">Experiment</div>
+  <div class="nav-tab" data-tab="rpg">RPG</div>
+  <div class="nav-tab" data-tab="links">Links</div>
+</nav>
+
+<!-- ═══════════ OVERVIEW ═══════════ -->
+<div class="section active" id="overview">
+  <div class="stagger">
+    <h1>AI-Collaborative<br>Mob Programming</h1>
+    <p class="subtitle">Whole team. Same thing. Same time. Same computer. With AI. A structured ritual for shared understanding.</p>
+
+    <div class="hero-card">
+      <div class="hero-quote">"For an idea to go from your head into the computer, it MUST go through someone else's hands."</div>
+      <div class="hero-attribution">Llewellyn Falco &mdash; The foundational constraint that makes mob programming a learning activity, not just a coding activity.</div>
+    </div>
+
+    <h2>The business why</h2>
+    <div class="flow">
+      <div class="flow-step">Mob with AI</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step">Shared understanding</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step">Break silos</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step">Maintain more apps (4&rarr;8+)</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step" style="border-color:var(--green); color:var(--green); font-weight:700;">Revenue diversification</div>
+    </div>
+
+    <blockquote>"If you've got the ability to keep ten of those apps in play, suddenly you've got a team able to maintain half a million ARR."<cite>Paul Cutting, Upscale BU</cite></blockquote>
+
+    <p>Not just for "new shiny stuff" &mdash; high value for <strong>legacy maintenance</strong> and <strong>bug fixes</strong> where context has drifted.</p>
+
+    <h2>The AI literacy why</h2>
+    <p style="font-size:13px; color:var(--ink-dim); margin-bottom:14px;">Gartner (Carlton Sapp, 2025): enterprises need Human-AI Collaboration Curricula with 6 domains. Mob programming delivers all 6 by design.</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Gartner domain</th><th>How mob delivers it</th></tr>
+        <tr><td><strong>Workflow integration</strong></td><td>Learning embedded in real work &mdash; not a separate training day</td></tr>
+        <tr><td><strong>Collaborative outcomes</strong></td><td>Tickets resolved, ramp-up time, shared understanding &mdash; all measurable</td></tr>
+        <tr><td><strong>Supervision &amp; observability</strong></td><td>Whole team watches AI output &mdash; humans-in-the-loop by default</td></tr>
+        <tr><td><strong>Knowledge expansion</strong></td><td>Every rotation transfers AI prompting patterns between people</td></tr>
+        <tr><td><strong>Role-based upskilling</strong></td><td>RPG levels + 5 AI-adapted roles = structured progression paths</td></tr>
+        <tr><td><strong>Executive AI governance</strong></td><td>Red Team role explicitly critiques AI output; deliberateness over impulsiveness</td></tr>
+      </table>
+    </div>
+    <blockquote>"Human-AI collaboration curricula must be deployed the same way cybersecurity awareness training is &mdash; as a shared, measurable competency tied to business outcomes."<cite>Gartner, Build Human-AI Collaboration Curricula (2025)</cite></blockquote>
+    <p style="font-size:13px; color:var(--ink-dim);">Gartner recommends <strong>tiered learning journeys</strong> (multiple paths to same standard), <strong>hands-on training</strong> (hackathons, AI labs), and <strong>embedding learning into daily workflows</strong>. Mob programming is all three at once.</p>
+
+    <hr class="divider">
+
+    <h2>Even/over framing</h2>
+    <p style="font-size:13px; color:var(--ink-dim); margin-bottom:18px;">When these are in tension, the left side wins &mdash; but acknowledge the cost on the right. Both sides are valuable; this is a priority declaration, not a judgment.</p>
+
+    <div class="eo-wrapper">
+      <div class="eo-header">
+        <span class="eo-header-label">Prioritise</span>
+        <span></span>
+        <span class="eo-header-label">Acknowledge cost</span>
+      </div>
+      <div class="eo-grid">
+        <div class="eo-row"><div class="eo-even">Shared understanding</div><div class="eo-divider"><div class="eo-divider-line"></div><div class="eo-divider-word">even over</div><div class="eo-divider-line"></div></div><div class="eo-over">Individual speed</div></div>
+        <div class="eo-row"><div class="eo-even">Exploration</div><div class="eo-divider"><div class="eo-divider-line"></div><div class="eo-divider-word">even over</div><div class="eo-divider-line"></div></div><div class="eo-over">Execution</div></div>
+        <div class="eo-row"><div class="eo-even">Deliberateness</div><div class="eo-divider"><div class="eo-divider-line"></div><div class="eo-divider-word">even over</div><div class="eo-divider-line"></div></div><div class="eo-over">Velocity</div></div>
+        <div class="eo-row"><div class="eo-even">Multiple perspectives</div><div class="eo-divider"><div class="eo-divider-line"></div><div class="eo-divider-word">even over</div><div class="eo-divider-line"></div></div><div class="eo-over">Single ownership</div></div>
+        <div class="eo-row"><div class="eo-even">Learning</div><div class="eo-divider"><div class="eo-divider-line"></div><div class="eo-divider-word">even over</div><div class="eo-divider-line"></div></div><div class="eo-over">Pure output</div></div>
+      </div>
+      <div class="eo-footer">Source: Even/Over Statements &mdash; Jurriaan Kamer / The Ready</div>
+    </div>
+
+    <hr class="divider">
+
+    <h2>Evidence from the field</h2>
+    <div class="card">
+      <h3>Crisp (Sweden) &mdash; Daily 3hr sessions</h3>
+      <p>AI as "superintelligent advisor &mdash; always available, never tired." Eliminated code reviews, removed key-person dependencies, reduced technical debt.</p>
+      <p><strong>"We tried splitting up to hit a deadline, but reintegration was painful. We're faster together."</strong></p>
+    </div>
+    <div class="card">
+      <h3>Atlassian &mdash; Define &rarr; Spec &rarr; Generate &rarr; Review &rarr; Iterate</h3>
+      <p>2&ndash;4 developers with rotating facilitator. Features in 1&ndash;2 days vs typical week. AI draft accuracy: ~50% &rarr; ~80% by project end.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ ROLES ═══════════ -->
+<div class="section" id="roles">
+  <h1>Roles</h1>
+  <p class="subtitle">5 roles for AI-collaborative sessions. Minimum 2 humans &mdash; AI augments, doesn't replace the social learning.</p>
+
+  <h2>AI-adapted roles</h2>
+  <div class="role-grid stagger">
+    <div class="role-card">
+      <div class="role-name">Driver</div>
+      <div class="role-desc">Types prompts, presses buttons. Does NOT decide what to create &mdash; only implements what the Navigator describes.</div>
+      <div class="role-ai no">Human only</div>
+    </div>
+    <div class="role-card">
+      <div class="role-name">Facilitator</div>
+      <div class="role-desc">Runs timer, tracks rotation, calls breaks. Key question: "Are we stuck?"</div>
+      <div class="role-ai partial">AI: partial</div>
+    </div>
+    <div class="role-card">
+      <div class="role-name">Subject Matter Expert</div>
+      <div class="role-desc">Brings business context the AI lacks. Domain knowledge, user stories, edge cases.</div>
+      <div class="role-ai no">Human only</div>
+    </div>
+    <div class="role-card">
+      <div class="role-name">Red Team</div>
+      <div class="role-desc">Critiques output, pokes holes, challenges assumptions. "What could go wrong?"</div>
+      <div class="role-ai yes">AI: yes</div>
+    </div>
+    <div class="role-card">
+      <div class="role-name">Outcome Keeper</div>
+      <div class="role-desc">Stays on mission, prevents AI tangents. "Is this still solving our problem?"</div>
+      <div class="role-ai partial">AI: partial</div>
+    </div>
+  </div>
+
+  <h2>AI integration models</h2>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Model</th><th>Who does what</th><th>Best for</th></tr>
+      <tr><td><strong>Copilot</strong></td><td>Driver uses AI suggestions, mob validates</td><td>Teams already comfortable mobbing</td></tr>
+      <tr><td><strong>Draft Generator</strong></td><td>AI writes first draft, mob reviews/refines</td><td>New codebases, specs-heavy work</td></tr>
+      <tr><td><strong>Red Team</strong></td><td>Mob writes, AI critiques</td><td>Learning, quality focus</td></tr>
+      <tr><td><strong>Observer</strong></td><td>Meta-AI watches mob, surfaces patterns</td><td>"Another AI watching us using AI"</td></tr>
+    </table>
+  </div>
+
+  <h2>Classic mob roles</h2>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Role</th><th>Function</th><th>Key rule</th></tr>
+      <tr><td><strong>Driver</strong></td><td>Hands on keyboard. Translates spoken ideas into code.</td><td>Doesn't decide what to create</td></tr>
+      <tr><td><strong>Navigator</strong></td><td>Strategic thinking. Describes next steps verbally.</td><td>Person with the idea navigates, doesn't drive</td></tr>
+      <tr><td><strong>Mobber</strong></td><td>Contributes ideas, asks questions, researches.</td><td>Yield to less-privileged voices</td></tr>
+      <tr><td><strong>Researcher</strong></td><td>Finds docs, blog posts, code examples in parallel.</td><td>Share findings, don't hoard</td></tr>
+      <tr><td><strong>Facilitator</strong></td><td>Timer, rotation, breaks.</td><td>"Are we stuck?" is the key question</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════ SETUP ═══════════ -->
+<div class="section" id="setup">
+  <h1>Session Setup</h1>
+  <p class="subtitle">Practical setup &mdash; physical, remote, cadence, ground rules.</p>
+
+  <h2>Timer progression</h2>
+  <div class="progression">
+    <div class="prog-bar" style="height:32%; background: linear-gradient(to top, var(--accent), #f97316);" onclick="setTimer(300)">4-5m<span>First session</span></div>
+    <div class="prog-bar" style="height:55%; background: linear-gradient(to top, var(--accent), #ea580c);" onclick="setTimer(600)">7-10m<span>Week 1-2</span></div>
+    <div class="prog-bar" style="height:80%; background: linear-gradient(to top, var(--teal), #0d9488);" onclick="setTimer(900)">10-15m<span>Established</span></div>
+    <div class="prog-bar" style="height:100%; background: linear-gradient(to top, var(--green), #16a34a);">Natural<span>Experienced</span></div>
+  </div>
+  <p style="font-size:13px; color:var(--ink-dim);">When the timer feels too short, you're at the right length. Click a bar to set the timer.</p>
+
+  <h2>Cadence options</h2>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Model</th><th>Schedule</th><th>Best for</th></tr>
+      <tr><td><strong>Full-time mob</strong></td><td>09:00&ndash;12:00 + 13:00&ndash;16:00 daily</td><td>Dedicated product teams (Crisp)</td></tr>
+      <tr><td><strong>Standing slot</strong></td><td>1&ndash;2 hours, 2&ndash;3x/week</td><td>Teams adopting gradually</td></tr>
+      <tr><td><strong>Experiment sprint</strong></td><td>1 week intensive</td><td>Proving the concept</td></tr>
+      <tr><td><strong>Ad-hoc</strong></td><td>Called for specific problems</td><td>Bug fixes, legacy ramp-up</td></tr>
+    </table>
+  </div>
+
+  <h2>Remote git handover</h2>
+  <div class="flow">
+    <div class="flow-step" style="font-family:var(--mono); font-size:12px;">mob start</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">Work (10-15 min)</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step" style="font-family:var(--mono); font-size:12px;">mob next</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">Next driver pulls</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">Repeat&hellip;</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step" style="font-family:var(--mono); font-size:12px; border-color:var(--green); color:var(--green);">mob done</div>
+  </div>
+  <p style="font-size:14px;">WIP commits to a <code>mob-session</code> branch. Don't worry about commit messages mid-session. Squash at end.</p>
+
+  <h2>Ground rules &amp; psychological safety</h2>
+  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:14px;">Ground rules aren't bureaucracy &mdash; they're the <strong>safety infrastructure</strong> that makes real challenge possible. Without them, people self-censor. With them, people speak up.</p>
+
+  <h3 style="margin-top:20px; font-size:15px; color:var(--accent);">The foundation: Kindness, Consideration, Respect</h3>
+  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:10px;">Woody Zuill's core principle. Sounds obvious &mdash; but explicitly stating it changes behaviour. People who aren't naturally inclined to these quickly improve when the whole group commits.</p>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Value</th><th>In practice</th><th>Observable signal</th></tr>
+      <tr><td><strong>Kindness</strong></td><td>Concern for your mob &mdash; check in, notice when someone goes quiet</td><td>People name difficulty without being asked</td></tr>
+      <tr><td><strong>Respect</strong></td><td>Disagree with <em>ideas</em>, never attack <em>people</em></td><td>"I see it differently" not "that's wrong"</td></tr>
+      <tr><td><strong>Consideration</strong></td><td>Actively listen &mdash; let ideas finish before responding</td><td>People build on each other's suggestions</td></tr>
+    </table>
+  </div>
+
+  <h3 style="margin-top:24px; font-size:15px; color:var(--accent);">Working agreements</h3>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Agreement</th><th>Why it builds safety</th></tr>
+      <tr><td><strong>"Yes, and&hellip;"</strong></td><td>Build on what came before. No deleting and starting over when you take the keyboard.</td></tr>
+      <tr><td><strong>Strong-style navigation</strong></td><td>"For an idea to go from your head to the computer, it must go through someone else's hands." Decouples ego from execution.</td></tr>
+      <tr><td><strong>No devices</strong></td><td>Full attention = full belonging. Announce before session so people don't bring laptops.</td></tr>
+      <tr><td><strong>Debate in code, not in the abstract</strong></td><td>Two approaches? Try both. Data decides, not hierarchy. Removes "who's right" pressure.</td></tr>
+      <tr><td><strong>Chatham House Rule</strong></td><td>What's said in the mob stays in the mob. Mistakes are learning, not ammunition.</td></tr>
+      <tr><td><strong>Deliberateness over impulsiveness</strong></td><td>"Read the AI output together before we hit accept." Prevents reflexive shipping.</td></tr>
+    </table>
+  </div>
+
+  <h3 style="margin-top:24px; font-size:15px; color:var(--accent);">AI-specific safety additions</h3>
+  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:10px;">AI introduces new psychological risks &mdash; people feel exposed when they don't know how to prompt, or embarrassed when AI produces something better than they could.</p>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Agreement</th><th>The risk it addresses</th></tr>
+      <tr><td><strong>"No such thing as a bad prompt"</strong></td><td>Prompt shame &mdash; people won't experiment if they fear looking foolish</td></tr>
+      <tr><td><strong>Read output aloud together</strong></td><td>Prevents one person silently deciding if AI output is "good enough"</td></tr>
+      <tr><td><strong>Everyone gets a turn prompting</strong></td><td>AI-confident people dominate; novices never learn the feel of it</td></tr>
+      <tr><td><strong>"The AI is wrong until proven right"</strong></td><td>Removes authority bias &mdash; nobody defers to AI just because it sounds confident</td></tr>
+      <tr><td><strong>Name what you don't know</strong></td><td>AI makes knowledge gaps visible &mdash; normalise saying "I don't understand this output"</td></tr>
+    </table>
+  </div>
+
+  <h3 style="margin-top:24px; font-size:15px; color:var(--accent);">Facilitator: calibrating safety in real-time</h3>
+  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:10px;">Safety isn't a checkbox &mdash; it's a live reading. Watch for these signals and adjust.</p>
+  <div class="table-wrap">
+    <table>
+      <tr><th style="width:40%;">Shutdown signal</th><th style="width:60%;">Facilitator response</th></tr>
+      <tr><td>Silence after rotation &mdash; new driver freezes</td><td>Navigator: use <strong>Intention &rarr; Location &rarr; Details</strong> ("We want to add a test. Open the test file. Type&hellip;")</td></tr>
+      <tr><td>"Yes, but&hellip;" responses increasing</td><td>Name it: "I notice we're in 'yes but' mode &mdash; let's try the idea for 5 minutes and then evaluate"</td></tr>
+      <tr><td>One person hasn't spoken for 10+ minutes</td><td>"[Name], what are you seeing that we might be missing?"</td></tr>
+      <tr><td>Defensive body language after AI critique</td><td>"Remember: we're debugging the prompt, not the person who wrote it"</td></tr>
+      <tr><td>Someone apologises for a "bad" prompt</td><td>"That prompt taught us what the AI needs &mdash; that's exactly how this works"</td></tr>
+      <tr><td>Group defers to the most senior person</td><td>Rotate so junior person navigates next; enforce strong-style strictly</td></tr>
+    </table>
+  </div>
+  <blockquote>"Truth without safety creates trauma, not transformation. Safety doesn't eliminate discomfort &mdash; it <em>enables</em> it."<cite>Psychological Safety Calibration principle</cite></blockquote>
+  <p style="font-size:13px; color:var(--ink-dim);">For deeper assessment: rate the group on <strong>Attitudes</strong> (openness to challenge), <strong>Behaviours</strong> (do actions match stated values?), and <strong>Context</strong> (does the org reward truth-telling or peace-keeping?) on a 1&ndash;5 scale. Average above 3.5 = tread carefully with challenge intensity.</p>
+
+  <hr class="divider">
+
+  <h2>Mob as enabling constraints</h2>
+  <p>John Cutler: <em>"The thoughtful design and deployment of constraints is a superpower."</em> Every mob practice is a <strong>deliberately designed boundary</strong> that drives creativity rather than restricting it.</p>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Mob constraint</th><th>Enabling intent</th><th>Risk if misapplied</th></tr>
+      <tr><td><strong>Rotation timer</strong></td><td>Forces knowledge transfer through handover discomfort</td><td>Becomes performative &mdash; rotating without actually sharing context</td></tr>
+      <tr><td><strong>Strong-style</strong></td><td>"Ideas must go through someone else's hands" &mdash; prevents solo hero mode</td><td>Driver becomes passive typist; Navigator micromanages keystrokes</td></tr>
+      <tr><td><strong>Single computer</strong></td><td>Eliminates multitasking; forces shared attention</td><td>Boredom/disengagement when mobber role feels passive</td></tr>
+      <tr><td><strong>No backlogs of ideas</strong></td><td>Present-moment focus; decide what matters NOW</td><td>Valuable observations lost because no capture mechanism</td></tr>
+      <tr><td><strong>8-week experiment horizon</strong></td><td>Long enough to build skill, short enough to evaluate</td><td>Killed at week 2 because "it feels slower" (see Kamer Tip 6)</td></tr>
+    </table>
+  </div>
+  <blockquote>"Same constraint, dramatically different results. Context determines whether a deadline is a creative forcing function or a performative metric."<cite>John Cutler, TBM 386</cite></blockquote>
+  <p style="font-size:13px; color:var(--ink-dim);">Cutler's 4 signs of well-designed constraints: <strong>Clarity</strong> (easy to understand), <strong>Tension</strong> (requires ongoing judgment), <strong>Full-loop</strong> (connects back to learning), <strong>Active engagement</strong> (not bureaucratic hoops).</p>
+
+  <hr class="divider">
+
+  <h2>Warning stickers</h2>
+  <p>At session start, ask each participant: <strong>"What's your known risk in this kind of session?"</strong> Public self-declaration builds vulnerability and gives the group permission to name patterns when they appear.</p>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Risk</th><th>Antidote</th><th>Why it matters for safety</th></tr>
+      <tr><td>Analysis paralysis</td><td>"We decide in 5 minutes"</td><td>Perfectionism shuts others out &mdash; speed creates space</td></tr>
+      <tr><td>Impatience / wants to build</td><td>"Let's read the output together"</td><td>Rushing skips shared understanding</td></tr>
+      <tr><td>Dominates keyboard</td><td>Timer enforces driver swap</td><td>Structure protects what social pressure can't</td></tr>
+      <tr><td>Goes quiet / defers</td><td>"What are you seeing?"</td><td>Silence ≠ agreement; draw out dissent gently</td></tr>
+      <tr><td>Prompt perfectionism</td><td>"Just try it &mdash; we'll iterate"</td><td>Fear of "bad" prompts prevents learning</td></tr>
+      <tr><td>AI authority bias</td><td>"What would <em>we</em> do without the AI?"</td><td>Group must maintain independent judgment</td></tr>
+    </table>
+  </div>
+  <p style="font-size:13px; color:var(--ink-dim); margin-top:10px;"><strong>Facilitator tip</strong>: Emotions in mob sessions are data, not problems. Use this quick read &mdash; <em>Happy</em> (needs met), <em>Frustrated</em> (blocked), <em>Bored</em> (not contributing enough), <em>Anxious</em> (exposed), <em>Confused</em> (pace too fast). Name the emotion, address the need.</p>
+</div>
+
+<!-- ═══════════ TIMER ═══════════ -->
+<div class="section" id="timer">
+  <h1>Mob Timer</h1>
+  <p class="subtitle">A working rotation timer. Add your team, set the duration, hit start.</p>
+
+  <div class="timer-container">
+    <div class="timer-label">Time remaining</div>
+    <div class="timer-display" id="timer-display">10:00</div>
+    <div class="timer-driver" id="timer-driver-label">Add team members below</div>
+    <div class="timer-controls">
+      <button class="btn btn-accent" id="timer-start" onclick="startTimer()">Start</button>
+      <button class="btn btn-ghost" onclick="pauseTimer()">Pause</button>
+      <button class="btn btn-ghost" onclick="resetTimer()">Reset</button>
+      <button class="btn btn-primary" onclick="nextDriver()">Next Driver &rarr;</button>
+    </div>
+    <div class="timer-presets">
+      <div class="timer-preset" onclick="setTimer(240)">4 min</div>
+      <div class="timer-preset" onclick="setTimer(300)">5 min</div>
+      <div class="timer-preset active" onclick="setTimer(600)">10 min</div>
+      <div class="timer-preset" onclick="setTimer(900)">15 min</div>
+    </div>
+  </div>
+
+  <h2>Team</h2>
+  <div style="display:flex; gap:8px; margin-bottom:16px;">
+    <input type="text" id="new-member" placeholder="Add a name&hellip;" style="flex:1; background:var(--cream); border:1.5px solid var(--border); border-radius:var(--radius-sm); padding:12px 16px; font-size:15px; font-family:var(--sans); color:var(--ink); outline:none; min-height:44px;" onkeydown="if(event.key==='Enter')addMember()">
+    <button class="btn btn-primary" onclick="addMember()">Add</button>
+  </div>
+  <div id="team-list" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+</div>
+
+<!-- ═══════════ EXPERIMENT ═══════════ -->
+<div class="section" id="experiment">
+  <h1>Experiment Designer</h1>
+  <p class="subtitle">Build a hypothesis, run the safe-to-try check, decide whether to proceed.</p>
+
+  <div class="hero-card">
+    <div class="hero-quote">"Do a radical thing at a non-radical scale."</div>
+    <div class="hero-attribution">Aaron Dignan, The Ready &mdash; Don't create a 1-hour meeting-free zone. Eliminate all meetings for 2 weeks. Experience the change fully before judging it.</div>
+  </div>
+
+  <h2>Kamer's 8 tips for experiments</h2>
+  <div class="table-wrap">
+    <table>
+      <tr><th>#</th><th>Tip</th><th>Applied to mob programming</th></tr>
+      <tr><td><strong>1</strong></td><td><strong>The test comes from you</strong> &mdash; genuine passion, not assigned</td><td>Champion volunteers, don't conscript</td></tr>
+      <tr><td><strong>2</strong></td><td><strong>Define the desired effect</strong> &mdash; concrete, measurable</td><td>"Resolve first ticket in &lt;2 hours"</td></tr>
+      <tr><td><strong>3</strong></td><td><strong>Be bold</strong> &mdash; radical thing, non-radical scale</td><td>Full mob week, not a timid 1-hour trial</td></tr>
+      <tr><td><strong>4</strong></td><td><strong>One thing at a time</strong> &mdash; change one variable</td><td>Mob OR new AI tool. Not both simultaneously</td></tr>
+      <tr><td><strong>5</strong></td><td><strong>Right time horizon</strong> &mdash; 8 weeks ideal, 16 max</td><td>2&ndash;3 sprint cycles to build real skill</td></tr>
+      <tr><td><strong>6</strong></td><td><strong>Don't kill it early</strong> &mdash; persist past discomfort</td><td>3 sessions is too few. Commit to 8+</td></tr>
+      <tr><td><strong>7</strong></td><td><strong>Retrospect regularly</strong> &mdash; monthly learnings</td><td>End-of-session retro + monthly pattern review</td></tr>
+      <tr><td><strong>8</strong></td><td><strong>Expect frustration</strong> &mdash; 2 steps forward, 1 back</td><td>"Why is this slower?" is normal at first</td></tr>
+    </table>
+  </div>
+
+  <h3>The T-shape model</h3>
+  <p>From Rodney Evans at The Ready: teach <strong>one universal practice</strong> across all teams (the bar of the T &mdash; e.g. retrospectives). Let a <strong>smaller adventurous group</strong> experiment widely (the stem of the T). That pioneering group becomes the organizational model.</p>
+
+  <blockquote>"Start with an adventurous group already doing things differently &mdash; not a group stuck in dysfunction. It will be more inspiring."<cite>Jurriaan Kamer, The Ready</cite></blockquote>
+
+  <hr class="divider">
+
+  <h2>Hypothesis builder</h2>
+  <div class="card" style="box-shadow:none; border:1.5px solid var(--border);">
+    <div class="input-group"><label>We believe that&hellip;</label><input type="text" id="exp-practice" placeholder="e.g. mob collaboration on maintenance tasks"></div>
+    <div class="input-group"><label>Applied to&hellip;</label><input type="text" id="exp-context" placeholder="e.g. apps untouched for 3+ months"></div>
+    <div class="input-group"><label>Will result in&hellip;</label><input type="text" id="exp-outcome" placeholder="e.g. 50% reduction in ramp-up time"></div>
+    <div class="input-group"><label>Because&hellip;</label><textarea id="exp-reasoning" placeholder="e.g. real-time collaboration eliminates handoff delays and creates shared context quicker"></textarea></div>
+    <div class="input-group"><label>We'll know it's TRUE when&hellip;</label><input type="text" id="exp-true" placeholder="e.g. team resolves first ticket in < 2 hours"></div>
+    <div class="input-group"><label>We'll know it's FALSE when&hellip;</label><input type="text" id="exp-false" placeholder="e.g. ramp-up time is same as solo work"></div>
+    <button class="btn btn-accent" onclick="generateHypothesis()" style="margin-top:8px;">Generate Statement</button>
+  </div>
+
+  <div id="hypothesis-output" style="display:none; margin-top:20px;"></div>
+
+  <p style="margin-top:16px; font-size:13px; color:var(--ink-dim);"><strong>Track it</strong>: Use the <a href="https://teamytastic.github.io/camekazi.github.io/gist/?1d1c0f86d462f101afcebdba737a4f19/mvi-experiment.html" target="_blank" style="color:var(--accent); font-weight:600;">MVI Experiment Designer</a> to design experiments with hypothesis, safe-to-try checks, and tracking.</p>
+
+  <h2>Safe-to-try check</h2>
+  <p style="margin-bottom:16px;">Click each test to toggle pass/fail. All 5 must pass.</p>
+
+  <div id="safe-checks">
+    <div class="check-row" onclick="toggleCheck(this)" data-state="pending"><div class="check-icon"></div><div><div class="check-label">Reversible</div><div class="check-question">Can we undo this if it fails?</div></div></div>
+    <div class="check-row" onclick="toggleCheck(this)" data-state="pending"><div class="check-icon"></div><div><div class="check-label">Bounded</div><div class="check-question">Is the blast radius small?</div></div></div>
+    <div class="check-row" onclick="toggleCheck(this)" data-state="pending"><div class="check-icon"></div><div><div class="check-label">Observable</div><div class="check-question">Can we see if it's working?</div></div></div>
+    <div class="check-row" onclick="toggleCheck(this)" data-state="pending"><div class="check-icon"></div><div><div class="check-label">Resourced</div><div class="check-question">Do we have what we need?</div></div></div>
+    <div class="check-row" onclick="toggleCheck(this)" data-state="pending"><div class="check-icon"></div><div><div class="check-label">Consensual</div><div class="check-question">Does anyone have a fundamental objection?</div></div></div>
+  </div>
+  <div id="verdict" class="verdict pending">Complete the checks above</div>
+</div>
+
+<!-- ═══════════ RPG ═══════════ -->
+<div class="section" id="rpg">
+  <h1>Mob Programming RPG</h1>
+  <p class="subtitle">Willem Larsen's gamified mob experience. Earn XP by embodying role behaviours. Print the cards, bring to your next session.</p>
+
+  <h2>Level 1 &mdash; Core</h2>
+  <div class="role-grid stagger">
+    <div class="role-card"><div class="role-level lvl-1">Level 1</div><div class="role-name">Driver</div><div class="role-desc">Ask clarifying questions about typing. Use new keyboard shortcuts. Type something you disagree with. Ignore non-Navigator instructions.</div></div>
+    <div class="role-card"><div class="role-level lvl-1">Level 1</div><div class="role-name">Navigator</div><div class="role-desc">Request ideas from the mob. Filter suggestions and direct Driver precisely. Communicate high-level intent. Follow TDD cycle.</div></div>
+    <div class="role-card"><div class="role-level lvl-1">Level 1</div><div class="role-name">Mobber</div><div class="role-desc">Yield to less-privileged voices. Contribute ideas. Ask questions until understanding is reached. Listen attentively.</div></div>
+  </div>
+
+  <h2>Level 2 &mdash; Support</h2>
+  <div class="role-grid stagger">
+    <div class="role-card"><div class="role-level lvl-2">Level 2</div><div class="role-name">Researcher</div><div class="role-desc">Share relevant documentation. Find blog insights. Locate coding forum solutions.</div></div>
+    <div class="role-card"><div class="role-level lvl-2">Level 2</div><div class="role-name">Sponsor</div><div class="role-desc">Amplify underheard perspectives. Support least-privileged contributors. Recognise moments of excellence.</div></div>
+    <div class="role-card"><div class="role-level lvl-2">Level 2</div><div class="role-name">Rear Admiral</div><div class="role-desc">Offer Navigator guidance privately. Provide minimal cues. Guide at highest abstraction level.</div></div>
+  </div>
+
+  <h2>Level 3 &mdash; Quality</h2>
+  <div class="role-grid stagger">
+    <div class="role-card"><div class="role-level lvl-3">Level 3</div><div class="role-name">Automationist</div><div class="role-desc">Identify repeated tool tasks. Notice repeated processes. Recognise boilerplate. Suggest automation.</div></div>
+    <div class="role-card"><div class="role-level lvl-3">Level 3</div><div class="role-name">Nose</div><div class="role-desc">Flag long lines, complex conditionals, duplication. Name unnamed things. Propose improvements.</div></div>
+    <div class="role-card"><div class="role-level lvl-3">Level 3</div><div class="role-name">Archivist</div><div class="role-desc">Record alternatives visibly. Document ideas on whiteboard. Display current task. Capture decisions.</div></div>
+  </div>
+
+  <h2>Level 4 &mdash; Culture</h2>
+  <div class="role-grid stagger">
+    <div class="role-card"><div class="role-level lvl-4">Level 4</div><div class="role-name">Conductor</div><div class="role-desc">Combine ideas (discard the first). Elicit quiet members. Make ridiculous proposals. Defer to junior voices.</div></div>
+    <div class="role-card"><div class="role-level lvl-4">Level 4</div><div class="role-name">Traffic Cop</div><div class="role-desc">Propose new agreements. Alert to process violations. Support adherence. Identify outdated agreements.</div></div>
+    <div class="role-card"><div class="role-level lvl-4">Level 4</div><div class="role-name">Dr. Feel Good</div><div class="role-desc">Express appreciation (SBI model). Share joy. Acknowledge happiness. Retrospect positive moments.</div></div>
+    <div class="role-card"><div class="role-level lvl-4">Level 4</div><div class="role-name">Major Pain</div><div class="role-desc">Articulate difficulties. Demonstrate empathy. Surface ignored pain points. Call retrospectives on pain.</div></div>
+  </div>
+
+  <hr class="divider">
+  <p><strong>First rule:</strong> Treat each other with Kindness, Consideration, and Respect at all times.</p>
+  <a href="https://github.com/willemlarsen/mobprogrammingrpg" target="_blank" class="btn btn-ghost" style="margin-top:12px;">Get Printable Cards &rarr;</a>
+</div>
+
+<!-- ═══════════ LINKS ═══════════ -->
+<div class="section" id="links">
+  <h1>Reference Library</h1>
+  <p class="subtitle">19 curated URLs &mdash; foundational practice, AI integration, gamification, experimentation strategy.</p>
+
+  <h2>Foundational</h2>
+  <a class="link-card" href="https://mobprogramming.org/mob-programming-basics/" target="_blank"><div class="link-tag tag-foundation">Foundation</div><div class="link-info"><div class="link-title">Mob Programming Basics &mdash; Woody Zuill</div><div class="link-url">mobprogramming.org</div></div></a>
+  <a class="link-card" href="https://www.remotemobprogramming.org/" target="_blank"><div class="link-tag tag-foundation">Foundation</div><div class="link-info"><div class="link-title">Remote Mob Programming &mdash; Git handover + mob CLI</div><div class="link-url">remotemobprogramming.org</div></div></a>
+  <a class="link-card" href="https://woodyzuill.com/" target="_blank"><div class="link-tag tag-foundation">Foundation</div><div class="link-info"><div class="link-title">Woody Zuill &mdash; Talks, Workshops, Blog</div><div class="link-url">woodyzuill.com</div></div></a>
+  <a class="link-card" href="https://www.agilealliance.org/wp-content/uploads/2015/12/ExperienceReport.2014.Zuill_.pdf" target="_blank"><div class="link-tag tag-foundation">Foundation</div><div class="link-info"><div class="link-title">Agile Alliance Experience Report (PDF)</div><div class="link-url">agilealliance.org</div></div></a>
+  <a class="link-card" href="https://martinfowler.com/articles/on-pair-programming.html" target="_blank"><div class="link-tag tag-foundation">Foundation</div><div class="link-info"><div class="link-title">On Pair Programming &mdash; Martin Fowler (strong-style section)</div><div class="link-url">martinfowler.com</div></div></a>
+  <a class="link-card" href="https://medium.com/@maaret.pyhajarvi/the-driver-navigator-in-strong-style-pairing-2df0ecb4f657" target="_blank"><div class="link-tag tag-foundation">Foundation</div><div class="link-info"><div class="link-title">Strong-Style Driver-Navigator &mdash; Maaret Pyhajarvi</div><div class="link-url">medium.com</div></div></a>
+  <a class="link-card" href="https://ensembleprogramming.xyz/" target="_blank"><div class="link-tag tag-foundation">Foundation</div><div class="link-info"><div class="link-title">Ensemble Programming Guidebook &mdash; Maaret Pyhajarvi (book)</div><div class="link-url">ensembleprogramming.xyz</div></div></a>
+
+  <h2>AI + Mob</h2>
+  <a class="link-card" href="https://blog.crisp.se/2025/06/02/michaelgothe/mob-programming-with-ai-inside-a-high-performing-teams-journey" target="_blank"><div class="link-tag tag-ai">AI + Mob</div><div class="link-info"><div class="link-title">Mob Programming with AI &mdash; Crisp (Sweden)</div><div class="link-url">blog.crisp.se &mdash; Daily 3hr sessions, "faster together"</div></div></a>
+  <a class="link-card" href="https://www.atlassian.com/blog/atlassian-engineering/mobbing-with-ai" target="_blank"><div class="link-tag tag-ai">AI + Mob</div><div class="link-info"><div class="link-title">Mobbing with AI &mdash; Atlassian</div><div class="link-url">atlassian.com &mdash; Define/Spec/Generate/Review/Iterate</div></div></a>
+
+  <h2>Gamification &amp; Facilitation</h2>
+  <a class="link-card" href="https://github.com/willemlarsen/mobprogrammingrpg" target="_blank"><div class="link-tag tag-game">Game</div><div class="link-info"><div class="link-title">Mob Programming RPG &mdash; Willem Larsen</div><div class="link-url">github.com &mdash; 4 levels, printable role cards with XP</div></div></a>
+  <a class="link-card" href="https://github.com/willemlarsen/mobprogrammingrpg/blob/master/rpg_roles_plain_text.md" target="_blank"><div class="link-tag tag-game">Game</div><div class="link-info"><div class="link-title">RPG Role Descriptions &mdash; All levels</div><div class="link-url">github.com &mdash; Driver through Dr. Feel Good</div></div></a>
+  <a class="link-card" href="https://jay.bazuzi.com/Mobbing-Pattern-Language/" target="_blank"><div class="link-tag tag-game">Patterns</div><div class="link-info"><div class="link-title">Mobbing Pattern Language &mdash; Jay Bazuzi</div><div class="link-url">jay.bazuzi.com</div></div></a>
+  <a class="link-card" href="https://kata-log.rocks/ensemble-programming" target="_blank"><div class="link-tag tag-game">Practice</div><div class="link-info"><div class="link-title">Ensemble Programming Kata</div><div class="link-url">kata-log.rocks</div></div></a>
+
+  <h2>Experimentation (Strategy)</h2>
+  <a class="link-card" href="https://teamytastic.github.io/camekazi.github.io/gist/?1d1c0f86d462f101afcebdba737a4f19/mvi-experiment.html" target="_blank"><div class="link-tag tag-strategy">Template</div><div class="link-info"><div class="link-title">MVI Experiment Designer</div><div class="link-url">Interactive tool &mdash; Design experiments with hypothesis, safe-to-try checks, and tracking</div></div></a>
+  <a class="link-card" href="https://open.substack.com/pub/strategyinpraxis/p/the-first-one-about-experimentation" target="_blank"><div class="link-tag tag-strategy">Strategy</div><div class="link-info"><div class="link-title">JP Castlin &mdash; Experimentation Part 1</div><div class="link-url">strategyinpraxis.substack.com</div></div></a>
+  <a class="link-card" href="https://open.substack.com/pub/strategyinpraxis/p/the-second-one-about-experimentation" target="_blank"><div class="link-tag tag-strategy">Strategy</div><div class="link-info"><div class="link-title">JP Castlin &mdash; Experimentation Part 2</div><div class="link-url">strategyinpraxis.substack.com</div></div></a>
+  <a class="link-card" href="https://open.substack.com/pub/strategyinpraxis/p/the-third-one-about-experimentation" target="_blank"><div class="link-tag tag-strategy">Strategy</div><div class="link-info"><div class="link-title">JP Castlin &mdash; Experimentation Part 3</div><div class="link-url">strategyinpraxis.substack.com</div></div></a>
+  <a class="link-card" href="https://cutlefish.substack.com/p/tbm-386-understanding-enabling-constraints" target="_blank"><div class="link-tag tag-strategy">Strategy</div><div class="link-info"><div class="link-title">Understanding Enabling Constraints &mdash; John Cutler (TBM 386)</div><div class="link-url">cutlefish.substack.com &mdash; Constraints that drive creativity, not restrict it</div></div></a>
+  <a class="link-card" href="https://www.chriscorrigan.com/parkinglot/escaping-confusion/" target="_blank"><div class="link-tag tag-strategy">Strategy</div><div class="link-info"><div class="link-title">Escaping Confusion &mdash; Chris Corrigan (safe-to-fail)</div><div class="link-url">chriscorrigan.com</div></div></a>
+  <a class="link-card" href="https://medium.com/the-ready/change-through-experimentation-978429cb99fa" target="_blank"><div class="link-tag tag-strategy">Strategy</div><div class="link-info"><div class="link-title">Changing Your Organization Through Experimentation &mdash; Jurriaan Kamer / The Ready</div><div class="link-url">medium.com &mdash; 8 tips, T-shape scaling, safe-to-try framing</div></div></a>
+</div>
+
+<script>
+// ── Tab navigation ──
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    tab.classList.add('active');
+    const section = document.getElementById(tab.dataset.tab);
+    section.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+
+// ── Working Mob Timer ──
+let timerSeconds = 600;
+let timerRemaining = 600;
+let timerInterval = null;
+let timerRunning = false;
+let team = [];
+let currentDriverIndex = 0;
+
+function setTimer(seconds) {
+  timerSeconds = seconds;
+  timerRemaining = seconds;
+  timerRunning = false;
+  clearInterval(timerInterval);
+  updateTimerDisplay();
+  document.querySelectorAll('.timer-preset').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.timer-preset').forEach(p => {
+    if (parseInt(p.textContent) * 60 === seconds || p.textContent.trim() === (seconds/60) + ' min') p.classList.add('active');
+  });
+  document.getElementById('timer-start').textContent = 'Start';
+}
+
+function updateTimerDisplay() {
+  const mins = Math.floor(timerRemaining / 60);
+  const secs = timerRemaining % 60;
+  const display = document.getElementById('timer-display');
+  display.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+  display.className = 'timer-display';
+  if (timerRemaining <= 30 && timerRemaining > 10) display.classList.add('warning');
+  if (timerRemaining <= 10) display.classList.add('critical');
+  updateDriverLabel();
+}
+
+function updateDriverLabel() {
+  const label = document.getElementById('timer-driver-label');
+  if (team.length === 0) {
+    label.textContent = 'Add team members below';
+  } else {
+    label.textContent = `Driving: ${team[currentDriverIndex % team.length]}`;
+  }
+}
+
+function startTimer() {
+  if (timerRunning) return;
+  timerRunning = true;
+  document.getElementById('timer-start').textContent = 'Running...';
+  timerInterval = setInterval(() => {
+    timerRemaining--;
+    if (timerRemaining <= 0) {
+      clearInterval(timerInterval);
+      timerRunning = false;
+      document.getElementById('timer-start').textContent = 'Start';
+      // Audio alert — two short beeps
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        [0, 0.25].forEach(delay => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.frequency.value = 880;
+          osc.type = 'sine';
+          gain.gain.setValueAtTime(0.3, ctx.currentTime + delay);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.2);
+          osc.start(ctx.currentTime + delay);
+          osc.stop(ctx.currentTime + delay + 0.2);
+        });
+      } catch(e) {}
+      timerRemaining = 0;
+    }
+    updateTimerDisplay();
+  }, 1000);
+}
+
+function pauseTimer() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  document.getElementById('timer-start').textContent = 'Start';
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  timerRemaining = timerSeconds;
+  updateTimerDisplay();
+  document.getElementById('timer-start').textContent = 'Start';
+}
+
+function nextDriver() {
+  currentDriverIndex = (currentDriverIndex + 1) % Math.max(team.length, 1);
+  resetTimer();
+  updateDriverLabel();
+  // Subtle haptic-like flash
+  const display = document.getElementById('timer-display');
+  display.style.transition = 'none';
+  display.style.color = 'var(--accent)';
+  setTimeout(() => { display.style.transition = 'color 0.5s'; display.style.color = ''; }, 50);
+}
+
+function addMember() {
+  const input = document.getElementById('new-member');
+  const name = input.value.trim();
+  if (!name) return;
+  team.push(name);
+  input.value = '';
+  renderTeam();
+  updateDriverLabel();
+}
+
+function removeMember(index) {
+  team.splice(index, 1);
+  if (currentDriverIndex >= team.length) currentDriverIndex = 0;
+  renderTeam();
+  updateDriverLabel();
+}
+
+function renderTeam() {
+  const list = document.getElementById('team-list');
+  list.innerHTML = team.map((name, i) => `
+    <div style="display:inline-flex; align-items:center; gap:6px; padding:8px 14px; background:${i === currentDriverIndex % team.length ? 'var(--accent-light)' : 'var(--surface)'}; border:1px solid var(--border); border-radius:20px; font-size:14px; font-weight:${i === currentDriverIndex % team.length ? '700' : '500'}; cursor:pointer; min-height:44px;" onclick="removeMember(${i})" title="Click to remove">
+      ${i === currentDriverIndex % team.length ? '<span style="color:var(--accent);">&bull;</span>' : ''}${name} <span style="color:var(--ink-faint); font-size:12px;">&times;</span>
+    </div>
+  `).join('');
+}
+
+updateTimerDisplay();
+
+// ── Hypothesis generator ──
+function generateHypothesis() {
+  const v = id => document.getElementById(id).value;
+  const practice = v('exp-practice') || '[mob practice]';
+  const context = v('exp-context') || '[specific context]';
+  const outcome = v('exp-outcome') || '[measurable outcome]';
+  const reasoning = v('exp-reasoning') || '[reasoning]';
+  const trueSignal = v('exp-true') || '[observable signal]';
+  const falseSignal = v('exp-false') || '[observable signal]';
+
+  const text = `We believe that ${practice}\napplied to ${context}\nwill result in ${outcome}\nbecause ${reasoning}.\n\nWe will know this is TRUE when ${trueSignal}.\nWe will know this is FALSE when ${falseSignal}.`;
+
+  const output = document.getElementById('hypothesis-output');
+  output.style.display = 'block';
+  output.innerHTML = `<div class="hypothesis-out">
+    <button class="copy-btn" onclick="copyHypothesis()">Copy</button>
+    <p>We believe that <strong>${practice}</strong></p>
+    <p>applied to <strong>${context}</strong></p>
+    <p>will result in <strong>${outcome}</strong></p>
+    <p>because <em>${reasoning}</em>.</p>
+    <br>
+    <p>We will know this is <span style="color:var(--green); font-weight:600;">TRUE</span> when ${trueSignal}.</p>
+    <p>We will know this is <span style="color:var(--red); font-weight:600;">FALSE</span> when ${falseSignal}.</p>
+  </div>`;
+  output.dataset.text = text;
+  output.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function copyHypothesis() {
+  const text = document.getElementById('hypothesis-output').dataset.text;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+// ── Safe-to-try checks ──
+function toggleCheck(el) {
+  const states = ['pending', 'passed', 'failed'];
+  const current = el.dataset.state;
+  const next = states[(states.indexOf(current) + 1) % 3];
+  el.dataset.state = next;
+  el.className = 'check-row ' + (next === 'pending' ? '' : next);
+  el.querySelector('.check-icon').textContent = next === 'passed' ? '\u2713' : next === 'failed' ? '\u2717' : '';
+  updateVerdict();
+}
+
+function updateVerdict() {
+  const checks = document.querySelectorAll('.check-row');
+  let passed = 0, failed = 0, pending = 0;
+  checks.forEach(c => { const s = c.dataset.state; if (s==='passed') passed++; else if (s==='failed') failed++; else pending++; });
+  const v = document.getElementById('verdict');
+  if (pending > 0) { v.className = 'verdict pending'; v.textContent = `${passed}/5 checks complete \u2014 ${pending} remaining`; }
+  else if (failed > 0) { v.className = 'verdict unsafe'; v.textContent = `Not safe to try \u2014 ${failed} check(s) failed. Address before proceeding.`; }
+  else { v.className = 'verdict safe'; v.textContent = 'Safe to try \u2014 All 5 checks passed. Run the experiment.'; }
+}
+</script>
+</body>
+</html>
