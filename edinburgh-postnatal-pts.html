@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Postnatal Personal Trainers - Edinburgh Map</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  #map { height: 65vh; width: 100%; }
+  .header { background: #2c3e50; color: white; padding: 16px 20px; }
+  .header h1 { font-size: 20px; margin-bottom: 4px; }
+  .header p { font-size: 13px; opacity: 0.8; }
+  .legend { padding: 12px 20px; background: #f8f9fa; border-bottom: 1px solid #dee2e6; display: flex; gap: 20px; flex-wrap: wrap; font-size: 13px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .dot-specialist { background: #e74c3c; }
+  .dot-physio { background: #8e44ad; }
+  .dot-community { background: #27ae60; }
+  .dot-general { background: #3498db; }
+  .cards { padding: 16px 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; max-height: 30vh; overflow-y: auto; }
+  .card { border: 1px solid #dee2e6; border-radius: 8px; padding: 12px; font-size: 13px; }
+  .card h3 { font-size: 14px; margin-bottom: 4px; }
+  .card .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 12px; color: white; margin-bottom: 6px; }
+  .tag-specialist { background: #e74c3c; }
+  .tag-physio { background: #8e44ad; }
+  .tag-community { background: #27ae60; }
+  .tag-general { background: #3498db; }
+  .card a { color: #2980b9; text-decoration: none; }
+  .card a:hover { text-decoration: underline; }
+  .trust { font-weight: 600; }
+  .trust-high { color: #27ae60; }
+  .trust-medium { color: #f39c12; }
+  .leaflet-popup-content { font-family: -apple-system, sans-serif; font-size: 13px; line-height: 1.5; }
+  .leaflet-popup-content h3 { font-size: 14px; margin: 0 0 4px 0; }
+  .leaflet-popup-content a { color: #2980b9; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Postnatal Personal Trainers &mdash; Edinburgh</h1>
+  <p>Specialists for new mums in Portobello, Joppa, Meadowbank, Bruntsfield &amp; beyond</p>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><span class="dot dot-specialist"></span> Postnatal Specialist</div>
+  <div class="legend-item"><span class="dot dot-physio"></span> Physio / Clinical</div>
+  <div class="legend-item"><span class="dot dot-community"></span> Community / Budget</div>
+  <div class="legend-item"><span class="dot dot-general"></span> General PT (women-focused)</div>
+</div>
+
+<div id="map"></div>
+
+<div class="cards" id="cards"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const locations = [
+  {
+    name: "Portobello Health Hub (Cat)",
+    lat: 55.9533, lng: -3.1147,
+    type: "physio",
+    trust: "HIGH",
+    area: "Portobello",
+    desc: "Mummy MOT postnatal assessment, pelvic floor & abdominal recovery",
+    creds: "Physio (QMU 2013), HCPC, CSP, POGP, NHS background",
+    url: "https://portobellohealthhub.co.uk/physiotherapy",
+    contact: "restoreplusphysio@gmail.com"
+  },
+  {
+    name: "fitandhappy (Laura)",
+    lat: 55.9520, lng: -3.1135,
+    type: "specialist",
+    trust: "HIGH",
+    area: "Portobello / Joppa",
+    desc: "Women-only outdoor boot camps, small personalised classes, 45 min",
+    creds: "\"Best PT in UK\" award, Sports Psychology degree, Pre/Postnatal Specialist, est. 2016",
+    url: "https://fitandhappy.co.uk/edinburgh-portobello/",
+    contact: "Via website"
+  },
+  {
+    name: "Yogi Jodie",
+    lat: 55.9540, lng: -3.1165,
+    type: "specialist",
+    trust: "MEDIUM",
+    area: "Portobello",
+    desc: "Postnatal yoga classes, all levels welcome. From 6-8 weeks post-birth.",
+    creds: "8 years teaching, 10+ years practice",
+    url: "https://www.yogijodie.com/",
+    contact: "Via website"
+  },
+  {
+    name: "Mighty Mums\u00ae (Elspeth Alexandra)",
+    lat: 55.9748, lng: -3.1855,
+    type: "specialist",
+    trust: "HIGH",
+    area: "Leith",
+    desc: "Small group postnatal training (6-wk blocks), Mon & Tue, 55 min. Babies cared for in adjacent room.",
+    creds: "Pelvic Health Coach, Holistic Core Restore\u00ae Certified, Women's Health Specialist",
+    url: "https://edinburghwomensfitness.co.uk/postnatal-fitness",
+    contact: "07748 183171"
+  },
+  {
+    name: "FitMamas (Fitness Soul)",
+    lat: 55.9722, lng: -3.1748,
+    type: "specialist",
+    trust: "HIGH",
+    area: "Leith",
+    desc: "Postnatal classes, small group PT, 1-to-1. Kids welcome (play, cartoons). Fri 10:45am.",
+    creds: "Level 3 Pre/Postnatal Coach, postnatal screening included. 95% TripAdvisor, 30+ reviews",
+    url: "https://fitnesssoul.co.uk/fitmamas/",
+    contact: "Via website"
+  },
+  {
+    name: "Edinburgh Buggy Bootcamp",
+    lat: 55.9383, lng: -3.2035,
+    type: "specialist",
+    trust: "HIGH",
+    area: "Bruntsfield Links + multiple",
+    desc: "60-min outdoor group fitness with buggies. Cardio, strength, posture, core. \u00a36.50/class.",
+    creds: "Operating since 2011 (13+ years), positive reviews, established reputation",
+    url: "https://edinburghbuggybootcamp.co.uk/",
+    contact: "07726 653367"
+  },
+  {
+    name: "Bootcamp Brunch (Krista)",
+    lat: 55.9658, lng: -3.2145,
+    type: "specialist",
+    trust: "HIGH",
+    area: "Victoria Park + various",
+    desc: "1-to-1 postnatal PT + Bumps & Baby Bootcamp classes. Buggy/toddler friendly. Drop-in \u00a38.",
+    creds: "Premier Global (NASM) L3 PT, Pre/Postnatal qualified, Nutrition Coach, since 2017",
+    url: "https://www.bootcampbrunch.co.uk/prepostnatal",
+    contact: "Via website"
+  },
+  {
+    name: "Jilly Reid Physio",
+    lat: 55.9572, lng: -3.1928,
+    type: "physio",
+    trust: "HIGH",
+    area: "New Town",
+    desc: "Pregnancy & postnatal Pilates (physio-led), pelvic floor treatment, online + in-person",
+    creds: "Specialist Women's Health Physiotherapist, POGP member, formerly NHS London",
+    url: "https://www.jillyreidphysio.co.uk/",
+    contact: "Via website"
+  },
+  {
+    name: "Active Mums (Edinburgh Leisure)",
+    lat: 55.9568, lng: -3.1638,
+    type: "community",
+    trust: "MEDIUM",
+    area: "Meadowbank",
+    desc: "8-week block + 6 months free gym/swim access. Drop-in \u00a35.25. Kids under 5 welcome.",
+    creds: "Edinburgh Leisure (council-run), qualified instructors",
+    url: "https://www.edinburghleisure.co.uk/activities/active-mums/",
+    contact: "Via Edinburgh Leisure"
+  },
+  {
+    name: "Forsyth Fitness (Sandy)",
+    lat: 55.9562, lng: -3.1625,
+    type: "general",
+    trust: "MEDIUM",
+    area: "Meadowbank",
+    desc: "1-to-1 PT at Meadowbank Sports Centre. Boxing, fitness assessments, nutrition guidance.",
+    creds: "13+ years as PT in Edinburgh, modern facilities, free parking",
+    url: "https://www.forsythfitness.co.uk/",
+    contact: "07796 844056"
+  },
+  {
+    name: "Castle Personal Training",
+    lat: 55.9418, lng: -3.2810,
+    type: "specialist",
+    trust: "MEDIUM",
+    area: "Corstorphine",
+    desc: "\"New Mom\" package: 2 sessions/week for 12 weeks + daily home workout",
+    creds: "BBC expert commentator, 6 hand-picked trainers, established",
+    url: "https://castlepersonaltraining.com/",
+    contact: "Via website"
+  },
+  {
+    name: "Streamline PT (Susan)",
+    lat: 55.9102, lng: -3.2548,
+    type: "specialist",
+    trust: "MEDIUM",
+    area: "Colinton",
+    desc: "1-to-1 private gym, online coaching, Baby & Me classes",
+    creds: "Women's Fitness Specialist, ClassPass reviews",
+    url: "https://www.streamlinept.co.uk/pre-postnatal",
+    contact: "susan@streamlinept.co.uk / 07954 163994"
+  },
+  {
+    name: "Bump Club",
+    lat: 55.9118, lng: -3.3205,
+    type: "community",
+    trust: "MEDIUM",
+    area: "Heriot-Watt (Riccarton)",
+    desc: "Mum & Baby classes, Mon 9:30 & 10:30, Fri 9:30. Baby can play nearby.",
+    creds: "Founder: Nutrition degree + Sports Science Masters + Pregnancy/Postnatal quals",
+    url: "https://thebumpclub.com/",
+    contact: "Via website"
+  },
+  {
+    name: "Mama Gives Light (Yoga)",
+    lat: 55.9268, lng: -3.2105,
+    type: "specialist",
+    trust: "MEDIUM",
+    area: "Morningside",
+    desc: "Postnatal yoga, Tue 7pm, 75 min. Old School House, Morningside.",
+    creds: "Yoga instructor, postnatal recovery focus",
+    url: "https://mamagiveslight.com/yoga",
+    contact: "Via website"
+  },
+  {
+    name: "Emma / EMS PT",
+    lat: 55.9488, lng: -3.1905,
+    type: "specialist",
+    trust: "MEDIUM-HIGH",
+    area: "Edinburgh (JD Gyms)",
+    desc: "Tailored 1-to-1 postnatal recovery and strength",
+    creds: "L3 PT, Nutrition Specialist, Certified Pre/Postnatal Fitness Specialist",
+    url: "https://ems-pt.co.uk/",
+    contact: "Via website"
+  },
+  {
+    name: "Movement Edinburgh",
+    lat: 55.9575, lng: -3.1610,
+    type: "general",
+    trust: "MEDIUM",
+    area: "Meadowbank",
+    desc: "Private studio, 1-to-1 and small group training, 12+ years experience",
+    creds: "12+ years coaching experience",
+    url: "https://www.movementedinburgh.com/",
+    contact: "Via website"
+  }
+];
+
+// Colour mapping
+const colours = {
+  specialist: "#e74c3c",
+  physio: "#8e44ad",
+  community: "#27ae60",
+  general: "#3498db"
+};
+
+const typeLabels = {
+  specialist: "Postnatal Specialist",
+  physio: "Physio / Clinical",
+  community: "Community / Budget",
+  general: "General PT"
+};
+
+// Init map centred on Edinburgh
+const map = L.map('map').setView([55.947, -3.200], 12);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors',
+  maxZoom: 18
+}).addTo(map);
+
+// Create markers
+const markers = [];
+locations.forEach((loc, i) => {
+  const col = colours[loc.type];
+  const icon = L.divIcon({
+    className: '',
+    html: `<div style="
+      width: 28px; height: 28px; border-radius: 50%; background: ${col};
+      border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 12px; font-weight: bold;
+    ">${i + 1}</div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+    popupAnchor: [0, -16]
+  });
+
+  const trustClass = loc.trust === "HIGH" ? "trust-high" : "trust-medium";
+  const popup = `
+    <h3>${loc.name}</h3>
+    <div style="margin-bottom:4px;"><strong>${typeLabels[loc.type]}</strong> &bull; ${loc.area}</div>
+    <div style="margin-bottom:6px;">${loc.desc}</div>
+    <div style="margin-bottom:6px; font-size:12px; color:#666;"><em>${loc.creds}</em></div>
+    <div><strong class="${trustClass}">Trust: ${loc.trust}</strong></div>
+    <div style="margin-top:6px;">
+      <a href="${loc.url}" target="_blank">Website</a>
+      ${loc.contact !== "Via website" ? ` &bull; ${loc.contact}` : ""}
+    </div>
+  `;
+
+  const marker = L.marker([loc.lat, loc.lng], { icon }).addTo(map).bindPopup(popup, { maxWidth: 280 });
+  markers.push(marker);
+});
+
+// Fit bounds to show all markers
+const group = L.featureGroup(markers);
+map.fitBounds(group.getBounds().pad(0.1));
+
+// Build cards
+const cardsEl = document.getElementById('cards');
+locations.forEach((loc, i) => {
+  const col = colours[loc.type];
+  const tagClass = `tag-${loc.type}`;
+  const trustClass = loc.trust === "HIGH" ? "trust-high" : "trust-medium";
+  cardsEl.innerHTML += `
+    <div class="card" onclick="markers[${i}].openPopup(); map.setView([${loc.lat}, ${loc.lng}], 14);" style="cursor:pointer;">
+      <span class="tag ${tagClass}">${i + 1}. ${typeLabels[loc.type]}</span>
+      <h3>${loc.name}</h3>
+      <div style="color:#666; margin-bottom:4px;">${loc.area}</div>
+      <div style="margin-bottom:4px;">${loc.desc}</div>
+      <div class="trust ${trustClass}">Trust: ${loc.trust}</div>
+      <div><a href="${loc.url}" target="_blank" onclick="event.stopPropagation();">Website &rarr;</a></div>
+    </div>
+  `;
+});
+</script>
+</body>
+</html>
