@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meeting Coach Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0f0f1a;--card:#161625;--border:#1e1e35;--text:#e0e0e8;--dim:#7a7a8e;--coral:#e94560;--teal:#4ecca3;--accent:#e94560;--gold:#f0c040}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh}
+.hidden{display:none!important}
+#overlay{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center}
+.pw-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:40px;text-align:center;max-width:360px;width:90%}
+.pw-box h2{font-size:1.3rem;margin-bottom:6px}
+.pw-box p{color:var(--dim);font-size:.85rem;margin-bottom:20px}
+.pw-box input{width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:#0c0c16;color:var(--text);font-size:.95rem;outline:none}
+.pw-box input:focus{border-color:var(--accent)}
+.pw-box button{margin-top:14px;padding:10px 28px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-weight:600;cursor:pointer;font-size:.9rem}
+.pw-box .err{color:var(--coral);font-size:.8rem;margin-top:10px;min-height:1.2em}
+.container{max-width:1100px;margin:0 auto;padding:24px 16px}
+h1{font-size:2.2rem;font-weight:700;margin-bottom:4px}
+.subtitle{color:var(--dim);font-size:.85rem;margin-bottom:32px}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:32px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;text-align:center}
+.stat-card .num{font-size:2rem;font-weight:700;color:var(--teal)}
+.stat-card .num.coral{color:var(--coral)}
+.stat-card .lbl{color:var(--dim);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+.section{margin-bottom:32px}
+.section h2{font-size:1.1rem;font-weight:600;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{text-align:left;color:var(--dim);font-weight:500;padding:8px 10px;border-bottom:1px solid var(--border);font-size:.75rem;text-transform:uppercase;letter-spacing:.04em}
+td{padding:8px 10px;border-bottom:1px solid #13132a}
+tr:hover{background:#1a1a30}
+.bar-wrap{display:flex;align-items:center;gap:6px;min-width:120px}
+.bar{height:8px;border-radius:4px;display:flex;overflow:hidden}
+.bar .pos{background:var(--teal)}
+.bar .neg{background:var(--coral)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.72rem;font-weight:500;margin:1px 2px}
+.badge-coral{background:#e9456020;color:var(--coral);border:1px solid #e9456040}
+.badge-teal{background:#4ecca320;color:var(--teal);border:1px solid #4ecca340}
+.badge-dim{background:#7a7a8e15;color:var(--dim);border:1px solid #7a7a8e30}
+.tl-item{display:grid;grid-template-columns:100px 60px 1fr;gap:10px;padding:10px;border-left:2px solid var(--border);margin-left:8px;font-size:.84rem}
+.tl-item.pos{border-left-color:var(--teal)}
+.tl-item.neg{border-left-color:var(--coral)}
+.tl-meta{color:var(--dim);font-size:.78rem}
+.tl-pat{font-weight:600}
+.tl-msg{color:var(--text)}
+.profile-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.pcard{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px}
+.pcard h3{font-size:.9rem;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.pcard ul{list-style:none;padding:0}
+.pcard li{padding:4px 0;font-size:.83rem;display:flex;align-items:flex-start;gap:8px}
+.pcard li::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;margin-top:7px;flex-shrink:0}
+.pcard.watch li::before{background:var(--coral)}
+.pcard.strength li::before{background:var(--teal)}
+.pcard.dev li::before{background:var(--gold)}
+.pcard.question li::before{background:var(--dim)}
+.pcard .stage{display:flex;justify-content:space-between;padding:4px 0;font-size:.83rem}
+.pcard .stage .label{color:var(--dim)}
+footer{text-align:center;color:var(--dim);font-size:.75rem;padding:24px 0 16px;border-top:1px solid var(--border);margin-top:16px}
+@media(max-width:640px){.stats-row{grid-template-columns:repeat(2,1fr)}.tl-item{grid-template-columns:80px 50px 1fr}.profile-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="overlay">
+  <div class="pw-box">
+    <h2>Meeting Coach</h2>
+    <p>Enter password to view dashboard</p>
+    <input type="password" id="pw" placeholder="Password" autofocus>
+    <button onclick="checkPw()">Unlock</button>
+    <div class="err" id="pwErr"></div>
+  </div>
+</div>
+<div id="app" class="hidden">
+<div class="container">
+  <h1>Meeting Coach</h1>
+  <p class="subtitle">Behavioral coaching dashboard &mdash; live meeting nudges &amp; observations</p>
+  <div class="stats-row" id="stats"></div>
+  <div class="section"><h2>Pattern Frequency</h2><div class="table-wrap"><table id="freqTable"><thead><tr><th>Pattern</th><th>Total</th><th>Positive</th><th>Corrective</th><th>Distribution</th></tr></thead><tbody></tbody></table></div></div>
+  <div class="section"><h2>Nudge Timeline</h2><div id="timeline"></div></div>
+  <div class="section"><h2>Session History</h2><div style="margin-bottom:10px"><label style="font-size:.82rem;color:var(--dim);cursor:pointer;display:inline-flex;align-items:center;gap:6px"><input type="checkbox" id="filterShort" checked> Hide test sessions (&lt;2 min)</label></div><div class="table-wrap"><table id="sessTable"><thead><tr><th>Date</th><th>Start</th><th>Duration</th><th>Nudges</th><th>Observations</th><th>Patterns</th></tr></thead><tbody></tbody></table></div></div>
+  <div class="section"><h2>Behavioral Profile</h2><div class="profile-grid" id="profile"></div></div>
+  <footer id="foot"></footer>
+</div>
+</div>
+<script>
+const HASH='f6d12d4672b70181ae82e9f0673c32fa6415c6c192e2bb4e447d44790121aacb';
+async function sha256(s){const d=new TextEncoder().encode(s);const h=await crypto.subtle.digest('SHA-256',d);return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('')}
+async function checkPw(){const v=document.getElementById('pw').value;if(await sha256(v)===HASH){document.getElementById('overlay').classList.add('hidden');document.getElementById('app').classList.remove('hidden')}else{document.getElementById('pwErr').textContent='Incorrect password'}}
+document.getElementById('pw').addEventListener('keydown',e=>{if(e.key==='Enter')checkPw()});
+
+const DATA=[{"file":"2026-01-30_1718.jsonl","date":"2026-01-30","time":"17:18","duration_min":0,"nudges":[],"observations":[]},{"file":"2026-01-30_1719.jsonl","date":"2026-01-30","time":"17:19","duration_min":0,"nudges":[],"observations":[]},{"file":"2026-01-30_1720.jsonl","date":"2026-01-30","time":"17:20","duration_min":0,"nudges":[],"observations":[]},{"file":"2026-01-30_1721.jsonl","date":"2026-01-30","time":"17:21","duration_min":0,"nudges":[],"observations":[]},{"file":"2026-01-31_1406.jsonl","date":"2026-01-31","time":"14:06","duration_min":0,"nudges":[{"ts":"2026-01-31T14:06:39.689310","pattern":"soft_close","positive":false,"nudge":"Lock a next step"}],"observations":[]},{"file":"2026-01-31_1407.jsonl","date":"2026-01-31","time":"14:07","duration_min":0,"nudges":[{"ts":"2026-01-31T14:07:08.014326","pattern":"soft_close","positive":false,"nudge":"Lock a next step"}],"observations":[]},{"file":"2026-01-31_1408.jsonl","date":"2026-01-31","time":"14:08","duration_min":0,"nudges":[{"ts":"2026-01-31T14:08:56.340954","pattern":"soft_close","positive":false,"nudge":"Lock a next step"}],"observations":[]},{"file":"2026-02-02_1321.jsonl","date":"2026-02-02","time":"13:21","duration_min":0,"nudges":[{"ts":"2026-02-02T13:21:40.073356","pattern":"soft_close","positive":false,"nudge":"Lock a next step \u2014 suggest scheduling the next meeting with specific date/time before ending"}],"observations":[]},{"file":"2026-02-02_1323.jsonl","date":"2026-02-02","time":"13:23","duration_min":0,"nudges":[],"observations":[]},{"file":"2026-02-02_1324.jsonl","date":"2026-02-02","time":"13:24","duration_min":0,"nudges":[],"observations":[]},{"file":"2026-02-18_1213.jsonl","date":"2026-02-18","time":"12:13","duration_min":0,"nudges":[{"ts":"2026-02-18T12:14:03.221305","pattern":"soft_close","positive":false,"nudge":"Lock a next step \u2014 who does what by when?"}],"observations":[]},{"file":"2026-02-18_1214.jsonl","date":"2026-02-18","time":"12:14","duration_min":0,"nudges":[{"ts":"2026-02-18T12:14:07.794476","pattern":"positional_hedging","positive":false,"nudge":"Park the analysis. What do YOU want?"},{"ts":"2026-02-18T12:14:11.475407","pattern":"underselling","positive":false,"nudge":"You\u2019re underselling. Name your value."},{"ts":"2026-02-18T12:14:14.267825","pattern":"advisor_stance","positive":true,"nudge":"Good \u2014 you\u2019re in advisor mode. Keep going."},{"ts":"2026-02-18T12:14:30.264574","pattern":"soft_close","positive":false,"nudge":"Lock a next step \u2014 who does what by when?"},{"ts":"2026-02-18T12:14:35.301057","pattern":"positional_hedging","positive":false,"nudge":"Park the analysis. What do YOU want?"},{"ts":"2026-02-18T12:14:39.140026","pattern":"underselling","positive":false,"nudge":"You\u2019re underselling. Name your value."},{"ts":"2026-02-18T12:14:43.171378","pattern":"advisor_stance","positive":true,"nudge":"Good \u2014 you\u2019re in advisor mode. Keep going."}],"observations":[{"ts":"2026-02-18T12:14:07.690195","pattern":"soft_close","what":"Soft close pattern was resolved \u2014 concrete next step locked."},{"ts":"2026-02-18T12:14:17.982329","pattern":"low_challenge_listener_mode","what":"Extended validation without testing the framing."},{"ts":"2026-02-18T12:14:35.196978","pattern":"soft_close","what":"Soft close pattern resolved cleanly \u2014 concrete next step locked."},{"ts":"2026-02-18T12:14:47.018018","pattern":"low_challenge_in_listener_mode","what":"Extended stretch of validation without alternative framing."}]},{"file":"2026-02-18_1217.jsonl","date":"2026-02-18","time":"12:17","duration_min":0,"nudges":[{"ts":"2026-02-18T12:17:52.034444","pattern":"soft_close","positive":false,"nudge":"Lock a next step \u2014 who does what by when?"},{"ts":"2026-02-18T12:17:56.258020","pattern":"positional_hedging","positive":false,"nudge":"Park the analysis. What do YOU want?"}],"observations":[{"ts":"2026-02-18T12:17:59.198917","pattern":"underselling","what":"Underselling the meeting\u2019s purpose."}]},{"file":"2026-02-18_1218.jsonl","date":"2026-02-18","time":"12:18","duration_min":0,"nudges":[{"ts":"2026-02-18T12:18:02.025055","pattern":"advisor_stance","positive":true,"nudge":"Strong advisor move. Sharing battle scars + frameworks."}],"observations":[{"ts":"2026-02-18T12:18:06.030132","pattern":"low_challenge_in_listener_mode","what":"Extended stretch of validation without testing the speaker\u2019s framing."}]},{"file":"2026-02-19_0930.jsonl","date":"2026-02-19","time":"09:30","duration_min":7,"nudges":[],"observations":[]},{"file":"2026-02-19_1002.jsonl","date":"2026-02-19","time":"10:02","duration_min":6,"nudges":[],"observations":[]},{"file":"2026-02-19_1027.jsonl","date":"2026-02-19","time":"10:27","duration_min":1,"nudges":[],"observations":[]},{"file":"2026-02-19_1230.jsonl","date":"2026-02-19","time":"12:30","duration_min":2,"nudges":[],"observations":[]},{"file":"2026-02-19_1401.jsonl","date":"2026-02-19","time":"14:01","duration_min":67,"nudges":[{"ts":"2026-02-19T15:02:23.555491","pattern":"soft_close","positive":false,"nudge":"Lock the Wednesday 3 slot \u2014 confirm time, owner, and what you\u2019re prepping."},{"ts":"2026-02-19T15:08:12.129172","pattern":"soft_close","positive":true,"nudge":"Strong close \u2014 you locked Friday + duration. Good contracting."}],"observations":[{"ts":"2026-02-19T14:11:45.226967","what":"Transcript audio quality severely degraded."},{"ts":"2026-02-19T14:20:01.072122","pattern":"experimentation_discipline","what":"Hypothesis refinement and measurement design."},{"ts":"2026-02-19T14:21:09.283239","pattern":"structural_thinking","what":"Building hypothesis about shifting perspective on invisible work."},{"ts":"2026-02-19T14:29:00.204422","what":"Audio degradation continues. Scattered structural references."},{"ts":"2026-02-19T14:43:23.264675","what":"Possible metric refinement detected."},{"ts":"2026-02-19T14:44:16.659077","pattern":"experimentation_discipline","what":"Moving from abstract to concrete."},{"ts":"2026-02-19T14:44:56.612950","pattern":"ground_rules","what":"Next steps being locked with specific owners."},{"ts":"2026-02-19T14:53:25.235448","pattern":"structural_over_persuasion","what":"Naming a structural tension."},{"ts":"2026-02-19T14:53:43.544099","pattern":"structural_thinking","what":"Naming structural tension around hack day format."},{"ts":"2026-02-19T14:54:01.874798","pattern":"experimentation_discipline","what":"Moving toward proposing concrete action."},{"ts":"2026-02-19T14:54:35.060086","pattern":"structural_thinking","what":"Moving from framing to proposing research approaches."},{"ts":"2026-02-19T14:54:52.729566","pattern":"soft_close_risk","what":"Multiple workstreams without locked next steps."},{"ts":"2026-02-19T14:55:27.667867","pattern":"experimentation_discipline","what":"Moving from problem to concrete initiatives."},{"ts":"2026-02-19T14:57:55.974346","pattern":"advisor_stance","what":"Demonstrating concrete technical capability."},{"ts":"2026-02-19T15:01:46.729767","pattern":"soft_close_prevention","what":"Scheduling moving toward concrete next step."},{"ts":"2026-02-19T15:07:14.048681","what":"Fragmented speech, unclear context."},{"ts":"2026-02-19T15:07:36.172550","pattern":"soft_close_risk","what":"Vague next-step language detected."},{"ts":"2026-02-19T15:07:54.139831","pattern":"soft_close_resolution","what":"Concrete next step locked: Friday, 30 min."}]}];
+
+const REAL=DATA.filter(d=>d.duration_min>=2||d.nudges.length>0||d.observations.length>0);
+const totalSessions=REAL.length;
+const totalMin=REAL.reduce((s,d)=>s+d.duration_min,0);
+const allNudges=DATA.flatMap(d=>d.nudges);
+const allObs=DATA.flatMap(d=>d.observations);
+
+document.getElementById('stats').innerHTML=[
+  {n:totalSessions,l:'Real Sessions',c:''},
+  {n:totalMin,l:'Minutes Coached',c:''},
+  {n:allNudges.length,l:'Nudges Sent',c:'coral'},
+  {n:allObs.length,l:'Observations',c:''}
+].map(s=>`<div class="stat-card"><div class="num ${s.c}">${s.n}</div><div class="lbl">${s.l}</div></div>`).join('');
+
+const pf={};
+allNudges.forEach(n=>{const p=n.pattern;if(!pf[p])pf[p]={total:0,pos:0,neg:0};pf[p].total++;n.positive?pf[p].pos++:pf[p].neg++});
+const sorted=Object.entries(pf).sort((a,b)=>b[1].total-a[1].total);
+const maxT=sorted.length?sorted[0][1].total:1;
+document.querySelector('#freqTable tbody').innerHTML=sorted.map(([p,v])=>{
+  const name=p.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+  return `<tr><td style="font-weight:600">${name}</td><td>${v.total}</td><td style="color:var(--teal)">${v.pos}</td><td style="color:var(--coral)">${v.neg}</td><td><div class="bar-wrap"><div class="bar" style="width:${(v.total/maxT)*100}%"><div class="pos" style="width:${v.total?v.pos/v.total*100:0}%"></div><div class="neg" style="width:${v.total?v.neg/v.total*100:0}%"></div></div></div></td></tr>`;
+}).join('');
+
+const tlNudges=allNudges.map(n=>{
+  const d=new Date(n.ts);const sess=DATA.find(s=>s.nudges.includes(n));
+  const sessStart=new Date(sess.date+'T'+sess.time+':00');
+  const minIn=Math.round((d-sessStart)/60000);
+  return Object.assign({},n,{d,minIn,sessDate:sess.date});
+}).sort((a,b)=>b.d-a.d);
+document.getElementById('timeline').innerHTML=tlNudges.map(n=>{
+  const cls=n.positive?'pos':'neg';
+  const name=n.pattern.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+  const badge=n.positive?'badge-teal':'badge-coral';
+  const time=n.d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  return `<div class="tl-item ${cls}"><div class="tl-meta">${n.sessDate}<br>${time}</div><div><span class="badge ${badge}">${n.minIn>=0?'+'+n.minIn+'m':''}</span></div><div><span class="tl-pat">${name}</span><br><span class="tl-msg">${n.nudge}</span></div></div>`;
+}).join('');
+
+function renderSessions(){
+  const filterOn=document.getElementById('filterShort').checked;
+  const shown=filterOn?REAL:DATA.slice();
+  document.querySelector('#sessTable tbody').innerHTML=shown.slice().reverse().map(s=>{
+    const pats=[...new Set(s.nudges.map(n=>n.pattern))];
+    const pills=pats.map(p=>{const name=p.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());return `<span class="badge badge-dim">${name}</span>`}).join('');
+    const dur=s.duration_min?s.duration_min+'m':'<1m';
+    return `<tr><td>${s.date}</td><td>${s.time}</td><td>${dur}</td><td>${s.nudges.length}</td><td>${s.observations.length}</td><td>${pills||'<span style="color:var(--dim)">--</span>'}</td></tr>`;
+  }).join('');
+}
+renderSessions();
+document.getElementById('filterShort').addEventListener('change',renderSessions);
+
+document.getElementById('profile').innerHTML=`
+<div class="pcard watch"><h3><span style="color:var(--coral)">&#9679;</span> Patterns to Watch</h3><ul>
+<li><strong>Soft Close</strong> &mdash; tendency to end meetings without locked next steps (who/what/when)</li>
+<li><strong>Positional Hedging</strong> &mdash; deflects direction questions into analysis mode</li>
+<li><strong>Low Challenge in Listener Mode</strong> &mdash; validates without testing alternatives</li>
+<li><strong>Over-Systematization</strong> &mdash; builds infrastructure when simpler approaches work</li>
+<li><strong>Underselling</strong> &mdash; frames meetings as &ldquo;just catching up&rdquo; when real intent exists</li>
+</ul></div>
+<div class="pcard strength"><h3><span style="color:var(--teal)">&#9679;</span> Coaching Strengths</h3><ul>
+<li><strong>Advisor Stance</strong> &mdash; proactively shares expertise, battle scars, and frameworks</li>
+<li><strong>Experimentation Discipline</strong> &mdash; grounds abstract ideas in testable hypotheses</li>
+<li><strong>Structural Thinking</strong> &mdash; sees interconnections and names system-level patterns</li>
+<li><strong>Pattern Detection</strong> &mdash; connects surface issues to underlying dynamics</li>
+<li><strong>Facilitative Listening</strong> &mdash; strong presence in supportive inquiry role</li>
+</ul></div>
+<div class="pcard dev"><h3><span style="color:var(--gold)">&#9679;</span> Developmental Context</h3>
+<div class="stage"><span class="label">Center of gravity</span> <strong>Individualist</strong></div>
+<div class="stage"><span class="label">Emerging toward</span> <strong>Strategist</strong></div>
+<div class="stage"><span class="label">Fallback under stress</span> <strong>Achiever</strong></div>
+<p style="font-size:.78rem;color:var(--dim);margin-top:10px">Torbert Action Logics &mdash; vertical development assessment</p></div>
+<div class="pcard strength"><h3><span style="color:var(--teal)">&#9679;</span> Signature Moves</h3><ul>
+<li><strong>&ldquo;I notice...&rdquo; framing</strong> &mdash; names patterns without accusation</li>
+<li><strong>Question before prescription</strong> &mdash; opens space for sense-making</li>
+<li><strong>System before self</strong> &mdash; prevents premature individual attribution</li>
+<li><strong>Enabling constraints</strong> &mdash; reframes control as design, not restriction</li>
+<li><strong>Experience vs Explanation</strong> &mdash; sense-making over information transfer</li>
+</ul></div>
+<div class="pcard question"><h3><span style="color:var(--dim)">&#9679;</span> Key Coaching Questions</h3><ul>
+<li>&ldquo;Park the analysis. What do <strong>YOU</strong> want?&rdquo;</li>
+<li>&ldquo;You proposed it &mdash; what stops you owning the first step?&rdquo;</li>
+<li>&ldquo;Is this Achiever-you or Individualist-you talking?&rdquo;</li>
+<li>&ldquo;What&rsquo;s the minimum viable experiment?&rdquo;</li>
+<li>&ldquo;What makes doing this hard?&rdquo;</li>
+</ul></div>`;
+
+document.getElementById('foot').textContent='Generated '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})+' by Meeting Coach';
+</script>
+</body>
+</html>
