@@ -219,9 +219,11 @@
     // Normalize a title for dedup comparison
     function normalizeTitle(str) {
       return str.toLowerCase()
+        .replace(/^\d{4}[\s-]\d{2}[\s-]\d{2}[\s-]?/, '') // strip leading date
         .replace(/[-_]/g, ' ')
         .replace(/\s+/g, ' ')
-        .replace(/\b(full|v2|prototype)\b/g, '')
+        .replace(/\b(full|v2|prototype|interactive|pattern tracking)\b/g, '')
+        .replace(/\s+/g, ' ')
         .trim();
     }
 
@@ -251,8 +253,14 @@
       const desc = gist.description || '';
       // Extract title from "Prototype: name" or use full description
       let title = desc.replace(/^Prototype:\s*/i, '');
+      // Strip date prefixes like "2026-02-19-"
+      title = title.replace(/^\d{4}-\d{2}-\d{2}-?/, '');
+      // Strip verbose suffixes from gist descriptions
+      title = title.replace(/\s*[-–—]\s+.{20,}$/, '');
       title = title
         .replace(/[-_]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
         .replace(/\b\w/g, c => c.toUpperCase());
 
       const date = gist.created_at.slice(0, 10);
@@ -315,31 +323,24 @@
           items.filter(i => i.source === 'archive').map(i => normalizeTitle(i.title))
         );
 
-        // Also deduplicate gists with same normalized title — keep latest
+        // Deduplicate gists: keep latest per normalized title, skip if archive has it
         const seenGistTitles = new Map();
-        items = items.filter(item => {
-          if (item.source === 'archive') return true;
+        const gistItems = items.filter(i => i.source === 'gist');
+        // Sort gists newest first so the first seen is the latest
+        gistItems.sort((a, b) => b.date.localeCompare(a.date));
 
-          const norm = normalizeTitle(item.title);
+        const keepGistIds = new Set();
+        for (const gist of gistItems) {
+          const norm = normalizeTitle(gist.title);
+          if (archiveTitles.has(norm)) continue; // archive has it
+          if (seenGistTitles.has(norm)) continue; // already kept a newer one
+          seenGistTitles.set(norm, gist);
+          keepGistIds.add(gist.gistId);
+        }
 
-          // Skip if archive already has this
-          if (archiveTitles.has(norm)) return false;
-
-          // Deduplicate gists — keep latest by date
-          if (seenGistTitles.has(norm)) {
-            const existing = seenGistTitles.get(norm);
-            if (item.date > existing.date) {
-              // Replace with newer
-              items = items.filter(i => i !== existing);
-              seenGistTitles.set(norm, item);
-              return true;
-            }
-            return false;
-          }
-
-          seenGistTitles.set(norm, item);
-          return true;
-        });
+        items = items.filter(item =>
+          item.source === 'archive' || keepGistIds.has(item.gistId)
+        );
 
         // Sort newest first
         items.sort((a, b) => b.sortKey.localeCompare(a.sortKey));
