@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Six Survival Characters — A System Diagnostic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #faf9f7;
+            --surface: #ffffff;
+            --surface-raised: #f4f3f0;
+            --surface-hover: #eeedea;
+            --border: #ddd9d3;
+            --border-light: #c8c3bb;
+            --ink: #1a1a1a;
+            --ink-muted: #555048;
+            --ink-dim: #8a847c;
+            --accent-gold: #96772a;
+            --accent-gold-dim: rgba(150, 119, 42, 0.1);
+            --accent-gold-glow: rgba(150, 119, 42, 0.06);
+            --hero-red: #a83a36;
+            --hero-red-dim: rgba(168, 58, 54, 0.08);
+            --ironist-teal: #2e7f7a;
+            --ironist-teal-dim: rgba(46, 127, 122, 0.07);
+            --game-amber: #96772a;
+            --game-amber-dim: rgba(150, 119, 42, 0.08);
+            --role-slate: #506888;
+            --role-slate-dim: rgba(80, 104, 136, 0.07);
+            --exhaust-ember: #8a4a34;
+            --exhaust-ember-dim: rgba(138, 74, 52, 0.07);
+            --confused-violet: #6a5290;
+            --confused-violet-dim: rgba(106, 82, 144, 0.07);
+            --font-serif: 'Instrument Serif', Georgia, serif;
+            --font-sans: 'DM Sans', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            font-family: var(--font-sans);
+            font-size: 16px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* === HEADER === */
+        .header {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 24px 20px;
+            text-align: center;
+        }
+
+        .header-eyebrow {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--accent-gold);
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-family: var(--font-serif);
+            font-size: clamp(32px, 6vw, 52px);
+            font-weight: 400;
+            line-height: 1.15;
+            color: var(--ink);
+            margin-bottom: 28px;
+        }
+
+        .header h1 em {
+            font-style: italic;
+            color: var(--accent-gold);
+        }
+
+        .reframe {
+            max-width: 680px;
+            margin: 0 auto 16px;
+            padding: 24px 28px;
+            background: var(--accent-gold-glow);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 8px;
+            font-size: 16px;
+            line-height: 1.7;
+            color: var(--ink-muted);
+        }
+
+        .reframe strong {
+            color: var(--ink);
+            font-weight: 500;
+        }
+
+        .header-sub {
+            font-size: 15px;
+            color: var(--ink-muted);
+            max-width: 580px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* === AXES LEGEND === */
+        .axes-legend {
+            max-width: 900px;
+            margin: 40px auto 0;
+            padding: 0 24px;
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .axis-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 14px 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            flex: 1;
+            min-width: 260px;
+            max-width: 420px;
+        }
+
+        .axis-label .axis-icon {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: var(--accent-gold);
+            white-space: nowrap;
+            padding-top: 2px;
+        }
+
+        .axis-label .axis-text {
+            font-size: 13px;
+            color: var(--ink-muted);
+            line-height: 1.55;
+        }
+
+        .axis-label .axis-text strong {
+            color: var(--ink);
+            font-weight: 500;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        /* === THE MAP === */
+        .map-container {
+            max-width: 960px;
+            margin: 40px auto 0;
+            padding: 0 24px;
+        }
+
+        .map {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            min-height: 480px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        /* Grid lines */
+        .map::before {
+            content: '';
+            position: absolute;
+            left: 33.33%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: var(--border);
+        }
+        .map::after {
+            content: '';
+            position: absolute;
+            left: 66.66%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: var(--border);
+        }
+
+        .map-midline {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* Axis labels on map */
+        .map-y-label {
+            position: absolute;
+            left: 10px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            writing-mode: vertical-lr;
+            transform: rotate(180deg);
+            color: var(--ink-dim);
+            z-index: 2;
+        }
+        .map-y-top { top: 14px; }
+        .map-y-bottom { bottom: 14px; }
+
+        .map-x-label {
+            position: absolute;
+            bottom: 10px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--ink-dim);
+            z-index: 2;
+        }
+        .map-x-left { left: 12%; transform: translateX(-50%); }
+        .map-x-mid { left: 50%; transform: translateX(-50%); }
+        .map-x-right { left: 83%; transform: translateX(-50%); }
+
+        /* Zone labels */
+        .zone-label {
+            position: absolute;
+            font-family: var(--font-mono);
+            font-size: 9px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--ink-dim);
+            opacity: 0.5;
+            z-index: 1;
+        }
+
+        .zone-top-left { top: 12px; left: 5%; }
+        .zone-bottom-mid { bottom: 34px; left: 38%; }
+        .zone-right { top: 45%; right: 4%; transform: translateY(-50%); }
+
+        /* Character nodes */
+        .node {
+            position: absolute;
+            cursor: pointer;
+            z-index: 10;
+            transition: transform 0.2s ease, z-index 0s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .node:hover, .node.active {
+            transform: scale(1.08);
+            z-index: 20;
+        }
+
+        .node-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 14px 16px 10px;
+            border-radius: 10px;
+            border: 1.5px solid;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            min-width: 120px;
+            text-align: center;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .node-icon {
+            font-size: 24px;
+            line-height: 1;
+        }
+
+        .node-name {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: 0.3px;
+            line-height: 1.3;
+        }
+
+        .node-quote {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 10.5px;
+            line-height: 1.4;
+            opacity: 0.7;
+            max-width: 140px;
+        }
+
+        /* Node colors */
+        .node-hero .node-inner { background: var(--hero-red-dim); border-color: rgba(168,58,54,0.25); color: var(--hero-red); }
+        .node-hero:hover .node-inner, .node-hero.active .node-inner { border-color: var(--hero-red); box-shadow: 0 4px 20px rgba(168,58,54,0.1); }
+        .node-hero .node-name { color: #a83a36; }
+
+        .node-ironist .node-inner { background: var(--ironist-teal-dim); border-color: rgba(46,127,122,0.25); color: var(--ironist-teal); }
+        .node-ironist:hover .node-inner, .node-ironist.active .node-inner { border-color: var(--ironist-teal); box-shadow: 0 4px 20px rgba(46,127,122,0.1); }
+        .node-ironist .node-name { color: #2e7f7a; }
+
+        .node-game .node-inner { background: var(--game-amber-dim); border-color: rgba(150,119,42,0.25); color: var(--game-amber); }
+        .node-game:hover .node-inner, .node-game.active .node-inner { border-color: var(--game-amber); box-shadow: 0 4px 20px rgba(150,119,42,0.1); }
+        .node-game .node-name { color: #96772a; }
+
+        .node-role .node-inner { background: var(--role-slate-dim); border-color: rgba(80,104,136,0.25); color: var(--role-slate); }
+        .node-role:hover .node-inner, .node-role.active .node-inner { border-color: var(--role-slate); box-shadow: 0 4px 20px rgba(80,104,136,0.1); }
+        .node-role .node-name { color: #506888; }
+
+        .node-exhaust .node-inner { background: var(--exhaust-ember-dim); border-color: rgba(138,74,52,0.25); color: var(--exhaust-ember); }
+        .node-exhaust:hover .node-inner, .node-exhaust.active .node-inner { border-color: var(--exhaust-ember); box-shadow: 0 4px 20px rgba(138,74,52,0.1); }
+        .node-exhaust .node-name { color: #8a4a34; }
+
+        .node-confused .node-inner { background: var(--confused-violet-dim); border-color: rgba(106,82,144,0.25); color: var(--confused-violet); }
+        .node-confused:hover .node-inner, .node-confused.active .node-inner { border-color: var(--confused-violet); box-shadow: 0 4px 20px rgba(106,82,144,0.1); }
+        .node-confused .node-name { color: #6a5290; }
+
+        /* Node positions */
+        .node-hero { top: 10%; left: 4%; }
+        .node-ironist { top: 22%; left: 18%; }
+        .node-game { top: 58%; left: 28%; }
+        .node-role { top: 62%; left: 46%; }
+        .node-exhaust { top: 8%; left: 68%; }
+        .node-confused { top: 52%; left: 72%; }
+
+        /* === DETAIL PANEL === */
+        .detail-panel {
+            display: none;
+            max-width: 900px;
+            margin: 24px auto 0;
+            padding: 0 24px;
+            animation: slideIn 0.25s ease;
+        }
+        .detail-panel.visible { display: block; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .detail-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            position: relative;
+        }
+
+        .detail-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: var(--surface-hover);
+            border-radius: 6px;
+            color: var(--ink-muted);
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s;
+        }
+        .detail-close:hover { background: var(--border); }
+
+        .detail-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 6px;
+        }
+
+        .detail-icon { font-size: 28px; }
+
+        .detail-name {
+            font-family: var(--font-serif);
+            font-size: 24px;
+            font-weight: 400;
+        }
+
+        .detail-motto {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 15px;
+            color: var(--ink-muted);
+            margin-bottom: 20px;
+            padding-left: 42px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .detail-section {
+            padding: 16px;
+            background: var(--surface-raised);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .detail-section h4 {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--ink-dim);
+            margin-bottom: 8px;
+        }
+
+        .detail-section p, .detail-section li {
+            font-size: 14.5px;
+            line-height: 1.65;
+            color: var(--ink-muted);
+        }
+
+        .detail-section ul {
+            list-style: none;
+            padding: 0;
+        }
+        .detail-section ul li {
+            padding-left: 14px;
+            position: relative;
+            margin-bottom: 4px;
+        }
+        .detail-section ul li::before {
+            content: '—';
+            position: absolute;
+            left: 0;
+            color: var(--ink-dim);
+        }
+
+        .detail-section .meeting-tell {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 15px;
+            color: var(--ink);
+            padding: 10px 14px;
+            background: rgba(0,0,0,0.02);
+            border-radius: 6px;
+            border-left: 2px solid var(--border-light);
+        }
+
+        .detail-full-width {
+            grid-column: 1 / -1;
+        }
+
+        .threshold-track {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+
+        .threshold-step {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            padding: 3px 8px;
+            background: rgba(0,0,0,0.03);
+            border-radius: 4px;
+            color: var(--ink-muted);
+        }
+
+        .threshold-arrow {
+            color: var(--ink-dim);
+            font-size: 11px;
+        }
+
+        /* === ORGANISATIONAL PHYSICS === */
+        .section {
+            max-width: 900px;
+            margin: 56px auto 0;
+            padding: 0 24px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .section-num {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: var(--accent-gold);
+        }
+
+        .section h2 {
+            font-family: var(--font-serif);
+            font-size: 28px;
+            font-weight: 400;
+        }
+
+        .section-sub {
+            font-size: 15px;
+            color: var(--ink-muted);
+            margin-bottom: 24px;
+            max-width: 680px;
+            line-height: 1.65;
+        }
+
+        .physics-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        .physics-card {
+            padding: 22px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            transition: border-color 0.2s;
+        }
+        .physics-card:hover {
+            border-color: var(--border-light);
+        }
+
+        .physics-card h3 {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .physics-card .physics-q {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 13.5px;
+            color: var(--ink-muted);
+            margin-bottom: 10px;
+        }
+
+        .physics-card p {
+            font-size: 14px;
+            color: var(--ink-dim);
+            line-height: 1.65;
+        }
+
+        /* === RUN / SERVE / CHANGE === */
+        .rsc-intro {
+            font-size: 14.5px;
+            color: var(--ink-muted);
+            line-height: 1.7;
+            max-width: 700px;
+            margin-bottom: 32px;
+        }
+        .rsc-intro strong { color: var(--ink); font-weight: 500; }
+
+        .rsc-columns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0;
+            margin-bottom: 32px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .rsc-col {
+            padding: 24px 22px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            position: relative;
+        }
+        .rsc-col:last-child { border-right: none; }
+
+        .rsc-col-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .rsc-badge {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+        .rsc-badge-run { background: rgba(45, 122, 74, 0.12); color: #2d7a4a; }
+        .rsc-badge-serve { background: rgba(58, 98, 152, 0.12); color: #3a6298; }
+        .rsc-badge-change { background: rgba(138, 96, 32, 0.12); color: #8a6020; }
+
+        .rsc-col h4 {
+            font-family: var(--font-serif);
+            font-size: 20px;
+            font-weight: 400;
+        }
+        .rsc-col-run h4 { color: #2d7a4a; }
+        .rsc-col-serve h4 { color: #3a6298; }
+        .rsc-col-change h4 { color: #8a6020; }
+
+        .rsc-defn {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 14px;
+            color: var(--ink-muted);
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .rsc-detail {
+            font-size: 13px;
+            color: var(--ink-dim);
+            line-height: 1.65;
+            margin-bottom: 14px;
+        }
+
+        .rsc-examples {
+            font-size: 12px;
+            color: var(--ink-dim);
+            line-height: 1.55;
+            padding: 10px 12px;
+            background: rgba(0,0,0,0.02);
+            border-radius: 6px;
+            border-left: 2px solid var(--border);
+        }
+        .rsc-col-run .rsc-examples { border-left-color: rgba(86,170,110,0.4); }
+        .rsc-col-serve .rsc-examples { border-left-color: rgba(106,140,200,0.4); }
+        .rsc-col-change .rsc-examples { border-left-color: rgba(200,140,86,0.4); }
+
+        /* Fractal bars */
+        .fractal-section {
+            margin-bottom: 32px;
+        }
+        .fractal-section h3 {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+        .fractal-sub {
+            font-size: 13px;
+            color: var(--ink-dim);
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .fractal-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 10px;
+        }
+
+        .fractal-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--ink-muted);
+            width: 130px;
+            flex-shrink: 0;
+            text-align: right;
+        }
+
+        .fractal-bar-wrap {
+            flex: 1;
+            display: flex;
+            height: 28px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+
+        .fractal-seg {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: flex 0.4s ease;
+        }
+        .fractal-seg-run { background: rgba(45,122,74,0.12); color: #2d7a4a; }
+        .fractal-seg-serve { background: rgba(58,98,152,0.12); color: #3a6298; }
+        .fractal-seg-change { background: rgba(138,96,32,0.12); color: #8a6020; }
+
+        .fractal-note {
+            font-size: 11px;
+            color: var(--ink-dim);
+            margin-left: 144px;
+            margin-top: -4px;
+            margin-bottom: 8px;
+            font-style: italic;
+        }
+
+        /* Misallocation cards */
+        .misalloc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .misalloc-card {
+            padding: 16px 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .misalloc-card h4 {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--ink);
+        }
+
+        .misalloc-card p {
+            font-size: 12.5px;
+            color: var(--ink-muted);
+            line-height: 1.55;
+        }
+
+        .misalloc-card .misalloc-signal {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 0.5px;
+            color: var(--ink-dim);
+            margin-top: 8px;
+        }
+
+        /* RSC → Character connection */
+        .rsc-char-table {
+            width: 100%;
+            min-width: 620px;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        .rsc-char-table th {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--ink-dim);
+            text-align: left;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .rsc-char-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            color: var(--ink-muted);
+            vertical-align: top;
+            line-height: 1.5;
+        }
+
+        .rsc-char-table tr:last-child td { border-bottom: none; }
+
+        .rsc-char-table .char-name-cell {
+            font-weight: 700;
+            font-size: 12.5px;
+            white-space: nowrap;
+        }
+
+        .rsc-key-quote {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 15px;
+            color: var(--ink-muted);
+            padding: 20px 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-top: 24px;
+            text-align: center;
+            line-height: 1.6;
+        }
+        .rsc-key-quote strong { color: var(--ink); font-weight: 500; }
+
+        @media (max-width: 700px) {
+            .rsc-columns { grid-template-columns: 1fr; }
+            .rsc-col { border-right: none; border-bottom: 1px solid var(--border); }
+            .rsc-col:last-child { border-bottom: none; }
+            .fractal-row { flex-direction: column; align-items: stretch; gap: 4px; }
+            .fractal-label { text-align: left; width: auto; }
+            .fractal-note { margin-left: 0; }
+            .misalloc-grid { grid-template-columns: 1fr; }
+            .rsc-char-table { font-size: 12px; }
+            .rsc-char-table th, .rsc-char-table td { padding: 8px; }
+        }
+
+        /* === DIAGNOSTIC QUESTIONS === */
+        .diagnostic-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .diagnostic-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 16px 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .diagnostic-item:hover { background: var(--surface-raised); }
+        .diagnostic-item.checked { border-color: var(--accent-gold); background: var(--accent-gold-glow); }
+
+        .diagnostic-check {
+            width: 20px;
+            height: 20px;
+            border: 1.5px solid var(--border-light);
+            border-radius: 4px;
+            flex-shrink: 0;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            font-size: 12px;
+            color: transparent;
+        }
+        .diagnostic-item.checked .diagnostic-check {
+            border-color: var(--accent-gold);
+            background: var(--accent-gold-dim);
+            color: var(--accent-gold);
+        }
+
+        .diagnostic-q {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 16px;
+            color: var(--ink);
+            line-height: 1.55;
+        }
+
+        .diagnostic-reveal {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--ink-dim);
+            margin-top: 4px;
+            letter-spacing: 0.3px;
+        }
+
+        .litmus-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--accent-gold);
+            margin: 28px 0 12px;
+        }
+
+        /* === WARNING SIGNS === */
+        .warning-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 12px;
+        }
+
+        .warning-card {
+            padding: 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            border-left: 3px solid;
+        }
+
+        .warning-card h4 {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .warning-card p {
+            font-size: 14px;
+            color: var(--ink-muted);
+            line-height: 1.6;
+        }
+
+        .warning-card.w-hero { border-left-color: var(--hero-red); }
+        .warning-card.w-hero h4 { color: #a83a36; }
+        .warning-card.w-role { border-left-color: var(--role-slate); }
+        .warning-card.w-role h4 { color: #506888; }
+        .warning-card.w-exhaust { border-left-color: var(--exhaust-ember); }
+        .warning-card.w-exhaust h4 { color: #8a4a34; }
+        .warning-card.w-ironist { border-left-color: var(--ironist-teal); }
+        .warning-card.w-ironist h4 { color: #2e7f7a; }
+        .warning-card.w-game { border-left-color: var(--game-amber); }
+        .warning-card.w-game h4 { color: #96772a; }
+        .warning-card.w-confused { border-left-color: var(--confused-violet); }
+        .warning-card.w-confused h4 { color: #6a5290; }
+
+        /* === FOOTER === */
+        .footer {
+            max-width: 900px;
+            margin: 64px auto 0;
+            padding: 28px 24px 48px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .footer p {
+            font-size: 12px;
+            color: var(--ink-dim);
+            line-height: 1.7;
+        }
+
+        .footer a {
+            color: var(--accent-gold);
+            text-decoration: none;
+        }
+        .footer a:hover { text-decoration: underline; }
+
+        /* === MOBILE MAP (grouped cards) === */
+        .mobile-map { display: none; }
+
+        .mobile-zone {
+            margin-bottom: 20px;
+        }
+
+        .mobile-zone-header {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+            color: var(--ink-dim);
+            padding: 8px 0;
+            margin-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .mobile-zone-header .zone-arrow {
+            color: var(--accent-gold);
+            margin-right: 4px;
+        }
+
+        .mobile-node {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .mobile-node:active {
+            transform: scale(0.98);
+        }
+
+        .mobile-node-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+            width: 40px;
+            text-align: center;
+        }
+
+        .mobile-node-text {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .mobile-node-name {
+            font-family: var(--font-serif);
+            font-size: 17px;
+            font-weight: 400;
+            line-height: 1.2;
+            margin-bottom: 3px;
+        }
+
+        .mobile-node-quote {
+            font-size: 13px;
+            color: var(--ink-dim);
+            font-style: italic;
+            line-height: 1.4;
+        }
+
+        .mobile-node-chevron {
+            color: var(--ink-dim);
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        /* Mobile node color accents */
+        .mobile-node-hero { border-left: 3px solid var(--hero-red); }
+        .mobile-node-hero .mobile-node-name { color: var(--hero-red); }
+        .mobile-node-ironist { border-left: 3px solid var(--ironist-teal); }
+        .mobile-node-ironist .mobile-node-name { color: var(--ironist-teal); }
+        .mobile-node-game { border-left: 3px solid var(--game-amber); }
+        .mobile-node-game .mobile-node-name { color: var(--game-amber); }
+        .mobile-node-role { border-left: 3px solid var(--role-slate); }
+        .mobile-node-role .mobile-node-name { color: var(--role-slate); }
+        .mobile-node-exhaust { border-left: 3px solid var(--exhaust-ember); }
+        .mobile-node-exhaust .mobile-node-name { color: var(--exhaust-ember); }
+        .mobile-node-confused { border-left: 3px solid var(--confused-violet); }
+        .mobile-node-confused .mobile-node-name { color: var(--confused-violet); }
+
+        /* === MOBILE === */
+        @media (max-width: 700px) {
+            .header { padding: 40px 16px 16px; }
+            .reframe { padding: 18px 20px; }
+            .axes-legend { flex-direction: column; padding: 0 16px; }
+            .axis-label { max-width: 100%; }
+
+            /* Hide spatial map, show grouped cards */
+            .map-container { display: none; }
+            .mobile-map { display: block; max-width: 600px; margin: 24px auto 0; padding: 0 16px; }
+
+            .detail-grid { grid-template-columns: 1fr; }
+            .detail-card { padding: 20px; }
+            .detail-motto { padding-left: 0; }
+
+            .section { margin-top: 40px; }
+            .physics-cards { grid-template-columns: 1fr; }
+            .warning-grid { grid-template-columns: 1fr; }
+            .misalloc-grid { grid-template-columns: 1fr; }
+
+            .rsc-columns { grid-template-columns: 1fr; }
+            .rsc-col { border-right: none; border-bottom: 1px solid var(--border); }
+            .rsc-col:last-child { border-bottom: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-eyebrow">Organisational Diagnostic</div>
+    <h1>The Six Survival Characters of <em>Organisational Incoherence</em></h1>
+
+    <div class="reframe">
+        <strong>These aren't personalities. They're diagnostics.</strong><br>
+        The question is not "how do we coach them?" but<br>
+        <strong>"What kind of system are we running that makes these roles the most rational way to survive?"</strong>
+    </div>
+
+    <p class="header-sub">
+        When structure, rules and values don't line up, people don't just cope — they adapt.
+        And those adaptations harden into recognisable survival patterns.
+        Click a character to read the pattern.
+    </p>
+</div>
+
+<div class="axes-legend">
+    <div class="axis-label">
+        <span class="axis-icon">Y-AXIS</span>
+        <div class="axis-text">
+            <strong>Contact with Reality</strong>
+            High = sees the work, the risk, the truth.
+            Low = sees the story, the signals, the official reality.
+        </div>
+    </div>
+    <div class="axis-label">
+        <span class="axis-icon">X-AXIS</span>
+        <div class="axis-text">
+            <strong>Survival Strategy</strong>
+            Fight = try to change the system or defend truth.
+            Fit = adapt, play the rules. Freeze/Flee = withdraw, detach.
+        </div>
+    </div>
+</div>
+
+<!-- === THE MAP === -->
+<div class="map-container">
+    <div class="map" id="map">
+        <div class="map-midline"></div>
+
+        <span class="map-y-label map-y-top">High contact</span>
+        <span class="map-y-label map-y-bottom">Low contact</span>
+        <span class="map-x-label map-x-left">Fight</span>
+        <span class="map-x-label map-x-mid">Fit</span>
+        <span class="map-x-label map-x-right">Freeze / Flee</span>
+
+        <span class="zone-label zone-top-left">high contact + fight</span>
+        <span class="zone-label zone-bottom-mid">low contact + fit</span>
+        <span class="zone-label zone-right">triggered, not chosen</span>
+
+        <!-- Naive Hero -->
+        <div class="node node-hero" data-char="hero" onclick="showDetail('hero')">
+            <div class="node-inner">
+                <span class="node-icon">&#9876;</span>
+                <span class="node-name">The Naive Hero</span>
+                <span class="node-quote">"If I just tell the truth clearly enough..."</span>
+            </div>
+        </div>
+
+        <!-- Third-Way Ironist -->
+        <div class="node node-ironist" data-char="ironist" onclick="showDetail('ironist')">
+            <div class="node-inner">
+                <span class="node-icon">&#9883;</span>
+                <span class="node-name">The Third-Way Ironist</span>
+                <span class="node-quote">"I see the theatre. I also see the work."</span>
+            </div>
+        </div>
+
+        <!-- Ambitious Game-Player -->
+        <div class="node node-game" data-char="game" onclick="showDetail('game')">
+            <div class="node-inner">
+                <span class="node-icon">&#9812;</span>
+                <span class="node-name">The Ambitious<br>Game-Player</span>
+                <span class="node-quote">"If legitimacy is the currency..."</span>
+            </div>
+        </div>
+
+        <!-- Adaptive Role-Actor -->
+        <div class="node node-role" data-char="role" onclick="showDetail('role')">
+            <div class="node-inner">
+                <span class="node-icon">&#127917;</span>
+                <span class="node-name">The Adaptive<br>Role-Actor</span>
+                <span class="node-quote">"Tell me what success looks like..."</span>
+            </div>
+        </div>
+
+        <!-- Emotionally Exhausted -->
+        <div class="node node-exhaust" data-char="exhaust" onclick="showDetail('exhaust')">
+            <div class="node-inner">
+                <span class="node-icon">&#9790;</span>
+                <span class="node-name">The Emotionally<br>Exhausted</span>
+                <span class="node-quote">"I can't carry another ounce of this."</span>
+            </div>
+        </div>
+
+        <!-- Cognitively Confused -->
+        <div class="node node-confused" data-char="confused" onclick="showDetail('confused')">
+            <div class="node-inner">
+                <span class="node-icon">&#10070;</span>
+                <span class="node-name">The Cognitively<br>Confused</span>
+                <span class="node-quote">"I can't tell what's real anymore."</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- === MOBILE MAP (grouped by quadrant) === -->
+<div class="mobile-map">
+    <div class="mobile-zone">
+        <div class="mobile-zone-header"><span class="zone-arrow">&uarr;</span> High Contact + Fight</div>
+        <div class="mobile-node mobile-node-hero" onclick="showDetail('hero')">
+            <span class="mobile-node-icon">&#9876;</span>
+            <div class="mobile-node-text">
+                <div class="mobile-node-name">The Naive Hero</div>
+                <div class="mobile-node-quote">"If I just tell the truth clearly enough..."</div>
+            </div>
+            <span class="mobile-node-chevron">&rsaquo;</span>
+        </div>
+        <div class="mobile-node mobile-node-ironist" onclick="showDetail('ironist')">
+            <span class="mobile-node-icon">&#9883;</span>
+            <div class="mobile-node-text">
+                <div class="mobile-node-name">The Third-Way Ironist</div>
+                <div class="mobile-node-quote">"I see the theatre. I also see the work."</div>
+            </div>
+            <span class="mobile-node-chevron">&rsaquo;</span>
+        </div>
+    </div>
+
+    <div class="mobile-zone">
+        <div class="mobile-zone-header"><span class="zone-arrow">&darr;</span> Low Contact + Fit</div>
+        <div class="mobile-node mobile-node-game" onclick="showDetail('game')">
+            <span class="mobile-node-icon">&#9812;</span>
+            <div class="mobile-node-text">
+                <div class="mobile-node-name">The Ambitious Game-Player</div>
+                <div class="mobile-node-quote">"If legitimacy is the currency..."</div>
+            </div>
+            <span class="mobile-node-chevron">&rsaquo;</span>
+        </div>
+        <div class="mobile-node mobile-node-role" onclick="showDetail('role')">
+            <span class="mobile-node-icon">&#127917;</span>
+            <div class="mobile-node-text">
+                <div class="mobile-node-name">The Adaptive Role-Actor</div>
+                <div class="mobile-node-quote">"Tell me what success looks like..."</div>
+            </div>
+            <span class="mobile-node-chevron">&rsaquo;</span>
+        </div>
+    </div>
+
+    <div class="mobile-zone">
+        <div class="mobile-zone-header"><span class="zone-arrow">&rarr;</span> Freeze / Flee</div>
+        <div class="mobile-node mobile-node-exhaust" onclick="showDetail('exhaust')">
+            <span class="mobile-node-icon">&#9790;</span>
+            <div class="mobile-node-text">
+                <div class="mobile-node-name">The Emotionally Exhausted</div>
+                <div class="mobile-node-quote">"I can't carry another ounce of this."</div>
+            </div>
+            <span class="mobile-node-chevron">&rsaquo;</span>
+        </div>
+        <div class="mobile-node mobile-node-confused" onclick="showDetail('confused')">
+            <span class="mobile-node-icon">&#10070;</span>
+            <div class="mobile-node-text">
+                <div class="mobile-node-name">The Cognitively Confused</div>
+                <div class="mobile-node-quote">"I can't tell what's real anymore."</div>
+            </div>
+            <span class="mobile-node-chevron">&rsaquo;</span>
+        </div>
+    </div>
+</div>
+
+<!-- === DETAIL PANEL === -->
+<div class="detail-panel" id="detailPanel"></div>
+
+<!-- === RUN / SERVE / CHANGE === -->
+<div class="section">
+    <div class="section-header">
+        <span class="section-num">02</span>
+        <h2>Run, Serve, Change</h2>
+    </div>
+
+    <div class="rsc-intro">
+        Every organisation carries three kinds of work simultaneously. Not as departments or projects — as <strong>loads that sit on every role, at every level</strong>. When the architecture doesn't make these loads visible and governable, they leak into heroics, invisible glue work, and evening emails. That's where the characters come from.
+    </div>
+
+    <div class="rsc-columns">
+        <div class="rsc-col rsc-col-run">
+            <div class="rsc-col-header">
+                <span class="rsc-badge rsc-badge-run">Run</span>
+                <h4>Keep it going</h4>
+            </div>
+            <div class="rsc-defn">Keeping the current system operational.</div>
+            <div class="rsc-detail">Execution of existing processes, meeting regulatory requirements, delivering today's work, managing P&L, handling customer service and compliance. The work the system is designed to do.</div>
+            <div class="rsc-examples">
+                Daily/weekly cycles &middot; Process execution &middot; Reporting &middot; Compliance &middot; Customer delivery &middot; Firefighting
+            </div>
+        </div>
+
+        <div class="rsc-col rsc-col-serve">
+            <div class="rsc-col-header">
+                <span class="rsc-badge rsc-badge-serve">Serve</span>
+                <h4>Stitch it together</h4>
+            </div>
+            <div class="rsc-defn">Horizontal integration across silos.</div>
+            <div class="rsc-detail">Connecting markets and functions, standardising practices, sharing innovations, reducing duplication, translating global directives into local reality. The invisible glue work that keeps a complex organisation from fragmenting.</div>
+            <div class="rsc-examples">
+                Cross-functional coordination &middot; Relationship repair &middot; Translation &middot; De-escalation &middot; Smoothing handovers &middot; "Human middleware"
+            </div>
+        </div>
+
+        <div class="rsc-col rsc-col-change">
+            <div class="rsc-col-header">
+                <span class="rsc-badge rsc-badge-change">Change</span>
+                <h4>Redesign it</h4>
+            </div>
+            <div class="rsc-defn">Altering the system itself.</div>
+            <div class="rsc-detail">Redesigning structures, practices, and constraints. Experimenting with new models. Deciding what legacy processes die. Shifting organisational architecture. The work that makes the future different from the present.</div>
+            <div class="rsc-examples">
+                Experimentation &middot; Architecture redesign &middot; New capabilities &middot; Killing legacy &middot; Sponsoring safe-to-fail probes
+            </div>
+        </div>
+    </div>
+
+    <!-- Fractal allocation -->
+    <div class="fractal-section">
+        <h3>The Fractal Pattern</h3>
+        <div class="fractal-sub">Every level carries all three loads — but the proportions shift. The higher the role, the more of its value should come from development, not just delivery. When everyone operates at 80–90% Run, there is no structural carrier for Serve or Change.</div>
+
+        <div class="fractal-row">
+            <span class="fractal-label">Frontline leader</span>
+            <div class="fractal-bar-wrap">
+                <div class="fractal-seg fractal-seg-run" style="flex:85">85% Run</div>
+                <div class="fractal-seg fractal-seg-serve" style="flex:10">10%</div>
+                <div class="fractal-seg fractal-seg-change" style="flex:5">5%</div>
+            </div>
+        </div>
+        <div class="fractal-note">Master craft. Team rhythms. Local problem-solving.</div>
+
+        <div class="fractal-row">
+            <span class="fractal-label">Country / regional head</span>
+            <div class="fractal-bar-wrap">
+                <div class="fractal-seg fractal-seg-run" style="flex:60">60% Run</div>
+                <div class="fractal-seg fractal-seg-serve" style="flex:30">30% Serve</div>
+                <div class="fractal-seg fractal-seg-change" style="flex:10">10%</div>
+            </div>
+        </div>
+        <div class="fractal-note">Move from hero to designer. Solve problems systemically, not just locally.</div>
+
+        <div class="fractal-row">
+            <span class="fractal-label">System architect</span>
+            <div class="fractal-bar-wrap">
+                <div class="fractal-seg fractal-seg-run" style="flex:40">40% Run</div>
+                <div class="fractal-seg fractal-seg-serve" style="flex:30">30% Serve</div>
+                <div class="fractal-seg fractal-seg-change" style="flex:30">30% Change</div>
+            </div>
+        </div>
+        <div class="fractal-note">Read the system. Redistribute complexity. Sponsor experiments. Evolve architecture.</div>
+    </div>
+
+    <!-- Misallocation consequences -->
+    <div class="fractal-section">
+        <h3>When the Load Is Misallocated</h3>
+        <div class="fractal-sub">Different misallocations produce different character distributions.</div>
+
+        <div class="misalloc-grid">
+            <div class="misalloc-card">
+                <h4>Run dominance everywhere</h4>
+                <p>Everyone at 80–90% Run. Prevents systemic learning. Burns out complexity carriers. Serve and Change work done invisibly in evenings — or not at all.</p>
+                <div class="misalloc-signal">Produces &rarr; Exhausted, Confused, Heroes burning out</div>
+            </div>
+            <div class="misalloc-card">
+                <h4>Unrecognised Serve work</h4>
+                <p>People solving cross-functional problems informally receive no credit. The system can't replicate their solutions. Their work is invisible to the performance regime.</p>
+                <div class="misalloc-signal">Produces &rarr; Exhausted (carrying invisible load), Role-Actors (learning not to bother)</div>
+            </div>
+            <div class="misalloc-card">
+                <h4>Change without support</h4>
+                <p>Experiments fail silently. No pathway from "local hack" to "regional pattern" to "standard." Innovation becomes theatre because there's no carrier to move it.</p>
+                <div class="misalloc-signal">Produces &rarr; Heroes (pushing change by willpower), Game-Players (narrating change without doing it)</div>
+            </div>
+            <div class="misalloc-card">
+                <h4>All three dumped on same people</h4>
+                <p>Run the operational load, Serve everyone by absorbing coordination, AND Change by trying to correct the system. That's not leadership development — that's a recipe for Stretch &rarr; Tangle &rarr; Break.</p>
+                <div class="misalloc-signal">Produces &rarr; Heroes collapsing into Exhausted</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How RSC maps to characters -->
+    <div class="fractal-section">
+        <h3>How the Characters Carry the Load</h3>
+        <div class="fractal-sub">Each character has a distinctive distortion pattern in how they carry Run, Serve, and Change.</div>
+
+        <div style="overflow-x:auto; border: 1px solid var(--border); border-radius: 10px; background: var(--surface);">
+            <table class="rsc-char-table">
+                <thead>
+                    <tr>
+                        <th>Character</th>
+                        <th>Run</th>
+                        <th>Serve</th>
+                        <th>Change</th>
+                        <th>The Distortion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="char-name-cell" style="color:#e07a77">Naive Hero</td>
+                        <td>Trapped in Run legitimacy rituals</td>
+                        <td>Absorbs coordination for everyone</td>
+                        <td>Tries to force through willpower</td>
+                        <td>Does all three at once — by voice alone, without carriers</td>
+                    </tr>
+                    <tr>
+                        <td class="char-name-cell" style="color:#6dc4be">Third-Way Ironist</td>
+                        <td>Minimum viable control</td>
+                        <td>Makes integration explicit</td>
+                        <td>Redesigns carriers, not just content</td>
+                        <td>Treats R/S/C as a design map, not categories of people</td>
+                    </tr>
+                    <tr>
+                        <td class="char-name-cell" style="color:#dfc06e">Game-Player</td>
+                        <td>Runs "transformations" as legitimacy projects</td>
+                        <td>Manages stakeholders</td>
+                        <td>Adds initiatives without removing load</td>
+                        <td>Looks like Change but carriers don't move — the org "transforms" permanently while becoming less capable</td>
+                    </tr>
+                    <tr>
+                        <td class="char-name-cell" style="color:#9aabc6">Role-Actor</td>
+                        <td>Produces the artefacts</td>
+                        <td>Mediates and smooths</td>
+                        <td>Narrates transformation</td>
+                        <td>Constant internal translation loop. Their success becomes evidence the system "works" — preventing architectural fix</td>
+                    </tr>
+                    <tr>
+                        <td class="char-name-cell" style="color:#c48068">Exhausted</td>
+                        <td>Constant compliance</td>
+                        <td>Carrying Serve far beyond role</td>
+                        <td>Another demand layered on top</td>
+                        <td>The "human middleware" between incompatible systems. Serve is where moral injury accumulates</td>
+                    </tr>
+                    <tr>
+                        <td class="char-name-cell" style="color:#a690c8">Confused</td>
+                        <td>Heavy reporting ("prove delivery")</td>
+                        <td>Informal reconciliation</td>
+                        <td>Layered on top without clarity</td>
+                        <td>Cannot tell which kind of work they're doing or which will be rewarded. Oscillates endlessly.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="rsc-key-quote">
+        "Your role is not just a job. It's a <strong>developmental container</strong>. If we don't treat it that way, we're wasting both you and the system."<br>
+        <span style="font-size:12px;color:var(--ink-dim);font-style:normal">— Hierarchy as spine, not ladder</span>
+    </div>
+</div>
+
+<!-- === ORGANISATIONAL PHYSICS === -->
+<div class="section">
+    <div class="section-header">
+        <span class="section-num">03</span>
+        <h2>Organisational Physics</h2>
+    </div>
+    <p class="section-sub">Three structural conditions manufacture the characters. Different answers produce different casts — and predict the plot.</p>
+
+    <div class="physics-cards">
+        <div class="physics-card">
+            <h3>Structural Load</h3>
+            <p class="physics-q">Where does Run, Serve, Change actually sit?</p>
+            <p>Beyond the org chart — who is actually carrying operational delivery, relationship maintenance, and transformation work? Where is it leaking into heroics and invisible glue? Redraw the org in three colours: estimate actual weekly percentages for each person.</p>
+        </div>
+        <div class="physics-card">
+            <h3>Regulatory Grammar</h3>
+            <p class="physics-q">What gets rewarded — truth, theatre, caution, speed, obedience?</p>
+            <p>The real incentive architecture. Not what the values deck says — what behaviour actually gets promoted, punished, and ignored. Bell curves that force a fixed percentage into "needs improvement." Promotion criteria that reward narrow visibility over systemic impact.</p>
+        </div>
+        <div class="physics-card">
+            <h3>Moral Universe</h3>
+            <p class="physics-q">Who benefits when the system "performs well"? Who absorbs harm?</p>
+            <p>Every organisation has a moral project, spoken or not. When the system runs "as designed," whose upside flows to one layer? Whose downside absorbs the strain? Who carries the hidden complexity — and at what personal cost?</p>
+        </div>
+    </div>
+</div>
+
+<!-- === DIAGNOSTIC QUESTIONS === -->
+<div class="section">
+    <div class="section-header">
+        <span class="section-num">04</span>
+        <h2>Diagnostic Questions</h2>
+    </div>
+    <p class="section-sub">Walk through these to read your system. Check the ones that produce an uncomfortable answer.</p>
+
+    <ul class="diagnostic-list" id="diagnosticList">
+        <li class="diagnostic-item" onclick="toggleCheck(this)">
+            <span class="diagnostic-check">&#10003;</span>
+            <div>
+                <div class="diagnostic-q">"If I asked someone here to surface an uncomfortable truth, what would happen?"</div>
+                <div class="diagnostic-reveal">reveals &rarr; safety to speak</div>
+            </div>
+        </li>
+        <li class="diagnostic-item" onclick="toggleCheck(this)">
+            <span class="diagnostic-check">&#10003;</span>
+            <div>
+                <div class="diagnostic-q">"Where does the real load sit — and who's invisibly carrying it?"</div>
+                <div class="diagnostic-reveal">reveals &rarr; hidden Serve work</div>
+            </div>
+        </li>
+        <li class="diagnostic-item" onclick="toggleCheck(this)">
+            <span class="diagnostic-check">&#10003;</span>
+            <div>
+                <div class="diagnostic-q">"What behaviours get punished first?"</div>
+                <div class="diagnostic-reveal">reveals &rarr; true regulatory grammar</div>
+            </div>
+        </li>
+        <li class="diagnostic-item" onclick="toggleCheck(this)">
+            <span class="diagnostic-check">&#10003;</span>
+            <div>
+                <div class="diagnostic-q">"Who are the people privately holding the system together?"</div>
+                <div class="diagnostic-reveal">reveals &rarr; human middleware</div>
+            </div>
+        </li>
+        <li class="diagnostic-item" onclick="toggleCheck(this)">
+            <span class="diagnostic-check">&#10003;</span>
+            <div>
+                <div class="diagnostic-q">"Which characters dominate here — and what does that tell us about the architecture?"</div>
+                <div class="diagnostic-reveal">reveals &rarr; system signature</div>
+            </div>
+        </li>
+    </ul>
+
+    <div class="litmus-label">The Litmus Test (Axion-Aligned)</div>
+
+    <ul class="diagnostic-list">
+        <li class="diagnostic-item" onclick="toggleCheck(this)">
+            <span class="diagnostic-check">&#10003;</span>
+            <div>
+                <div class="diagnostic-q">"Who can fix a $500 problem?"</div>
+                <div class="diagnostic-reveal">reveals &rarr; decision rights reality</div>
+            </div>
+        </li>
+        <li class="diagnostic-item" onclick="toggleCheck(this)">
+            <span class="diagnostic-check">&#10003;</span>
+            <div>
+                <div class="diagnostic-q">"What work dies in meetings?"</div>
+                <div class="diagnostic-reveal">reveals &rarr; where energy leaks</div>
+            </div>
+        </li>
+        <li class="diagnostic-item" onclick="toggleCheck(this)">
+            <span class="diagnostic-check">&#10003;</span>
+            <div>
+                <div class="diagnostic-q">"What behaviour gets punished first?"</div>
+                <div class="diagnostic-reveal">reveals &rarr; true regulatory grammar</div>
+            </div>
+        </li>
+        <li class="diagnostic-item" onclick="toggleCheck(this)">
+            <span class="diagnostic-check">&#10003;</span>
+            <div>
+                <div class="diagnostic-q">"What must people hide to get the job done?"</div>
+                <div class="diagnostic-reveal">reveals &rarr; shadow work &amp; moral universe</div>
+            </div>
+        </li>
+    </ul>
+</div>
+
+<!-- === WARNING SIGNS === -->
+<div class="section">
+    <div class="section-header">
+        <span class="section-num">05</span>
+        <h2>Warning Signs by Character Distribution</h2>
+    </div>
+    <p class="section-sub">Count the characters in your system. The dominant cast tells you the plot.</p>
+
+    <div class="warning-grid">
+        <div class="warning-card w-hero">
+            <h4>Heroes proliferating</h4>
+            <p>System rewarding truth-telling but not supporting it. Heroes burn bright — then burn out.</p>
+        </div>
+        <div class="warning-card w-role">
+            <h4>Role-Actors dominant</h4>
+            <p>Appearance over reality in the regulatory grammar. The system is being held together by invisible translation labour.</p>
+        </div>
+        <div class="warning-card w-exhaust">
+            <h4>Exhausted everywhere</h4>
+            <p>Invisible Serve work not recognised. Load is being outsourced into nervous systems. The system's truth sensors are going quiet.</p>
+        </div>
+        <div class="warning-card w-ironist">
+            <h4>No Ironists remaining</h4>
+            <p>System has expelled or exhausted its redesigners. Nobody left who can see the theatre AND change the carriers.</p>
+        </div>
+        <div class="warning-card w-game">
+            <h4>Game-Players rising</h4>
+            <p>Legitimacy signals divorced from reality. The system is selecting for performance of competence over actual competence.</p>
+        </div>
+        <div class="warning-card w-confused">
+            <h4>Confused people everywhere</h4>
+            <p>Incoherent grammar — contradictory demands without resolution. Strategy isn't being implemented, it's being locally survived.</p>
+        </div>
+    </div>
+</div>
+
+<!-- === FOOTER === -->
+<div class="footer">
+    <p>
+        Based on Richard Claydon, <em>"The Six Survival Characters of Organisational Incoherence,"</em><br>
+        <a href="https://richardclaydon.substack.com/" target="_blank" rel="noopener">Leadership, Rewritten</a>, 2025.
+        &nbsp;&middot;&nbsp; Diagnostic tool, not a personality model.
+    </p>
+    <p style="margin-top: 10px; font-size: 12px; opacity: 0.6;">
+        Created by ewancameron@gmail.com 🤖
+    </p>
+</div>
+
+<script>
+const characters = {
+    hero: {
+        icon: '&#9876;',
+        name: 'The Naive Hero',
+        color: 'hero',
+        motto: '"If I just tell the truth clearly enough, the system will change."',
+        sections: [
+            {
+                title: 'What They See',
+                content: '<p>Still believes the organisation is basically moral — not sentimentally, but structurally. Assumes that if leaders could only see what is happening, the system would correct itself. They believe truth has intrinsic authority.</p>'
+            },
+            {
+                title: 'Meeting Tell',
+                content: '<div class="meeting-tell">"We\'re green on paper, but customers are screaming."</div><div class="meeting-tell" style="margin-top:8px">"The metric is stable because we\'ve stopped reporting the incidents."</div>'
+            },
+            {
+                title: 'What the System Does to Them',
+                content: '<ul><li>Legitimacy is not awarded for truth — it\'s awarded for performance signals</li><li>Load doesn\'t move because someone cares — it moves because carriers change</li><li>The system protects itself before it protects reality</li></ul><p style="margin-top:8px">Their truth doesn\'t land as "help." It lands as "instability." They get labelled: <em>negative, not strategic, not a team player, too intense, difficult.</em></p>'
+            },
+            {
+                title: 'Threshold Pattern',
+                content: '<div class="threshold-track"><span class="threshold-step">Stretch</span><span class="threshold-arrow">&rarr;</span><span class="threshold-step">Tangle</span><span class="threshold-arrow">&rarr;</span><span class="threshold-step" style="background:rgba(199,84,80,0.15)">Break</span></div><p style="margin-top:8px;font-size:12.5px;color:var(--ink-dim)">"I can fix this if I push harder" &rarr; "Why are they resisting the truth?" &rarr; blow-up or collapse</p>'
+            },
+            {
+                title: 'Hidden Gift',
+                content: '<p>First honest sensor in a decaying system. Detects reality early. Names problems while they\'re still reversible. Keeps moral gravity alive in rooms drifting into theatre.</p>',
+            },
+            {
+                title: 'Failure Mode',
+                content: '<p><strong>Mistakes moral clarity for structural power.</strong> Assumes "saying the right thing" will change the carriers. But carriers don\'t change through truth alone — they change through redesign of legitimacy, load, and grammar.</p>'
+            }
+        ]
+    },
+    ironist: {
+        icon: '&#9883;',
+        name: 'The Third-Way Ironist',
+        color: 'ironist',
+        motto: '"I see the theatre. I also see the work. I\'ll redesign the carriers."',
+        sections: [
+            {
+                title: 'What They See',
+                content: '<p>Can see the system\'s theatre without being seduced by it. Can see the system\'s harm without collapsing into despair. Speaks the language of legitimacy without becoming a Game-Player. Honours reality without becoming a Naive Hero. <em>Double-seeing</em> — ironic in the classical sense.</p>'
+            },
+            {
+                title: 'Meeting Tell',
+                content: '<div class="meeting-tell">"What would we stop doing if we were serious about this?"</div><div class="meeting-tell" style="margin-top:8px">"What is the work this dashboard is a proxy for?"</div>'
+            },
+            {
+                title: 'Signature Moves',
+                content: '<ul><li>Doesn\'t fight the dashboard — <strong>changes the meeting that worships it</strong></li><li>Doesn\'t demand "more empowerment" — <strong>removes a central approval loop</strong></li><li>Doesn\'t ask for cultural change — <strong>redesigns the workflow so desired behaviour is easiest</strong></li></ul>'
+            },
+            {
+                title: 'Optimises For',
+                content: '<ul><li><strong>Load coherence</strong> — Run/Serve/Change is explicit and governable</li><li><strong>Grammar coherence</strong> — metrics, incentives, governance aligned enough for judgment without self-betrayal</li><li><strong>Moral coherence</strong> — purpose as real constraint, not branding</li></ul>'
+            },
+            {
+                title: 'Hidden Gift',
+                content: '<p>Creates islands of sane coherence — teams that run cleaner, fewer dashboards, more actual work, tighter rhythms, people who feel safer and more capable.</p>'
+            },
+            {
+                title: 'Failure Mode',
+                content: '<p>Islands are fragile. As soon as the Ironist loses positional capital — moves role, gets restructured, loses protection — the sea returns. The confusion tax reasserts itself. <strong>Relying on rare leaders for coherence is not a design strategy.</strong></p>'
+            }
+        ]
+    },
+    game: {
+        icon: '&#9812;',
+        name: 'The Ambitious Game-Player',
+        color: 'game',
+        motto: '"If legitimacy is the currency, I\'ll become rich."',
+        sections: [
+            {
+                title: 'What They See',
+                content: '<p>Not always immoral. Not always cruel. Often charming, smart, genuinely hardworking. But they\'ve made a clean internal decision: <strong>success is measured by winning the system\'s legitimacy game, not by changing the system\'s reality.</strong></p>'
+            },
+            {
+                title: 'Meeting Tell',
+                content: '<div class="meeting-tell">"We\'ve got a watch-out, but it\'s under control."</div><div class="meeting-tell" style="margin-top:8px">"We\'ll take it offline and come back with a plan."</div>'
+            },
+            {
+                title: 'How the Architecture Creates Them',
+                content: '<ul><li>Legitimacy allocated through <strong>performance signals</strong> — targets, scorecards, rankings</li><li>Truth is punished subtly — candour becomes "poor stakeholder management"</li><li>Complexity managed through <strong>theatre</strong> — reporting intensity substitutes for redesign</li></ul>'
+            },
+            {
+                title: 'Their Key Move',
+                content: '<p>Converts truth into narrative without explicitly lying. Not "How will this affect the work?" but <strong>"How will this be received?"</strong></p>'
+            },
+            {
+                title: 'Hidden Gift',
+                content: '<p>Can create momentum. Can simplify narratives. Can mobilise attention. In crisis, those skills matter. The issue is not capability — it\'s <strong>orientation</strong>.</p>'
+            },
+            {
+                title: 'Failure Mode',
+                content: '<p><strong>Industrialises the Confusion Tax.</strong> More reporting, more escalation rituals, more status meetings, more KPI negotiation, more "managing stakeholders" — less actual work. They don\'t just play the game. They expand the playing field.</p>'
+            }
+        ]
+    },
+    role: {
+        icon: '&#127917;',
+        name: 'The Adaptive Role-Actor',
+        color: 'role',
+        motto: '"Tell me what success looks like in this room — and I\'ll become it."',
+        sections: [
+            {
+                title: 'What They See',
+                content: '<p>What cognitive confusion turns into when a capable person decides they can\'t afford to keep searching for coherence. They stop asking "What is true?" and start asking <strong>"What is rewarded?"</strong> Not cynical — pragmatic. Often the ones who keep a decaying system functioning.</p>'
+            },
+            {
+                title: 'Meeting Tell',
+                content: '<p style="font-size:13px;color:var(--ink-muted)">Speaks different dialects to different audiences fluently:</p><ul><li>With executives: outcomes, confidence, controllability</li><li>With frontline: constraints, reality, workarounds</li><li>With Risk: exposure, controls, mitigation</li><li>With HR: values, culture, capability</li></ul>'
+            },
+            {
+                title: 'How the Architecture Creates Them',
+                content: '<ul><li>The system is incoherent — trade-offs unresolved, metrics conflict</li><li>Legitimacy is performative — being <em>seen</em> as competent matters more than being correct</li><li>Punishment is real — speak too plainly and you\'re "difficult"</li></ul>'
+            },
+            {
+                title: 'The Trap',
+                content: '<p>The organisation depends on their adaptability <strong>instead of fixing the architecture</strong>. Their success becomes evidence the system "works" when it\'s being held together by invisible labour.</p>'
+            },
+            {
+                title: 'Hidden Gift',
+                content: '<p>Potential bridge-builders. Redesign the carriers — clarify decisions, align metrics — and Role-Actors often become your best integrators. They already understand the interfaces. <strong>One architectural shift from genuine post-managerial leaders.</strong></p>'
+            },
+            {
+                title: 'Failure Mode',
+                content: '<p>Gradual moral erosion. Stops telling the truth to protect people. Starts protecting people to avoid telling the truth. When the system asks them to betray their own compass — role-acting either hardens into game-playing, or cracks open into ironist-level clarity.</p>'
+            }
+        ]
+    },
+    exhaust: {
+        icon: '&#9790;',
+        name: 'The Emotionally Exhausted',
+        color: 'exhaust',
+        motto: '"I can\'t carry another ounce of this."',
+        sections: [
+            {
+                title: 'What They See',
+                content: '<p>What happens when someone stays in contact with reality for too long without structural support. Often former Heroes or burnt-out Zealots. Not because they stopped caring — because they cared in a system that <strong>punished caring with extra load</strong>.</p>'
+            },
+            {
+                title: 'Meeting Tell',
+                content: '<div class="meeting-tell">Present physically, absent internally. Speaks less. Volunteers less. Stops pushing back. Sometimes performs competence on the surface — but with no surplus. No generosity. No buffer. The light has gone.</div>'
+            },
+            {
+                title: 'How the Architecture Creates Them',
+                content: '<ul><li><strong>Serve work becomes invisible</strong> — relationship repair, translation, de-escalation treated as "soft stuff"</li><li><strong>Run work is over-measured</strong> — pushed into reporting and control rituals</li><li><strong>Change work becomes theatre</strong> — more initiatives without removing load</li></ul><p style="margin-top:8px">The org doesn\'t just exhaust people by asking too much. It exhausts them by <strong>refusing to name what they are already doing as work</strong>.</p>'
+            },
+            {
+                title: 'Threshold Pattern',
+                content: '<div class="threshold-track"><span class="threshold-step">Stretch</span><span class="threshold-arrow">&rarr;</span><span class="threshold-step">Tangle</span><span class="threshold-arrow">&rarr;</span><span class="threshold-step">Drift</span><span class="threshold-arrow">&rarr;</span><span class="threshold-step" style="background:rgba(160,96,74,0.2)">Break</span></div><p style="margin-top:8px;font-size:12.5px;color:var(--ink-dim)">"I\'ll push through" &rarr; "I\'m stuck between impossible demands" &rarr; "Why am I even doing this?" &rarr; shutdown</p>'
+            },
+            {
+                title: 'Hidden Gift — System Signal',
+                content: '<p>If you have exhausted people, you are not looking at an individual problem. You are looking at: <strong>misallocated load, invisible Serve work, incoherent grammar, or a moral universe extracting from the same people repeatedly.</strong> They are living evidence your architecture is outsourcing complexity into nervous systems.</p>'
+            },
+            {
+                title: 'Failure Mode',
+                content: '<p>When exhausted people stop speaking, the system loses its truth sensors. Everything looks greener. The dashboard improves. The theatre gets smoother. <strong>And then the load moves to someone else</strong> — often to whoever becomes the next Cognitively Confused.</p>'
+            }
+        ]
+    },
+    confused: {
+        icon: '&#10070;',
+        name: 'The Cognitively Confused',
+        color: 'confused',
+        motto: '"I can\'t tell what\'s real anymore — or what \'good\' even means."',
+        sections: [
+            {
+                title: 'What They See',
+                content: '<p>The signature symptom of the Confusion Tax. Rarely incompetent — often highly capable, conscientious, and eager to do right. That\'s part of the tragedy: they are exactly the kind of person you want, and <strong>the architecture makes them feel stupid</strong>.</p>'
+            },
+            {
+                title: 'Meeting Tell',
+                content: '<div class="meeting-tell">"Just to clarify... which metric are we prioritising this week?"</div><div class="meeting-tell" style="margin-top:8px">"If we escalate, does anything actually change?"</div>'
+            },
+            {
+                title: 'How the Architecture Creates Them',
+                content: '<ul><li><strong>Competing scoreboards</strong> — Finance, Ops, Risk, Strategy, HR all "right" but system never resolves trade-offs</li><li><strong>Metric drift</strong> — measures change faster than work can adapt</li><li><strong>Escalation without resolution</strong> — problems raised but never structurally solved</li><li><strong>Double binds</strong> — "Be innovative but don\'t fail" / "Move fast but follow process"</li></ul>'
+            },
+            {
+                title: 'The Core Insight',
+                content: '<p><strong>Confusion is not lack of intelligence. It is rational adaptation to unstable meaning.</strong> They are trying to reconcile contradictory signals until sensemaking fragments. They start tasks, stop tasks, reframe tasks, report tasks. They look busy. The system is busy. Nothing moves.</p>'
+            },
+            {
+                title: 'Hidden Gift',
+                content: '<p>Early detectors of incoherence. When enough people are confused, your strategy isn\'t being "implemented" — it\'s being <strong>reinterpreted locally into whatever can be survived</strong>.</p>'
+            },
+            {
+                title: 'Failure Mode',
+                content: '<p>Resolves into one of two adaptations: <strong>passive compliance</strong> (do what you\'re told, don\'t think too hard) or <strong>role-acting</strong> (stop trying to find a stable reality, start performing the role the system rewards).</p>'
+            }
+        ]
+    }
+};
+
+function showDetail(charId) {
+    const char = characters[charId];
+    const panel = document.getElementById('detailPanel');
+
+    // Toggle active states on nodes
+    document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
+    const activeNode = document.querySelector(`.node-${charId}`);
+    if (activeNode) activeNode.classList.add('active');
+
+    let sectionsHtml = char.sections.map((s, i) => {
+        const fullWidth = i === char.sections.length - 1 && char.sections.length % 2 !== 0;
+        return `<div class="detail-section ${fullWidth ? 'detail-full-width' : ''}">
+            <h4>${s.title}</h4>
+            ${s.content}
+        </div>`;
+    }).join('');
+
+    panel.innerHTML = `
+        <div class="detail-card" style="border-color: var(--${char.color === 'hero' ? 'hero-red' : char.color === 'ironist' ? 'ironist-teal' : char.color === 'game' ? 'game-amber' : char.color === 'role' ? 'role-slate' : char.color === 'exhaust' ? 'exhaust-ember' : 'confused-violet'});">
+            <button class="detail-close" onclick="hideDetail()" aria-label="Close">&times;</button>
+            <div class="detail-header">
+                <span class="detail-icon">${char.icon}</span>
+                <span class="detail-name" style="color: var(--${char.color === 'hero' ? 'hero-red' : char.color === 'ironist' ? 'ironist-teal' : char.color === 'game' ? 'game-amber' : char.color === 'role' ? 'role-slate' : char.color === 'exhaust' ? 'exhaust-ember' : 'confused-violet'})">${char.name}</span>
+            </div>
+            <div class="detail-motto">${char.motto}</div>
+            <div class="detail-grid">${sectionsHtml}</div>
+        </div>
+    `;
+
+    panel.classList.add('visible');
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function hideDetail() {
+    const panel = document.getElementById('detailPanel');
+    panel.classList.remove('visible');
+    document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
+}
+
+function toggleCheck(el) {
+    el.classList.toggle('checked');
+}
+
+// Close detail on escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') hideDetail();
+});
+</script>
+
+</body>
+</html>
