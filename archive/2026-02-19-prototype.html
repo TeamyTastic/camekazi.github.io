@@ -686,9 +686,9 @@ hr.divider {
   </div>
 
   <div class="card" style="border-left: 4px solid var(--accent);">
-    <h3 style="margin-top:0; color:var(--accent);">Prioritise &ldquo;Serve&rdquo; work</h3>
-    <p>Solo AI work optimises for &ldquo;Run&rdquo; mode &mdash; getting tickets closed fast. This play shifts attention to &ldquo;Serve&rdquo; mode, making sure what we deliver serves the users and the teams who inherit it next.</p>
-    <p style="margin-bottom:0; font-size:13px; color:var(--ink-dim);">Yes, this will <em>look slower</em> on burndown charts. That's the point &mdash; you're investing in Serve, which Run metrics can't see. <a href="#" onclick="document.querySelector('[data-tab=reference]').click(); setTimeout(()=>document.getElementById('rsc-note').scrollIntoView({behavior:'smooth'}),400); return false;" style="color:var(--accent);">What is Run/Serve/Change? &rarr;</a></p>
+    <h3 style="margin-top:0; color:var(--accent);">Stack Run, Serve, and Change</h3>
+    <p>Solo AI usage does Run &mdash; tickets closed, code shipped. The AI Mob does Run <em>while</em> investing in Serve <em>and</em> running a Change experiment. Three modes, one session, same time budget as solo work.</p>
+    <p style="margin-bottom:0; font-size:13px; color:var(--ink-dim);">You're not trading delivery for learning. You're stacking them. <a href="#" onclick="document.querySelector('[data-tab=reference]').click(); setTimeout(()=>document.getElementById('rsc-note').scrollIntoView({behavior:'smooth'}),400); return false;" style="color:var(--accent);">What is Run/Serve/Change? &rarr;</a></p>
   </div>
 
   <div class="card" style="border-left: 4px solid var(--green);">
@@ -1034,17 +1034,20 @@ hr.divider {
   <p class="subtitle">Supporting material, theory, and evidence. Not required to run the play.</p>
 
   <div class="card" id="rsc-note" style="background:var(--cream); border:1.5px dashed var(--border);">
-    <h3 style="margin-top:0;">A quick note on Run / Serve / Change</h3>
-    <p>These are three modes every team operates in:</p>
+    <h3 style="margin-top:0;">Run, Serve, and Change: Where AI Creates Risk &mdash; and Opportunity</h3>
+    <p>Most teams use AI to accelerate Run work &mdash; closing tickets faster, generating boilerplate, shipping more code. AI is exceptionally good at this.</p>
+    <p>The problem is what gets lost. When one person works alone with AI, the emphasis shifts entirely to output. Architectural trade-offs, maintainability, and whether we're solving the right problem &mdash; the Serve work &mdash; gets skipped because there's nobody else in the room to ask the hard questions.</p>
+    <p>The result is AI Slop: code that works today but creates tomorrow's maintenance burden. Technically functional, architecturally poor, understood by nobody.</p>
+    <p>AI-Augmented Collaboration doesn't ask you to stop delivering. It stacks all three modes into a single session:</p>
     <div class="table-wrap" style="margin-top:8px;">
       <table>
-        <tr><th>Mode</th><th>What it means</th></tr>
-        <tr><td><strong style="color:var(--accent);">Run</strong></td><td>Deliver today's work. Close tickets, ship features, keep the lights on.</td></tr>
-        <tr><td><strong style="color:var(--teal);">Serve</strong></td><td>Deliver the <em>right</em> thing. Make decisions that serve users, stakeholders, and the team who inherits the code next.</td></tr>
-        <tr><td><strong style="color:var(--violet);">Change</strong></td><td>Build new capability. Transform how the team works.</td></tr>
+        <tr><th>Mode</th><th>What happens in the mob</th></tr>
+        <tr><td><strong style="color:var(--accent);">Run</strong></td><td>The ticket still gets closed. Code ships. The AI handles the production work.</td></tr>
+        <tr><td><strong style="color:var(--teal);">Serve</strong></td><td>The group steers the AI toward solutions that serve future maintainers, not just today's deadline. The hard questions get asked in real-time, not in a code review three days later.</td></tr>
+        <tr><td><strong style="color:var(--violet);">Change</strong></td><td>The practice itself is the experiment. Every session builds a new team capability &mdash; shared architectural understanding, collaborative AI fluency, and confidence to maintain legacy systems independently.</td></tr>
       </table>
     </div>
-    <p style="font-size:13px; color:var(--ink-dim); margin-bottom:0;">Most teams default to Run. Legacy maintenance especially lives here &mdash; heads down, get through the backlog. The AI Mob deliberately shifts into Serve: slowing down enough to make better decisions together, so the next person who touches this code doesn't face the same ramp-up dread.</p>
+    <p style="font-size:13px; color:var(--ink-dim); margin-bottom:0;">This is the real argument for the AI Mob: you're not trading Run for Serve. You're doing Run <em>while</em> investing in Serve <em>and</em> running a Change experiment. Three modes, one session, same time budget as solo work.</p>
   </div>
 
   <h2>Starting Scenarios</h2>
