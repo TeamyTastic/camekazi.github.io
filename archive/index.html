@@ -134,6 +134,30 @@
       margin-left: 16px;
     }
 
+    .archive-item .title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .archive-item .badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .badge-gist {
+      background: rgba(102, 126, 234, 0.1);
+      color: #667eea;
+    }
+
     .archive-item .arrow {
       color: var(--ink-faint);
       margin-left: 12px;
@@ -188,16 +212,137 @@
   </div>
 
   <script>
-    // Fetch archive contents from GitHub API
-    async function loadArchive() {
-      try {
-        const res = await fetch('https://api.github.com/repos/TeamyTastic/camekazi.github.io/contents/archive');
-        const files = await res.json();
+    const GIST_VIEWER = 'https://teamytastic.github.io/camekazi.github.io/gist';
+    const GIST_USER = 'Camekazi';
+    const ARCHIVE_BASE = 'https://teamytastic.github.io/camekazi.github.io/archive/';
 
-        // Filter HTML files and sort newest first
-        const htmlFiles = files
-          .filter(f => f.name.endsWith('.html'))
-          .sort((a, b) => b.name.localeCompare(a.name));
+    // Normalize a title for dedup comparison
+    function normalizeTitle(str) {
+      return str.toLowerCase()
+        .replace(/[-_]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .replace(/\b(full|v2|prototype)\b/g, '')
+        .trim();
+    }
+
+    // Parse archive filename into { title, date, url, source }
+    function parseArchiveFile(file) {
+      const name = file.name.replace('.html', '');
+      const dateMatch = name.match(/^(\d{4}-\d{2}-\d{2})-(.+)$/);
+      let date = '', title = name;
+      if (dateMatch) {
+        date = dateMatch[1];
+        title = dateMatch[2]
+          .replace(/-/g, ' ')
+          .replace(/_/g, ' ')
+          .replace(/\b\w/g, c => c.toUpperCase());
+      }
+      return {
+        title,
+        date,
+        sortKey: name,
+        url: ARCHIVE_BASE + file.name,
+        source: 'archive'
+      };
+    }
+
+    // Parse gist into { title, date, url, source }
+    function parseGist(gist) {
+      const desc = gist.description || '';
+      // Extract title from "Prototype: name" or use full description
+      let title = desc.replace(/^Prototype:\s*/i, '');
+      title = title
+        .replace(/[-_]/g, ' ')
+        .replace(/\b\w/g, c => c.toUpperCase());
+
+      const date = gist.created_at.slice(0, 10);
+
+      // Find the first HTML file in the gist
+      const files = Object.values(gist.files);
+      const htmlFile = files.find(f => f.filename.endsWith('.html'));
+      if (!htmlFile) return null;
+
+      const url = `${GIST_VIEWER}/?${gist.id}/${htmlFile.filename}`;
+
+      return {
+        title,
+        date,
+        sortKey: `${date}-${title.toLowerCase().replace(/\s+/g, '-')}`,
+        url,
+        source: 'gist',
+        gistId: gist.id
+      };
+    }
+
+    async function loadArchive() {
+      const list = document.getElementById('archive-list');
+
+      try {
+        // Fetch archive files and gists in parallel
+        const [archiveRes, gistsRes] = await Promise.allSettled([
+          fetch('https://api.github.com/repos/TeamyTastic/camekazi.github.io/contents/archive'),
+          fetch(`https://api.github.com/users/${GIST_USER}/gists?per_page=100`)
+        ]);
+
+        let items = [];
+
+        // Process archive files
+        if (archiveRes.status === 'fulfilled' && archiveRes.value.ok) {
+          const files = await archiveRes.value.json();
+          const htmlFiles = files.filter(f => f.name.endsWith('.html') && f.name !== 'index.html');
+          items.push(...htmlFiles.map(parseArchiveFile));
+        }
+
+        // Process gists — filter to prototypes with HTML files
+        if (gistsRes.status === 'fulfilled' && gistsRes.value.ok) {
+          const gists = await gistsRes.value.json();
+          const protoGists = gists
+            .filter(g => {
+              const hasHtml = Object.values(g.files).some(f => f.filename.endsWith('.html'));
+              const isProto = (g.description || '').toLowerCase().includes('prototype');
+              return hasHtml && isProto;
+            });
+
+          for (const g of protoGists) {
+            const parsed = parseGist(g);
+            if (parsed) items.push(parsed);
+          }
+        }
+
+        // Deduplicate: if a gist and archive entry have similar titles,
+        // keep only the archive version (it's the canonical copy)
+        const archiveTitles = new Set(
+          items.filter(i => i.source === 'archive').map(i => normalizeTitle(i.title))
+        );
+
+        // Also deduplicate gists with same normalized title — keep latest
+        const seenGistTitles = new Map();
+        items = items.filter(item => {
+          if (item.source === 'archive') return true;
+
+          const norm = normalizeTitle(item.title);
+
+          // Skip if archive already has this
+          if (archiveTitles.has(norm)) return false;
+
+          // Deduplicate gists — keep latest by date
+          if (seenGistTitles.has(norm)) {
+            const existing = seenGistTitles.get(norm);
+            if (item.date > existing.date) {
+              // Replace with newer
+              items = items.filter(i => i !== existing);
+              seenGistTitles.set(norm, item);
+              return true;
+            }
+            return false;
+          }
+
+          seenGistTitles.set(norm, item);
+          return true;
+        });
+
+        // Sort newest first
+        items.sort((a, b) => b.sortKey.localeCompare(a.sortKey));
 
         // Try to detect current prototype name
         try {
@@ -206,13 +351,12 @@
           if (Array.isArray(protoFiles)) {
             const indexFile = protoFiles.find(f => f.name === 'index.html');
             if (indexFile) {
-              // Fetch index.html to get redirect title
               const contentRes = await fetch(indexFile.url);
               const contentData = await contentRes.json();
               const html = atob(contentData.content);
-              const match = html.match(/Redirecting to ([^.]+)/);
-              if (match) {
-                document.getElementById('current-title').textContent = match[1].replace(/\.\.\./g, '').trim();
+              const titleMatch = html.match(/<title>([^<]+)<\/title>/);
+              if (titleMatch && titleMatch[1] !== 'Prototype') {
+                document.getElementById('current-title').textContent = titleMatch[1];
               } else {
                 document.getElementById('current-title').textContent = 'Latest Prototype';
               }
@@ -222,43 +366,36 @@
           document.getElementById('current-title').textContent = 'Latest Prototype';
         }
 
-        // Build archive list
-        const list = document.getElementById('archive-list');
+        // Render
         list.innerHTML = '';
 
-        for (const file of htmlFiles) {
-          const name = file.name.replace('.html', '');
-          // Extract date and title from filename
-          const dateMatch = name.match(/^(\d{4}-\d{2}-\d{2})-(.+)$/);
-          let date = '';
-          let title = name;
-
-          if (dateMatch) {
-            date = dateMatch[1];
-            title = dateMatch[2]
-              .replace(/-/g, ' ')
-              .replace(/_/g, ' ')
-              .replace(/\b\w/g, c => c.toUpperCase());
-          }
-
+        for (const item of items) {
           const link = document.createElement('a');
           link.className = 'archive-item';
-          link.href = 'https://teamytastic.github.io/camekazi.github.io/archive/' + file.name;
+          link.href = item.url;
+
+          const badge = item.source === 'gist'
+            ? '<span class="badge badge-gist">gist</span>'
+            : '';
+
           link.innerHTML = `
-            <span class="title">${title}</span>
+            <span class="title-row">
+              <span class="title">${item.title}</span>
+              ${badge}
+            </span>
             <span style="display:flex; align-items:center;">
-              <span class="date">${date}</span>
+              <span class="date">${item.date}</span>
               <span class="arrow">&rarr;</span>
             </span>
           `;
           list.appendChild(link);
         }
 
-        if (htmlFiles.length === 0) {
+        if (items.length === 0) {
           list.innerHTML = '<div style="padding:20px; text-align:center; color:var(--ink-faint);">No archived prototypes yet.</div>';
         }
       } catch (e) {
-        document.getElementById('archive-list').innerHTML =
+        list.innerHTML =
           '<div style="padding:20px; text-align:center; color:var(--ink-faint);">Could not load archive. <a href="https://github.com/TeamyTastic/camekazi.github.io/tree/main/archive" style="color:var(--accent);">View on GitHub</a></div>';
       }
     }
