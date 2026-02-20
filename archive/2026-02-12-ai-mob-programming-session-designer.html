@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>AI Collaboration Session Designer</title>
-<meta name="keywords" content="mob programming, ensemble programming, AI collaboration, pair programming, group coding">
+<title>AI Mob Play &mdash; AI-Augmented Collaboration</title>
+<meta name="keywords" content="mob programming, ensemble programming, AI collaboration, pair programming, group coding, AI mob">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -50,7 +50,6 @@ body {
   overflow-x: hidden;
   font-size: 15px;
   line-height: 1.65;
-  /* subtle grain */
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
 }
 
@@ -644,6 +643,29 @@ blockquote cite {
   margin: 36px 0;
 }
 
+/* ── Step cards ── */
+.step-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  padding-left: 56px;
+}
+.step-number {
+  position: absolute;
+  left: 18px; top: 22px;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  font-size: 14px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+}
+
 /* ── Stagger animation ── */
 .stagger > * {
   opacity: 0;
@@ -657,6 +679,22 @@ blockquote cite {
 .stagger > *:nth-child(6) { animation-delay: 0.3s; }
 .stagger > *:nth-child(7) { animation-delay: 0.35s; }
 .stagger > *:nth-child(8) { animation-delay: 0.4s; }
+
+/* ── Meta badge ── */
+.meta-badge {
+  display: inline-flex; gap: 12px;
+  font-size: 13px; color: var(--ink-dim);
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.meta-badge span {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-weight: 500;
+}
 
 @media (max-width: 640px) {
   h1 { font-size: 30px; }
@@ -672,9 +710,8 @@ blockquote cite {
   .timer-display { font-size: 52px; }
   .section { padding: 28px 16px 100px; }
   .hero-card { padding: 24px; }
+  .step-card { padding-left: 50px; }
 }
-
-/* Safe localStorage wrapper */
 </style>
 <script>
 const storage = {
@@ -687,101 +724,89 @@ const storage = {
 <body>
 
 <nav class="nav">
-  <div class="nav-brand">collab</div>
-  <div class="nav-tab active" data-tab="quickstart">Quick Start</div>
-  <div class="nav-tab" data-tab="scenarios">Scenarios</div>
+  <div class="nav-brand">AI Mob</div>
+  <div class="nav-tab active" data-tab="quickstart">The Play</div>
   <div class="nav-tab" data-tab="roles">Roles</div>
-  <div class="nav-tab" data-tab="setup">Setup</div>
-  <div class="nav-tab" data-tab="timer">Timer</div>
+  <div class="nav-tab" data-tab="setup">Run It</div>
   <div class="nav-tab" data-tab="experiment">Experiment</div>
+  <div class="nav-tab" data-tab="timer">Timer</div>
   <div class="nav-tab" data-tab="rpg">RPG</div>
   <div class="nav-tab" data-tab="research">Research</div>
   <div class="nav-tab" data-tab="links">Links</div>
 </nav>
 
-<!-- ═══════════ QUICK START ═══════════ -->
+<!-- ═══════════ THE PLAY (Quick Start) ═══════════ -->
 <div class="section active" id="quickstart">
   <div class="stagger">
-    <h1>AI Collaboration<br>Session Designer</h1>
-    <p class="subtitle">Design collaborative AI sessions for maintenance tasks and unfamiliar codebases. A lightweight starting point, not a mandate. Adapt freely.</p>
+    <h1>AI-Augmented<br>Collaboration</h1>
+    <p class="subtitle">Reduce cycle time for legacy maintenance tasks by 50% through collective AI steering.</p>
 
-    <div class="card" style="border-left: 4px solid var(--accent); background: var(--surface);">
-      <p style="font-size:13px; color:var(--ink-dim); margin-bottom:0;"><strong>What this is:</strong> A starting point for teams who want to try collaborating with AI on real work. Not a methodology to follow &mdash; an experiment to adapt. As Adaptavist teams run sessions, we'll share learnings here.</p>
+    <div class="meta-badge">
+      <span>Prep: 30m</span>
+      <span>Run: 2&ndash;3hr</span>
+      <span>Persons: 2&ndash;4</span>
     </div>
 
-    <h2>Get started in 3 steps</h2>
-    <p style="font-size:13px; color:var(--ink-dim); margin-bottom:18px;">Est. time: ~5 minutes to set up, 1&ndash;3 hours for a first session.</p>
-
-    <div class="card" style="border-left: 4px solid var(--green);">
-      <h3 style="margin-top:0; color:var(--green);">Step 1: Gather 2&ndash;3 people</h3>
-      <p>Assign three roles to start:</p>
-      <div class="table-wrap" style="margin-top:8px;">
-        <table>
-          <tr><th>Role</th><th>What they do</th><th>Key rule</th></tr>
-          <tr><td><strong>Driver</strong></td><td>Types prompts, executes code. Rotates every 15 minutes.</td><td>Does NOT decide what to do &mdash; only implements</td></tr>
-          <tr><td><strong>Navigator</strong></td><td>Directs the Driver at intent level: "Add a test for null input"</td><td>Describes <em>what</em>, not <em>how</em> &mdash; AI fills the gap</td></tr>
-          <tr><td><strong>Red Team</strong></td><td>Challenges AI output. "What could go wrong? What did it miss?"</td><td>The AI is wrong until proven right</td></tr>
-        </table>
-      </div>
-      <p style="font-size:13px; color:var(--ink-dim); margin-top:8px; margin-bottom:0;">More roles exist &mdash; see the <strong>Roles</strong> tab. Start with these three.</p>
+    <div class="hero-card">
+      <div class="hero-quote">"Work on legacy code collaboratively with AI as the tour guide."</div>
+      <div class="hero-attribution">Transition from &ldquo;solo AI usage&rdquo; to a high-leverage collaborative process, and share learnings that help teams improve over time. Prioritise quality of thought and collective learning over raw speed.</div>
     </div>
 
-    <div class="card" style="border-left: 4px solid var(--teal);">
-      <h3 style="margin-top:0; color:var(--teal);">Step 2: Set a 3-hour time limit</h3>
-      <p>Driver rotates every 15 minutes (use the <strong>Timer</strong> tab). Three hours is long enough to make real progress, short enough to stay energized.</p>
-      <p style="font-size:13px; color:var(--ink-dim); margin-bottom:0;">If 3 hours feels too much, start with 90 minutes. The key constraint is: <strong>commit to finishing, not to a time length.</strong></p>
-    </div>
+    <h2>What is this play?</h2>
+    <p>2&ndash;4 people work on a single legacy task together, with AI as the tour guide and the team as the decision-makers. The AI explains the unfamiliar codebase, proposes solutions, and surfaces context &mdash; but the group decides where to go, what to trust, and what to challenge.</p>
 
-    <div class="card" style="border-left: 4px solid var(--accent);">
-      <h3 style="margin-top:0; color:var(--accent);">Step 3: Pick a real task</h3>
-      <p>Best starting points:</p>
-      <ul style="margin:8px 0 0 20px; font-size:14px; line-height:1.8;">
-        <li><strong>A maintenance bug</strong> in an app the team hasn't touched recently</li>
-        <li><strong>An unfamiliar codebase</strong> the team needs to learn</li>
-        <li><strong>A code review</strong> where AI can explain what the code does</li>
-      </ul>
-      <p style="font-size:13px; color:var(--ink-dim); margin-top:8px; margin-bottom:0;">See the <strong>Scenarios</strong> tab for detailed starting points.</p>
-    </div>
+    <p>One person operates the AI (the <strong>Driver</strong>), the group directs the questions (the <strong>Navigators</strong>), and someone actively pokes holes in what the AI produces (the <strong>Red Team</strong>). Roles rotate every 20&ndash;30 minutes so everyone builds the mental map, not just one person.</p>
 
-    <div class="card" style="background:var(--cream); border:1.5px dashed var(--border);">
-      <h3 style="margin-top:0;">Materials required</h3>
-      <ul style="margin:4px 0 0 20px; font-size:14px; line-height:1.8;">
-        <li>AI tool access (Claude, Copilot, Cursor, etc.)</li>
-        <li>Shared screen (projector, screenshare, or single laptop)</li>
-        <li>Timer (use the <strong>Timer</strong> tab or a phone)</li>
-        <li>Optional: recording for transcript analysis afterwards</li>
-      </ul>
+    <p>This is mob programming adapted for AI-assisted work. Instead of one person exploring alone and accepting whatever the AI suggests, the group navigates together &mdash; trading individual speed for shared understanding.</p>
+
+    <blockquote>"This isn't just for new shiny stuff. The highest value is in legacy maintenance and bug fixes &mdash; exactly where context has drifted and ramp-up dread is worst."</blockquote>
+
+    <div class="flow">
+      <div class="flow-step">Navigator describes <em>what</em></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step">AI suggests <em>how</em></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step">Driver executes</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step" style="border-color:var(--red); color:var(--red); font-weight:700;">Red Team challenges</div>
     </div>
 
     <hr class="divider">
 
-    <h2>The core principle</h2>
-    <div class="hero-card">
-      <div class="hero-quote">"For an idea to go from your head into the computer, it MUST go through someone else's hands."</div>
-      <div class="hero-attribution">Llewellyn Falco &mdash; The foundational constraint that makes collaborative sessions a learning activity, not just a coding activity.</div>
+    <h2>Why run this play?</h2>
+
+    <div class="card" style="border-left: 4px solid var(--accent);">
+      <h3 style="margin-top:0; color:var(--accent);">Break the Knowledge Silo</h3>
+      <p style="margin-bottom:0;">Legacy code isn't just intimidating &mdash; it's often understood by one person or nobody. The AI becomes the tour guide, building shared understanding across the group in minutes rather than hours of solo exploration.</p>
     </div>
 
-    <h2>Why this works</h2>
-    <div class="flow">
-      <div class="flow-step">Collaborate with AI</div>
-      <div class="flow-arrow">&rarr;</div>
-      <div class="flow-step">Shared understanding</div>
-      <div class="flow-arrow">&rarr;</div>
-      <div class="flow-step">Break silos</div>
-      <div class="flow-arrow">&rarr;</div>
-      <div class="flow-step">Maintain more apps (4&rarr;8+)</div>
-      <div class="flow-arrow">&rarr;</div>
-      <div class="flow-step" style="border-color:var(--green); color:var(--green); font-weight:700;">Revenue diversification</div>
+    <div class="card" style="border-left: 4px solid var(--teal);">
+      <h3 style="margin-top:0; color:var(--teal);">Deliberate over Fast</h3>
+      <p style="margin-bottom:0;">A solo dev optimises for &ldquo;does it work?&rdquo; A mob asks &ldquo;should it work <em>this way</em>?&rdquo; The group catches architecturally poor AI suggestions before they become tomorrow's maintenance burden.</p>
     </div>
 
-    <blockquote>"If you've got the ability to keep ten of those apps in play, suddenly you've got a team able to maintain half a million ARR."<cite>Paul Cutting, Upscale BU</cite></blockquote>
+    <div class="card" style="border-left: 4px solid var(--green);">
+      <h3 style="margin-top:0; color:var(--green);">Stack Run, Serve, and Change</h3>
+      <p>Solo AI usage does Run &mdash; tickets closed, code shipped. The AI Mob does Run <em>while</em> investing in Serve <em>and</em> running a Change experiment. Three modes, one session, same time budget as solo work.</p>
+      <div class="table-wrap" style="margin-top:8px; margin-bottom:0;">
+        <table>
+          <tr><th>Mode</th><th>What happens in the mob</th></tr>
+          <tr><td><strong>Run</strong></td><td>The ticket still gets closed. Code ships. The AI handles the production work.</td></tr>
+          <tr><td><strong>Serve</strong></td><td>The group steers the AI toward solutions that serve future maintainers, not just today's deadline.</td></tr>
+          <tr><td><strong>Change</strong></td><td>The practice itself is the experiment. Every session builds shared architectural understanding and collaborative AI fluency.</td></tr>
+        </table>
+      </div>
+    </div>
 
-    <p>Not just for "new shiny stuff" &mdash; high value for <strong>legacy maintenance</strong> and <strong>bug fixes</strong> where context has drifted.</p>
+    <div class="card" style="border-left: 4px solid var(--violet);">
+      <h3 style="margin-top:0; color:var(--violet);">Scale the Portfolio</h3>
+      <p style="margin-bottom:0;">A team that mobs on legacy apps builds transferable context. Keep multiple apps in play and you've got a team maintaining serious ARR, not just one hero per app.</p>
+    </div>
 
     <hr class="divider">
 
     <h2>Even/over framing</h2>
-    <p style="font-size:13px; color:var(--ink-dim); margin-bottom:18px;">When these are in tension, the left side wins &mdash; but acknowledge the cost on the right. Both sides are valuable; this is a priority declaration, not a judgment.</p>
+    <p style="font-size:13px; color:var(--ink-dim); margin-bottom:18px;">When these are in tension, the left side wins &mdash; but acknowledge the cost on the right.</p>
 
     <div class="eo-wrapper">
       <div class="eo-header">
@@ -796,408 +821,244 @@ const storage = {
         <div class="eo-row"><div class="eo-even">Multiple perspectives</div><div class="eo-divider"><div class="eo-divider-line"></div><div class="eo-divider-word">even over</div><div class="eo-divider-line"></div></div><div class="eo-over">Single ownership</div></div>
         <div class="eo-row"><div class="eo-even">Learning</div><div class="eo-divider"><div class="eo-divider-line"></div><div class="eo-divider-word">even over</div><div class="eo-divider-line"></div></div><div class="eo-over">Pure output</div></div>
       </div>
-      <div class="eo-footer">Source: Even/Over Statements &mdash; Jurriaan Kamer / The Ready</div>
+    </div>
+
+    <hr class="divider">
+
+    <h2>What you will need</h2>
+    <div class="card" style="background:var(--cream); border:1.5px dashed var(--border);">
+      <ul style="margin:4px 0 0 20px; font-size:14px; line-height:2;">
+        <li><strong>Shared IDE/Session</strong>: Cursor, VS Code Live Share, or a shared Gemini/Claude screen</li>
+        <li><strong>The Scratchpad</strong>: A shared page (Confluence, Google Doc) for co-authoring prompts</li>
+        <li><strong>A timer</strong>: To enforce role rotation (use the <strong>Timer</strong> tab)</li>
+        <li><strong>A transcription tool</strong>: Otter/Granola to capture the &ldquo;why&rdquo; behind decisions</li>
+      </ul>
     </div>
   </div>
-</div>
-
-<!-- ═══════════ SCENARIOS ═══════════ -->
-<div class="section" id="scenarios">
-  <h1>Example Starting Scenarios</h1>
-  <p class="subtitle">Not sure where to begin? Pick the scenario closest to your situation. Each includes a suggested first AI prompt.</p>
-
-  <div class="card">
-    <h3 style="margin-top:0; color:var(--green);">Bug already triaged</h3>
-    <p>You know what the bug is and roughly where it lives. You need to fix it.</p>
-    <div class="flow" style="margin:12px 0;">
-      <div class="flow-step">Verify bug exists</div>
-      <div class="flow-arrow">&rarr;</div>
-      <div class="flow-step">Locate in codebase</div>
-      <div class="flow-arrow">&rarr;</div>
-      <div class="flow-step">AI suggests fix</div>
-      <div class="flow-arrow">&rarr;</div>
-      <div class="flow-step">Review together</div>
-    </div>
-    <p style="font-size:13px; color:var(--ink-dim); margin-bottom:0;"><strong>First prompt:</strong> "Here's the bug report: [paste]. Walk us through the likely root cause and suggest a fix. Explain your reasoning."</p>
-  </div>
-
-  <div class="card">
-    <h3 style="margin-top:0; color:var(--amber);">Bug not yet triaged</h3>
-    <p>Something is broken but nobody knows why. The team needs to investigate together.</p>
-    <div class="flow" style="margin:12px 0;">
-      <div class="flow-step">Reproduce issue</div>
-      <div class="flow-arrow">&rarr;</div>
-      <div class="flow-step">Understand symptoms</div>
-      <div class="flow-arrow">&rarr;</div>
-      <div class="flow-step">Locate root cause</div>
-      <div class="flow-arrow">&rarr;</div>
-      <div class="flow-step">Fix</div>
-    </div>
-    <p style="font-size:13px; color:var(--ink-dim); margin-bottom:0;"><strong>First prompt:</strong> "We're seeing [symptom]. Here's the relevant code: [paste]. Help us narrow down where the issue might be."</p>
-  </div>
-
-  <div class="card">
-    <h3 style="margin-top:0; color:var(--teal);">Unfamiliar legacy codebase</h3>
-    <p>The team needs to work in code nobody currently understands. AI becomes the tour guide.</p>
-    <div class="flow" style="margin:12px 0;">
-      <div class="flow-step">AI explains architecture</div>
-      <div class="flow-arrow">&rarr;</div>
-      <div class="flow-step">Identify relevant files</div>
-      <div class="flow-arrow">&rarr;</div>
-      <div class="flow-step">Make small test change</div>
-    </div>
-    <p style="font-size:13px; color:var(--ink-dim); margin-bottom:0;"><strong>First prompt:</strong> "This is a [language/framework] project we haven't touched in months. Explain the overall architecture, key files, and how data flows through the system."</p>
-  </div>
-
-  <div class="card">
-    <h3 style="margin-top:0; color:var(--violet);">New feature in unfamiliar area</h3>
-    <p>You need to add something to a part of the codebase nobody on the team wrote.</p>
-    <div class="flow" style="margin:12px 0;">
-      <div class="flow-step">AI maps existing patterns</div>
-      <div class="flow-arrow">&rarr;</div>
-      <div class="flow-step">Design approach</div>
-      <div class="flow-arrow">&rarr;</div>
-      <div class="flow-step">Implement following conventions</div>
-    </div>
-    <p style="font-size:13px; color:var(--ink-dim); margin-bottom:0;"><strong>First prompt:</strong> "We need to add [feature]. Show us the existing patterns in this codebase for similar features, and suggest an approach that follows those conventions."</p>
-  </div>
-
-  <div class="card">
-    <h3 style="margin-top:0; color:var(--accent);">Code review / understanding</h3>
-    <p>The goal is comprehension, not shipping. AI generates documentation the team validates.</p>
-    <div class="flow" style="margin:12px 0;">
-      <div class="flow-step">AI generates docs</div>
-      <div class="flow-arrow">&rarr;</div>
-      <div class="flow-step">Team validates</div>
-      <div class="flow-arrow">&rarr;</div>
-      <div class="flow-step">Improve clarity</div>
-    </div>
-    <p style="font-size:13px; color:var(--ink-dim); margin-bottom:0;"><strong>First prompt:</strong> "Document this module as if for a new team member. Include: purpose, key functions, data flow, and any gotchas you spot."</p>
-  </div>
-
-  <hr class="divider">
-  <p style="font-size:13px; color:var(--ink-dim);">These are starting points, not scripts. Each team's context is different &mdash; adapt the prompts and flow to what actually works for you.</p>
 </div>
 
 <!-- ═══════════ ROLES ═══════════ -->
 <div class="section" id="roles">
-  <h1>Roles</h1>
-  <p class="subtitle">Start with 3 roles. Add others as you gain experience. Minimum 2 humans &mdash; AI augments, doesn't replace the social learning.</p>
+  <h1>The Roles</h1>
+  <p class="subtitle">Roles <strong>must rotate every 20&ndash;30 minutes</strong> to maintain high engagement and distribute learning. Minimum 2 humans.</p>
 
-  <h2>Minimum viable roles <span style="font-size:13px; font-weight:400; color:var(--ink-dim);">(start here)</span></h2>
-  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:14px;">These three are all you need for a first session. Everyone else is optional.</p>
   <div class="role-grid stagger">
     <div class="role-card" style="border-left: 4px solid var(--accent);">
-      <div class="role-name">Driver</div>
-      <div class="role-desc">Types prompts, presses buttons. Does NOT decide what to create &mdash; only implements what the Navigator describes. <strong>Rotates every 15 minutes.</strong></div>
+      <div class="role-name">The Driver</div>
+      <div style="font-size:11px; font-weight:700; color:var(--ink-faint); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">The &ldquo;hands&rdquo;</div>
+      <div class="role-desc">They operate the AI and the keyboard. They only input what the group agrees upon. Does NOT decide what to create &mdash; only implements.</div>
       <div class="role-ai no">Human only</div>
     </div>
     <div class="role-card" style="border-left: 4px solid var(--teal);">
-      <div class="role-name">Navigator</div>
-      <div class="role-desc">Directs the Driver's actions at intent level ("add a test for null input"), not keystroke level. In AI context: frames prompts at high abstraction, delegates details to AI/Driver.</div>
+      <div class="role-name">The Navigator</div>
+      <div style="font-size:11px; font-weight:700; color:var(--ink-faint); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">The &ldquo;brains&rdquo; (collective)</div>
+      <div class="role-desc">They suggest logic, ask &ldquo;what if&rdquo; questions, and research edge cases. Describes <em>what</em>, not <em>how</em> &mdash; AI fills the gap.</div>
       <div class="role-ai no">Human only</div>
     </div>
     <div class="role-card" style="border-left: 4px solid var(--red);">
-      <div class="role-name">Red Team</div>
-      <div class="role-desc">Critiques AI output, pokes holes, challenges assumptions. "What could go wrong? What did the AI miss?" The AI is wrong until proven right.</div>
-      <div class="role-ai yes">AI: yes</div>
+      <div class="role-name">The Red Team</div>
+      <div style="font-size:11px; font-weight:700; color:var(--ink-faint); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">The &ldquo;critic&rdquo; (AI-assisted)</div>
+      <div class="role-desc">One person uses a secondary AI instance to find holes, security risks, or slop in the primary AI's suggestions and the team's approach.</div>
+      <div class="role-ai yes">AI-assisted</div>
     </div>
-  </div>
-  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:4px;"><strong>The handoff:</strong> Navigator describes <em>what</em> &rarr; AI suggests <em>how</em> &rarr; Driver executes &rarr; Red Team challenges the result.</p>
-
-  <h2>Optional advanced roles <span style="font-size:13px; font-weight:400; color:var(--ink-dim);">(add when ready)</span></h2>
-  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:14px;">Once the team is comfortable with the basics, layer in additional roles as needed.</p>
-  <div class="role-grid stagger">
-    <div class="role-card">
-      <div class="role-name">Facilitator</div>
-      <div class="role-desc">Runs timer, tracks rotation, calls breaks. Key question: "Are we stuck?"</div>
+    <div class="role-card" style="border-left: 4px solid var(--amber);">
+      <div class="role-name">The Outcome Keeper</div>
+      <div style="font-size:11px; font-weight:700; color:var(--ink-faint); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">The &ldquo;referee&rdquo;</div>
+      <div class="role-desc">Ensures the session stays focused on the specific ticket. Prevents &ldquo;AI rabbit holes&rdquo; and ensures learning is a byproduct of the group's work.</div>
       <div class="role-ai partial">AI: partial</div>
     </div>
-    <div class="role-card">
-      <div class="role-name">Subject Matter Expert</div>
-      <div class="role-desc">Brings business context the AI lacks. Domain knowledge, user stories, edge cases.</div>
-      <div class="role-ai no">Human only</div>
-    </div>
-    <div class="role-card">
-      <div class="role-name">Outcome Keeper</div>
-      <div class="role-desc">Stays on mission, prevents AI tangents. "Is this still solving our problem?"</div>
-      <div class="role-ai partial">AI: partial</div>
-    </div>
-    <div class="role-card">
-      <div class="role-name">Session Recorder</div>
-      <div class="role-desc">Transcribes session for post-session AI analysis. Captures decisions, questions, and blockers. See <strong>Setup</strong> tab for reflection prompts.</div>
-      <div class="role-ai yes">AI: yes</div>
-    </div>
   </div>
 
-  <h2>AI task models</h2>
-  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:14px;">Start with <strong>augmentation</strong> (AI assists human work). Graduate to <strong>automation</strong> (AI handles tasks) as trust builds.</p>
-  <div class="table-wrap">
-    <table>
-      <tr><th>Mode</th><th>What AI does</th><th>Examples</th></tr>
-      <tr><td><strong>Augmentation</strong></td><td>AI enhances human work &mdash; suggests, explains, reviews</td><td>Debugging suggestions, refactoring ideas, explaining legacy code</td></tr>
-      <tr><td><strong>Automation</strong></td><td>AI handles task entirely &mdash; human reviews output</td><td>Code generation, test writing, documentation drafts</td></tr>
-    </table>
-  </div>
-
-  <h2>AI integration models</h2>
-  <div class="table-wrap">
-    <table>
-      <tr><th>Model</th><th>Who does what</th><th>Best for</th></tr>
-      <tr><td><strong>Copilot</strong></td><td>Driver uses AI suggestions, group validates</td><td>Teams already comfortable collaborating</td></tr>
-      <tr><td><strong>Draft Generator</strong></td><td>AI writes first draft, group reviews/refines</td><td>New codebases, specs-heavy work</td></tr>
-      <tr><td><strong>Red Team</strong></td><td>Group writes, AI critiques</td><td>Learning, quality focus</td></tr>
-      <tr><td><strong>Observer</strong></td><td>Meta-AI watches session, surfaces patterns</td><td>"Another AI watching us using AI"</td></tr>
-    </table>
-  </div>
-
-  <h2>Classic ensemble roles</h2>
-  <div class="table-wrap">
-    <table>
-      <tr><th>Role</th><th>Function</th><th>Key rule</th></tr>
-      <tr><td><strong>Driver</strong></td><td>Hands on keyboard. Translates spoken ideas into code.</td><td>Doesn't decide what to create</td></tr>
-      <tr><td><strong>Navigator</strong></td><td>Strategic thinking. Describes next steps verbally.</td><td>Person with the idea navigates, doesn't drive</td></tr>
-      <tr><td><strong>Participant</strong></td><td>Contributes ideas, asks questions, researches.</td><td>Yield to less-privileged voices</td></tr>
-      <tr><td><strong>Researcher</strong></td><td>Finds docs, blog posts, code examples in parallel.</td><td>Share findings, don't hoard</td></tr>
-      <tr><td><strong>Facilitator</strong></td><td>Timer, rotation, breaks.</td><td>"Are we stuck?" is the key question</td></tr>
-    </table>
-  </div>
-</div>
-
-<!-- ═══════════ SETUP ═══════════ -->
-<div class="section" id="setup">
-  <h1>Session Setup</h1>
-  <p class="subtitle">Practical setup &mdash; physical, remote, cadence, ground rules. Est. time: 20 minutes first time, 5 minutes after.</p>
-
-  <h2>Before you start: onboard your AI</h2>
-  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:14px;">Set the AI up for success at session start. Paste relevant context so it follows your team's conventions from the first prompt.</p>
-  <div class="card" style="background:var(--cream); border:1.5px dashed var(--border);">
-    <h3 style="margin-top:0;">AI context checklist</h3>
-    <div class="table-wrap" style="margin-top:8px;">
-      <table>
-        <tr><th style="width:30%;">Context</th><th>What to share</th><th style="width:15%;">Priority</th></tr>
-        <tr><td><strong>Coding standards</strong></td><td>Style guide, linting rules, naming conventions</td><td style="color:var(--red);">Must</td></tr>
-        <tr><td><strong>Git workflow</strong></td><td>Branching model, commit message format, PR process</td><td style="color:var(--red);">Must</td></tr>
-        <tr><td><strong>Testing requirements</strong></td><td>Coverage targets, test patterns, frameworks used</td><td style="color:var(--amber);">Should</td></tr>
-        <tr><td><strong>Tech stack constraints</strong></td><td>Approved libraries, deprecated patterns, version requirements</td><td style="color:var(--amber);">Should</td></tr>
-        <tr><td><strong>Documentation expectations</strong></td><td>Inline comments, README updates, ADR format</td><td style="color:var(--ink-dim);">Nice</td></tr>
-      </table>
-    </div>
-    <p style="font-size:13px; color:var(--ink-dim); margin-top:12px; margin-bottom:0;"><strong>Example opening prompt:</strong> "We follow these standards: [paste]. Please adhere throughout this session and flag any deviations."</p>
-  </div>
-
-  <h2>Session recording &amp; transcript analysis</h2>
-  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:14px;">Record your session (audio or screen) and analyse the transcript with AI afterwards. This is how the team learns about <em>how they collaborate</em>, not just what they built.</p>
-  <div class="card">
-    <h3 style="margin-top:0;">After the session: reflection prompts</h3>
-    <p style="font-size:13px; color:var(--ink-dim); margin-bottom:10px;">Use these for manual discussion <strong>or</strong> paste your transcript into AI and ask it to answer them:</p>
-    <div class="table-wrap" style="margin-top:8px;">
-      <table>
-        <tr><th style="width:5%;">#</th><th>Question</th><th style="width:35%;">What it reveals</th></tr>
-        <tr><td>1</td><td>Did everyone contribute roughly equally?</td><td>Participation balance, dominance patterns</td></tr>
-        <tr><td>2</td><td>Where did we get stuck? What unblocked us?</td><td>Bottlenecks and effective interventions</td></tr>
-        <tr><td>3</td><td>What assumptions did the AI make that we had to correct?</td><td>Context gaps in AI onboarding</td></tr>
-        <tr><td>4</td><td>What patterns emerged in how we worked together?</td><td>Collaboration dynamics, role effectiveness</td></tr>
-        <tr><td>5</td><td>What would we do differently next time?</td><td>Specific improvements to try</td></tr>
-      </table>
-    </div>
-    <p style="font-size:13px; color:var(--ink-dim); margin-top:12px; margin-bottom:0;"><strong>AI analysis prompt:</strong> "Here's a transcript of our collaborative coding session. Analyse it against these 5 questions and give us specific, actionable feedback. Be honest about what didn't work."</p>
+  <h2>The handoff</h2>
+  <div class="flow">
+    <div class="flow-step">Navigator describes <em>what</em></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">AI suggests <em>how</em></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">Driver executes</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step" style="border-color:var(--red); color:var(--red); font-weight:700;">Red Team challenges</div>
   </div>
 
   <hr class="divider">
 
-  <h2>Timer progression</h2>
-  <div class="progression">
-    <div class="prog-bar" style="height:32%; background: linear-gradient(to top, var(--accent), #f97316);" onclick="setTimer(300)">4-5m<span>First session</span></div>
-    <div class="prog-bar" style="height:55%; background: linear-gradient(to top, var(--accent), #ea580c);" onclick="setTimer(600)">7-10m<span>Week 1-2</span></div>
-    <div class="prog-bar" style="height:80%; background: linear-gradient(to top, var(--teal), #0d9488);" onclick="setTimer(900)">10-15m<span>Established</span></div>
-    <div class="prog-bar" style="height:100%; background: linear-gradient(to top, var(--green), #16a34a);">Natural<span>Experienced</span></div>
-  </div>
-  <p style="font-size:13px; color:var(--ink-dim);">When the timer feels too short, you're at the right length. Click a bar to set the timer.</p>
+  <h2>The manifesto</h2>
 
-  <h2>Cadence options</h2>
+  <div class="card">
+    <h3 style="margin-top:0; color:var(--accent);">On the Pitch</h3>
+    <p style="margin-bottom:0;">If you are in the room, you are &ldquo;on the pitch.&rdquo; No passive observers.</p>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0; color:var(--teal);">Safe to Try</h3>
+    <p style="margin-bottom:0;">Experiments are encouraged. If the AI suggests something that breaks, it's a group learning moment, not an individual failure.</p>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0; color:var(--green);">Shared Intentionality</h3>
+    <p style="margin-bottom:0;">We are here to make better decisions, not just more code.</p>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0; color:var(--violet);">Debate in Code</h3>
+    <p style="margin-bottom:0;">Two approaches? Try both. Data decides, not hierarchy.</p>
+  </div>
+</div>
+
+<!-- ═══════════ RUN IT (Setup) ═══════════ -->
+<div class="section" id="setup">
+  <h1>Run the Play</h1>
+  <p class="subtitle">The step-by-step session guide, ground rules, and psychological safety infrastructure.</p>
+
+  <h2>Prep: the ingredients</h2>
   <div class="table-wrap">
     <table>
-      <tr><th>Model</th><th>Schedule</th><th>Best for</th></tr>
-      <tr><td><strong>Full-time collab</strong></td><td>09:00&ndash;12:00 + 13:00&ndash;16:00 daily</td><td>Dedicated product teams (Crisp)</td></tr>
-      <tr><td><strong>Standing slot</strong></td><td>1&ndash;2 hours, 2&ndash;3x/week</td><td>Teams adopting gradually</td></tr>
-      <tr><td><strong>Experiment sprint</strong></td><td>1 week intensive</td><td>Proving the concept</td></tr>
-      <tr><td><strong>Ad-hoc</strong></td><td>Called for specific problems</td><td>Bug fixes, legacy ramp-up</td></tr>
-      <tr><td><strong>GSD rhythm</strong></td><td>10min align &rarr; 30min focus &rarr; 5min regroup (repeat)</td><td>Teams balancing collaboration with deep work</td></tr>
+      <tr><th style="width:25%;">Ingredient</th><th>Details</th></tr>
+      <tr><td><strong>People</strong></td><td>2&ndash;4 participants. Mixing seniority is encouraged to maximise learning.</td></tr>
+      <tr><td><strong>Time</strong></td><td>2 to 3 hours.</td></tr>
+      <tr><td><strong>Shared IDE</strong></td><td>Cursor, VS Code Live Share, or a shared Gemini/Claude screen</td></tr>
+      <tr><td><strong>The Scratchpad</strong></td><td>A shared document for co-authoring prompts</td></tr>
+      <tr><td><strong>Transcription</strong></td><td>Granola or Otter to capture the &ldquo;why&rdquo; behind decisions</td></tr>
+      <tr><td><strong>Timer</strong></td><td>To enforce rotation so learning is distributed (use the <strong>Timer</strong> tab)</td></tr>
     </table>
   </div>
 
-  <h2>Remote git handover</h2>
-  <div class="flow">
-    <div class="flow-step" style="font-family:var(--mono); font-size:12px;">mob start</div>
-    <div class="flow-arrow">&rarr;</div>
-    <div class="flow-step">Work (10-15 min)</div>
-    <div class="flow-arrow">&rarr;</div>
-    <div class="flow-step" style="font-family:var(--mono); font-size:12px;">mob next</div>
-    <div class="flow-arrow">&rarr;</div>
-    <div class="flow-step">Next driver pulls</div>
-    <div class="flow-arrow">&rarr;</div>
-    <div class="flow-step">Repeat&hellip;</div>
-    <div class="flow-arrow">&rarr;</div>
-    <div class="flow-step" style="font-family:var(--mono); font-size:12px; border-color:var(--green); color:var(--green);">mob done</div>
-  </div>
-  <p style="font-size:14px;">WIP commits to a <code>collab-session</code> branch. Don't worry about commit messages mid-session. Squash at end.</p>
+  <hr class="divider">
 
-  <h2>Ground rules &amp; psychological safety</h2>
-  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:14px;">Ground rules aren't bureaucracy &mdash; they're the <strong>safety infrastructure</strong> that makes real challenge possible. Without them, people self-censor. With them, people speak up.</p>
+  <h2>The play: step-by-step</h2>
 
-  <h3 style="margin-top:20px; font-size:15px; color:var(--accent);">The foundation: Kindness, Consideration, Respect</h3>
-  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:10px;">Woody Zuill's core principle. Sounds obvious &mdash; but explicitly stating it changes behaviour. People who aren't naturally inclined to these quickly improve when the whole group commits.</p>
-  <div class="table-wrap">
-    <table>
-      <tr><th>Value</th><th>In practice</th><th>Observable signal</th></tr>
-      <tr><td><strong>Kindness</strong></td><td>Concern for your group &mdash; check in, notice when someone goes quiet</td><td>People name difficulty without being asked</td></tr>
-      <tr><td><strong>Respect</strong></td><td>Disagree with <em>ideas</em>, never attack <em>people</em></td><td>"I see it differently" not "that's wrong"</td></tr>
-      <tr><td><strong>Consideration</strong></td><td>Actively listen &mdash; let ideas finish before responding</td><td>People build on each other's suggestions</td></tr>
-    </table>
+  <div class="step-card">
+    <div class="step-number">1</div>
+    <h3 style="margin-top:0; color:var(--accent);">Context Injection &amp; Onboarding <span style="font-size:12px; font-weight:400; color:var(--ink-dim);">(15 mins)</span></h3>
+    <p>Treat the AI like a new contractor.</p>
+    <ul style="margin:4px 0 0 20px; font-size:14px; line-height:1.8;">
+      <li>Feed the AI the relevant code files and any Technical Constraints &amp; Standards</li>
+      <li><strong>Rule</strong>: Read every prompt twice before hitting &ldquo;Enter.&rdquo; Value intentionality over velocity</li>
+    </ul>
   </div>
 
-  <h3 style="margin-top:24px; font-size:15px; color:var(--accent);">Working agreements</h3>
-  <div class="table-wrap">
-    <table>
-      <tr><th>Agreement</th><th>Why it builds safety</th></tr>
-      <tr><td><strong>"Yes, and&hellip;"</strong></td><td>Build on what came before. No deleting and starting over when you take the keyboard.</td></tr>
-      <tr><td><strong>Strong-style navigation</strong></td><td>"For an idea to go from your head to the computer, it must go through someone else's hands." Decouples ego from execution.</td></tr>
-      <tr><td><strong>No devices</strong></td><td>Full attention = full belonging. Announce before session so people don't bring laptops.</td></tr>
-      <tr><td><strong>Debate in code, not in the abstract</strong></td><td>Two approaches? Try both. Data decides, not hierarchy. Removes "who's right" pressure.</td></tr>
-      <tr><td><strong>Chatham House Rule</strong></td><td>What's said in the session stays in the session. Mistakes are learning, not ammunition.</td></tr>
-      <tr><td><strong>Deliberateness over impulsiveness</strong></td><td>"Read the AI output together before we hit accept." Prevents reflexive shipping.</td></tr>
-    </table>
+  <div class="step-card">
+    <div class="step-number">2</div>
+    <h3 style="margin-top:0; color:var(--teal);">The Discovery Loop</h3>
+    <p>Before writing a single line of a fix, ask the AI to:</p>
+    <ul style="margin:4px 0 0 20px; font-size:14px; line-height:1.8;">
+      <li>Explain how the legacy logic currently works</li>
+      <li>Hypothesise why the bug exists</li>
+      <li>Propose three different ways to solve it (architectural trade-offs)</li>
+    </ul>
   </div>
 
-  <h3 style="margin-top:24px; font-size:15px; color:var(--accent);">AI-specific safety additions</h3>
-  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:10px;">AI introduces new psychological risks &mdash; people feel exposed when they don't know how to prompt, or embarrassed when AI produces something better than they could.</p>
+  <div class="step-card">
+    <div class="step-number">3</div>
+    <h3 style="margin-top:0; color:var(--red);">The &ldquo;Healthy Friction&rdquo; Loop</h3>
+    <p>When the AI generates a solution:</p>
+    <ul style="margin:4px 0 0 20px; font-size:14px; line-height:1.8;">
+      <li><strong>The Pause</strong>: Read the output aloud together. Don't just hit &ldquo;Apply&rdquo;</li>
+      <li><strong>Red Team Check</strong>: Does it follow our standards? Is it slop?</li>
+      <li><strong>The 15-Minute Rule</strong>: If stuck, one person &ldquo;spikes&rdquo; it for 15 mins while the others break</li>
+    </ul>
+  </div>
+
+  <div class="step-card">
+    <div class="step-number">4</div>
+    <h3 style="margin-top:0; color:var(--green);">Integrated Testing</h3>
+    <p style="margin-bottom:0;">Run the test pipelines during the session. &ldquo;Done&rdquo; isn't just code that looks right &mdash; it's code that passes the build and is understood by the Mob.</p>
+  </div>
+
+  <div class="step-card">
+    <div class="step-number">5</div>
+    <h3 style="margin-top:0; color:var(--amber);">Final Slop Review</h3>
+    <p style="margin-bottom:0;">Perform a &ldquo;Group PR Review&rdquo; before the session ends. Ensure the code is human-readable and maintainable.</p>
+  </div>
+
+  <div class="step-card">
+    <div class="step-number">6</div>
+    <h3 style="margin-top:0; color:var(--violet);">Retrospective <span style="font-size:12px; font-weight:400; color:var(--ink-dim);">(5 mins)</span></h3>
+    <p>Three votes, 30 seconds each. Likert scale (1 = Strongly Disagree, 5 = Strongly Agree):</p>
+    <div class="table-wrap" style="margin-top:8px;">
+      <table>
+        <tr><th style="width:8%;">#</th><th style="width:22%;">Dimension</th><th>Statement</th></tr>
+        <tr><td>1</td><td><strong>The Group</strong></td><td>&ldquo;Everyone contributed meaningfully and felt heard&rdquo;</td></tr>
+        <tr><td>2</td><td><strong>The AI</strong></td><td>&ldquo;We caught and corrected the AI's mistakes before accepting them&rdquo;</td></tr>
+        <tr><td>3</td><td><strong>The Learning</strong></td><td>&ldquo;I know what I'd do differently next time&rdquo;</td></tr>
+      </table>
+    </div>
+    <p style="font-size:13px; color:var(--ink-dim); margin-top:10px; margin-bottom:0;"><strong>Then ask:</strong> &ldquo;What's the one thing we should change for next session?&rdquo;</p>
+  </div>
+
+  <hr class="divider">
+
+  <h2>AI-specific safety</h2>
+  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:14px;">AI introduces psychological risks people don't expect &mdash; prompt shame, authority bias, feeling exposed when the AI produces something better than you could.</p>
   <div class="table-wrap">
     <table>
       <tr><th>Agreement</th><th>The risk it addresses</th></tr>
-      <tr><td><strong>"No such thing as a bad prompt"</strong></td><td>Prompt shame &mdash; people won't experiment if they fear looking foolish</td></tr>
-      <tr><td><strong>Read output aloud together</strong></td><td>Prevents one person silently deciding if AI output is "good enough"</td></tr>
+      <tr><td><strong>&ldquo;No such thing as a bad prompt&rdquo;</strong></td><td>Prompt shame &mdash; people won't experiment if they fear looking foolish</td></tr>
+      <tr><td><strong>Read output aloud together</strong></td><td>Prevents one person silently deciding if AI output is &ldquo;good enough&rdquo;</td></tr>
       <tr><td><strong>Everyone gets a turn prompting</strong></td><td>AI-confident people dominate; novices never learn the feel of it</td></tr>
-      <tr><td><strong>"The AI is wrong until proven right"</strong></td><td>Removes authority bias &mdash; nobody defers to AI just because it sounds confident</td></tr>
-      <tr><td><strong>Name what you don't know</strong></td><td>AI makes knowledge gaps visible &mdash; normalise saying "I don't understand this output"</td></tr>
+      <tr><td><strong>&ldquo;The AI is wrong until proven right&rdquo;</strong></td><td>Removes authority bias &mdash; nobody defers to AI just because it sounds confident</td></tr>
+      <tr><td><strong>Name what you don't know</strong></td><td>AI makes knowledge gaps visible &mdash; normalise saying &ldquo;I don't understand this output&rdquo;</td></tr>
     </table>
   </div>
-
-  <h3 style="margin-top:24px; font-size:15px; color:var(--accent);">Facilitator: calibrating safety in real-time</h3>
-  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:10px;">Safety isn't a checkbox &mdash; it's a live reading. Watch for these signals and adjust.</p>
-  <div class="table-wrap">
-    <table>
-      <tr><th style="width:40%;">Shutdown signal</th><th style="width:60%;">Facilitator response</th></tr>
-      <tr><td>Silence after rotation &mdash; new driver freezes</td><td>Navigator: use <strong>Intention &rarr; Location &rarr; Details</strong> ("We want to add a test. Open the test file. Type&hellip;")</td></tr>
-      <tr><td>"Yes, but&hellip;" responses increasing</td><td>Name it: "I notice we're in 'yes but' mode &mdash; let's try the idea for 5 minutes and then evaluate"</td></tr>
-      <tr><td>One person hasn't spoken for 10+ minutes</td><td>"[Name], what are you seeing that we might be missing?"</td></tr>
-      <tr><td>Defensive body language after AI critique</td><td>"Remember: we're debugging the prompt, not the person who wrote it"</td></tr>
-      <tr><td>Someone apologises for a "bad" prompt</td><td>"That prompt taught us what the AI needs &mdash; that's exactly how this works"</td></tr>
-      <tr><td>Group defers to the most senior person</td><td>Rotate so junior person navigates next; enforce strong-style strictly</td></tr>
-    </table>
-  </div>
-  <blockquote>"Truth without safety creates trauma, not transformation. Safety doesn't eliminate discomfort &mdash; it <em>enables</em> it."<cite>Psychological Safety Calibration principle</cite></blockquote>
-  <p style="font-size:13px; color:var(--ink-dim);">For deeper assessment: rate the group on <strong>Attitudes</strong> (openness to challenge), <strong>Behaviours</strong> (do actions match stated values?), and <strong>Context</strong> (does the org reward truth-telling or peace-keeping?) on a 1&ndash;5 scale. Average above 3.5 = tread carefully with challenge intensity.</p>
-
-  <hr class="divider">
-
-  <h2>Enabling constraints</h2>
-  <p>John Cutler: <em>"The thoughtful design and deployment of constraints is a superpower."</em> Every practice here is a <strong>deliberately designed boundary</strong> that drives creativity rather than restricting it.</p>
-  <div class="table-wrap">
-    <table>
-      <tr><th>Constraint</th><th>Enabling intent</th><th>Risk if misapplied</th></tr>
-      <tr><td><strong>Rotation timer</strong></td><td>Forces knowledge transfer through handover discomfort</td><td>Becomes performative &mdash; rotating without actually sharing context</td></tr>
-      <tr><td><strong>Strong-style</strong></td><td>"Ideas must go through someone else's hands" &mdash; prevents solo hero mode</td><td>Driver becomes passive typist; Navigator micromanages keystrokes</td></tr>
-      <tr><td><strong>Single computer</strong></td><td>Eliminates multitasking; forces shared attention</td><td>Boredom/disengagement when participant role feels passive</td></tr>
-      <tr><td><strong>No backlogs of ideas</strong></td><td>Present-moment focus; decide what matters NOW</td><td>Valuable observations lost because no capture mechanism</td></tr>
-      <tr><td><strong>8-week experiment horizon</strong></td><td>Long enough to build skill, short enough to evaluate</td><td>Killed at week 2 because "it feels slower" (see Kamer Tip 6)</td></tr>
-    </table>
-  </div>
-  <blockquote>"Same constraint, dramatically different results. Context determines whether a deadline is a creative forcing function or a performative metric."<cite>John Cutler, TBM 386</cite></blockquote>
-  <p style="font-size:13px; color:var(--ink-dim);">Cutler's 4 signs of well-designed constraints: <strong>Clarity</strong> (easy to understand), <strong>Tension</strong> (requires ongoing judgment), <strong>Full-loop</strong> (connects back to learning), <strong>Active engagement</strong> (not bureaucratic hoops).</p>
-
-  <hr class="divider">
 
   <h2>Warning stickers</h2>
-  <p>At session start, ask each participant: <strong>"What's your known risk in this kind of session?"</strong> Public self-declaration builds vulnerability and gives the group permission to name patterns when they appear.</p>
+  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:14px;">At session start, ask each participant: <strong>&ldquo;What's your known risk in this kind of session?&rdquo;</strong> Public self-declaration builds vulnerability and gives the group permission to name patterns when they appear.</p>
   <div class="table-wrap">
     <table>
-      <tr><th>Risk</th><th>Antidote</th><th>Why it matters for safety</th></tr>
-      <tr><td>Analysis paralysis</td><td>"We decide in 5 minutes"</td><td>Perfectionism shuts others out &mdash; speed creates space</td></tr>
-      <tr><td>Impatience / wants to build</td><td>"Let's read the output together"</td><td>Rushing skips shared understanding</td></tr>
-      <tr><td>Dominates keyboard</td><td>Timer enforces driver swap</td><td>Structure protects what social pressure can't</td></tr>
-      <tr><td>Goes quiet / defers</td><td>"What are you seeing?"</td><td>Silence ≠ agreement; draw out dissent gently</td></tr>
-      <tr><td>Prompt perfectionism</td><td>"Just try it &mdash; we'll iterate"</td><td>Fear of "bad" prompts prevents learning</td></tr>
-      <tr><td>AI authority bias</td><td>"What would <em>we</em> do without the AI?"</td><td>Group must maintain independent judgment</td></tr>
+      <tr><th>Risk</th><th>Antidote</th></tr>
+      <tr><td>Analysis paralysis</td><td>&ldquo;We decide in 5 minutes&rdquo;</td></tr>
+      <tr><td>Impatience / wants to build</td><td>&ldquo;Let's read the output together&rdquo;</td></tr>
+      <tr><td>Dominates keyboard</td><td>Timer enforces driver swap</td></tr>
+      <tr><td>Goes quiet / defers</td><td>&ldquo;What are you seeing?&rdquo;</td></tr>
+      <tr><td>Prompt perfectionism</td><td>&ldquo;Just try it &mdash; we'll iterate&rdquo;</td></tr>
+      <tr><td>AI authority bias</td><td>&ldquo;What would <em>we</em> do without the AI?&rdquo;</td></tr>
     </table>
   </div>
-  <p style="font-size:13px; color:var(--ink-dim); margin-top:10px;"><strong>Facilitator tip</strong>: Emotions in collaborative sessions are data, not problems. Use this quick read &mdash; <em>Happy</em> (needs met), <em>Frustrated</em> (blocked), <em>Bored</em> (not contributing enough), <em>Anxious</em> (exposed), <em>Confused</em> (pace too fast). Name the emotion, address the need.</p>
-</div>
 
-<!-- ═══════════ TIMER ═══════════ -->
-<div class="section" id="timer">
-  <h1>Session Timer</h1>
-  <p class="subtitle">A working rotation timer. Add your team, set the duration, hit start. Est. time: 15-minute rotations recommended.</p>
+  <hr class="divider">
 
-  <div class="timer-container">
-    <div class="timer-label">Time remaining</div>
-    <div class="timer-display" id="timer-display">10:00</div>
-    <div class="timer-driver" id="timer-driver-label">Add team members below</div>
-    <div class="timer-controls">
-      <button class="btn btn-accent" id="timer-start" onclick="startTimer()">Start</button>
-      <button class="btn btn-ghost" onclick="pauseTimer()">Pause</button>
-      <button class="btn btn-ghost" onclick="resetTimer()">Reset</button>
-      <button class="btn btn-primary" onclick="nextDriver()">Next Driver &rarr;</button>
-    </div>
-    <div class="timer-presets">
-      <div class="timer-preset" onclick="setTimer(240)">4 min</div>
-      <div class="timer-preset" onclick="setTimer(300)">5 min</div>
-      <div class="timer-preset active" onclick="setTimer(600)">10 min</div>
-      <div class="timer-preset" onclick="setTimer(900)">15 min</div>
-    </div>
+  <h2>Post-session analysis</h2>
+  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:14px;">Feed the session transcript to AI with this prompt:</p>
+  <div class="card" style="background:var(--cream); border:1.5px dashed var(--border);">
+    <p style="font-family:var(--mono); font-size:13px; line-height:1.7; margin-bottom:0;">&ldquo;Analyse this collaborative coding session. Did everyone contribute equally? Where did we get stuck? What AI assumptions did we correct? What collaboration patterns emerged? What should we change?&rdquo;</p>
   </div>
-
-  <h2>Team</h2>
-  <div style="display:flex; gap:8px; margin-bottom:16px;">
-    <input type="text" id="new-member" placeholder="Add a name&hellip;" style="flex:1; background:var(--cream); border:1.5px solid var(--border); border-radius:var(--radius-sm); padding:12px 16px; font-size:15px; font-family:var(--sans); color:var(--ink); outline:none; min-height:44px;" onkeydown="if(event.key==='Enter')addMember()">
-    <button class="btn btn-primary" onclick="addMember()">Add</button>
-  </div>
-  <div id="team-list" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
 </div>
 
 <!-- ═══════════ EXPERIMENT ═══════════ -->
 <div class="section" id="experiment">
-  <h1>Experiment Designer</h1>
-  <p class="subtitle">Build a hypothesis, run the safe-to-try check, decide whether to proceed. Est. time: 15 minutes.</p>
+  <h1>The Experiment</h1>
+  <p class="subtitle">The hypothesis, success metrics, and tools to design your own experiment.</p>
 
+  <h2>The hypothesis</h2>
   <div class="hero-card">
-    <div class="hero-quote">"Do a radical thing at a non-radical scale."</div>
-    <div class="hero-attribution">Aaron Dignan, The Ready &mdash; Don't create a 1-hour meeting-free zone. Eliminate all meetings for 2 weeks. Experience the change fully before judging it.</div>
+    <div class="hero-quote">&ldquo;We believe that by shifting from solo AI usage to a collaborative &lsquo;AI Mob&rsquo; approach when working on legacy maintenance, we will reduce the total time from &lsquo;In-Progress&rsquo; to &lsquo;PR Merged&rsquo; by 50%.&rdquo;</div>
+    <div class="hero-attribution">This is achieved by eliminating individual &lsquo;ramp-up dread&rsquo; and replacing asynchronous code reviews with real-time group consensus.</div>
   </div>
 
-  <h2>Kamer's 8 tips for experiments</h2>
+  <p>We will also learn whether, after participating in AI Mob sessions on the same app, participants can independently describe its architecture and confidently pick up the next maintenance ticket solo.</p>
+
+  <hr class="divider">
+
+  <h2>Success metrics</h2>
+  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:14px;">Two falsifiable signals &mdash; one for delivery, one for learning.</p>
+
   <div class="table-wrap">
     <table>
-      <tr><th>#</th><th>Tip</th><th>Applied to collaborative AI sessions</th></tr>
-      <tr><td><strong>1</strong></td><td><strong>The test comes from you</strong> &mdash; genuine passion, not assigned</td><td>Champion volunteers, don't conscript</td></tr>
-      <tr><td><strong>2</strong></td><td><strong>Define the desired effect</strong> &mdash; concrete, measurable</td><td>"Resolve first ticket in &lt;2 hours"</td></tr>
-      <tr><td><strong>3</strong></td><td><strong>Be bold</strong> &mdash; radical thing, non-radical scale</td><td>Full collaboration week, not a timid 1-hour trial</td></tr>
-      <tr><td><strong>4</strong></td><td><strong>One thing at a time</strong> &mdash; change one variable</td><td>Collaborative sessions OR new AI tool. Not both simultaneously</td></tr>
-      <tr><td><strong>5</strong></td><td><strong>Right time horizon</strong> &mdash; 8 weeks ideal, 16 max</td><td>2&ndash;3 sprint cycles to build real skill</td></tr>
-      <tr><td><strong>6</strong></td><td><strong>Don't kill it early</strong> &mdash; persist past discomfort</td><td>3 sessions is too few. Commit to 8+</td></tr>
-      <tr><td><strong>7</strong></td><td><strong>Retrospect regularly</strong> &mdash; monthly learnings</td><td>End-of-session retro + monthly pattern review</td></tr>
-      <tr><td><strong>8</strong></td><td><strong>Expect frustration</strong> &mdash; 2 steps forward, 1 back</td><td>"Why is this slower?" is normal at first</td></tr>
+      <tr><th style="width:33%;">TRUE when&hellip;</th><th style="width:33%;">FALSE when&hellip;</th><th>What this tells us</th></tr>
+      <tr>
+        <td>Average cycle time (In-Progress &rarr; Merged) drops 50% faster than historical solo benchmarks</td>
+        <td>Cycle time doesn't meaningfully improve, or gets worse due to coordination overhead</td>
+        <td><strong>TRUE</strong>: Mob eliminates ramp-up and review bottlenecks. <strong>FALSE</strong>: Coordination overhead exceeds savings.</td>
+      </tr>
+      <tr>
+        <td>Participants feel 50% more confident maintaining this legacy area</td>
+        <td>Participants still defer maintenance tickets on that app to others despite having mobbed on it</td>
+        <td><strong>TRUE</strong>: Shared understanding transfers to individual capability. <strong>FALSE</strong>: Group experience didn't build individual capability.</td>
+      </tr>
     </table>
   </div>
-
-  <h3>The T-shape model</h3>
-  <p>From Rodney Evans at The Ready: teach <strong>one universal practice</strong> across all teams (the bar of the T &mdash; e.g. retrospectives). Let a <strong>smaller adventurous group</strong> experiment widely (the stem of the T). That pioneering group becomes the organizational model.</p>
-
-  <blockquote>"Start with an adventurous group already doing things differently &mdash; not a group stuck in dysfunction. It will be more inspiring."<cite>Jurriaan Kamer, The Ready</cite></blockquote>
 
   <hr class="divider">
 
   <h2>Hypothesis builder</h2>
+  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:16px;">Build your own hypothesis for your team's context.</p>
   <div class="card" style="box-shadow:none; border:1.5px solid var(--border);">
     <div class="input-group"><label>We believe that&hellip;</label><input type="text" id="exp-practice" placeholder="e.g. collaborative AI sessions on maintenance tasks"></div>
     <div class="input-group"><label>Applied to&hellip;</label><input type="text" id="exp-context" placeholder="e.g. apps untouched for 3+ months"></div>
@@ -1211,8 +1072,6 @@ const storage = {
 
   <div id="hypothesis-output" style="display:none; margin-top:20px;"></div>
 
-  <p style="margin-top:16px; font-size:13px; color:var(--ink-dim);"><strong>Track it</strong>: Use the <a href="https://teamytastic.github.io/camekazi.github.io/gist/?1d1c0f86d462f101afcebdba737a4f19/mvi-experiment.html" target="_blank" style="color:var(--accent); font-weight:600;">MVI Experiment Designer</a> to design experiments with hypothesis, safe-to-try checks, and tracking.</p>
-
   <h2>Safe-to-try check</h2>
   <p style="margin-bottom:16px;">Click each test to toggle pass/fail. All 6 must pass.</p>
 
@@ -1225,34 +1084,47 @@ const storage = {
     <div class="check-row" onclick="toggleCheck(this)" data-state="pending"><div class="check-icon"></div><div><div class="check-label">Learning-measured</div><div class="check-question">How will we measure learning, not just delivery?</div></div></div>
   </div>
   <div id="verdict" class="verdict pending">Complete the checks above</div>
+</div>
 
-  <hr class="divider">
+<!-- ═══════════ TIMER ═══════════ -->
+<div class="section" id="timer">
+  <h1>Session Timer</h1>
+  <p class="subtitle">A working rotation timer. Add your team, set the duration, hit start. Roles rotate every 20&ndash;30 minutes.</p>
 
-  <h2>What's next: after your first sessions</h2>
-  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:18px;">This isn't one-and-done. Each session should make the next one better.</p>
-
-  <div class="card">
-    <h3 style="margin-top:0;">Close the feedback loop</h3>
-    <div class="table-wrap" style="margin-top:8px;">
-      <table>
-        <tr><th style="width:5%;">#</th><th>Step</th><th>How</th></tr>
-        <tr><td>1</td><td><strong>Review transcript analysis together</strong></td><td>Use the reflection prompts from the Setup tab. Do this as a team, not solo.</td></tr>
-        <tr><td>2</td><td><strong>Document what worked / what to change</strong></td><td>Keep a shared "session log" &mdash; even a simple list in a wiki page.</td></tr>
-        <tr><td>3</td><td><strong>Update team practices</strong></td><td>What AI context template needs updating? What rotation length felt right? What roles helped?</td></tr>
-        <tr><td>4</td><td><strong>Share learnings with other teams</strong></td><td>Optional but powerful. Your first sessions become case studies for others.</td></tr>
-      </table>
+  <div class="timer-container">
+    <div class="timer-label">Time remaining</div>
+    <div class="timer-display" id="timer-display">20:00</div>
+    <div class="timer-driver" id="timer-driver-label">Add team members below</div>
+    <div class="timer-controls">
+      <button class="btn btn-accent" id="timer-start" onclick="startTimer()">Start</button>
+      <button class="btn btn-ghost" onclick="pauseTimer()">Pause</button>
+      <button class="btn btn-ghost" onclick="resetTimer()">Reset</button>
+      <button class="btn btn-primary" onclick="nextDriver()">Next Driver &rarr;</button>
+    </div>
+    <div class="timer-presets">
+      <div class="timer-preset" onclick="setTimer(600)">10 min</div>
+      <div class="timer-preset" onclick="setTimer(900)">15 min</div>
+      <div class="timer-preset active" onclick="setTimer(1200)">20 min</div>
+      <div class="timer-preset" onclick="setTimer(1800)">30 min</div>
     </div>
   </div>
 
-  <div class="card" style="background:var(--cream); border:1.5px dashed var(--border);">
-    <h3 style="margin-top:0;">Questions to evolve your practice</h3>
-    <ul style="margin:4px 0 0 20px; font-size:14px; line-height:2;">
-      <li>What patterns emerged across sessions? What would we systematise?</li>
-      <li>Are we getting better at prompting? At challenging AI output?</li>
-      <li>Is the team's shared understanding of the codebase actually growing?</li>
-      <li>Which roles added the most value? Which felt unnecessary?</li>
-    </ul>
-    <p style="font-size:13px; color:var(--ink-dim); margin-top:12px; margin-bottom:0;">For teams ready to go deeper, explore <strong>Compound Engineering</strong> practices in the Research tab &mdash; a systematic approach to making each development cycle better than the last.</p>
+  <h2>Team</h2>
+  <div style="display:flex; gap:8px; margin-bottom:16px;">
+    <input type="text" id="new-member" placeholder="Add a name&hellip;" style="flex:1; background:var(--cream); border:1.5px solid var(--border); border-radius:var(--radius-sm); padding:12px 16px; font-size:15px; font-family:var(--sans); color:var(--ink); outline:none; min-height:44px;" onkeydown="if(event.key==='Enter')addMember()">
+    <button class="btn btn-primary" onclick="addMember()">Add</button>
+  </div>
+  <div id="team-list" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+
+  <hr class="divider">
+
+  <h2>Timer progression</h2>
+  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:14px;">Start short, extend as the team builds skill. When the timer feels too short, you're at the right length.</p>
+  <div class="progression">
+    <div class="prog-bar" style="height:32%; background: linear-gradient(to top, var(--accent), #f97316);" onclick="setTimer(600)">10m<span>First session</span></div>
+    <div class="prog-bar" style="height:55%; background: linear-gradient(to top, var(--accent), #ea580c);" onclick="setTimer(900)">15m<span>Week 1-2</span></div>
+    <div class="prog-bar" style="height:80%; background: linear-gradient(to top, var(--teal), #0d9488);" onclick="setTimer(1200)">20m<span>Established</span></div>
+    <div class="prog-bar" style="height:100%; background: linear-gradient(to top, var(--green), #16a34a);" onclick="setTimer(1800)">30m<span>Experienced</span></div>
   </div>
 </div>
 
@@ -1262,7 +1134,7 @@ const storage = {
   <p class="subtitle">Willem Larsen's gamified experience. Earn XP by embodying role behaviours. Print the cards, bring to your next session.</p>
 
   <div class="card" style="border-left: 4px solid var(--amber); background: var(--surface);">
-    <p style="font-size:13px; color:var(--ink-dim); margin-bottom:0;"><strong>Optional: Gamification for experienced teams.</strong> Start with the basics first (Quick Start &rarr; Roles &rarr; Setup). Once your team is comfortable with the core workflow, these RPG cards add depth and fun. They're not required for a great first session.</p>
+    <p style="font-size:13px; color:var(--ink-dim); margin-bottom:0;"><strong>Optional: Gamification for experienced teams.</strong> Start with the basics first (The Play &rarr; Roles &rarr; Run It). Once your team is comfortable with the core workflow, these RPG cards add depth and fun.</p>
   </div>
 
   <h2>Level 1 &mdash; Core</h2>
@@ -1302,7 +1174,18 @@ const storage = {
 <!-- ═══════════ RESEARCH & EVIDENCE ═══════════ -->
 <div class="section" id="research">
   <h1>Research &amp; Evidence</h1>
-  <p class="subtitle">Supporting research for those who want to understand the "why" behind these practices. Optional reading &mdash; not required to get started.</p>
+  <p class="subtitle">Supporting research for those who want to understand the &ldquo;why&rdquo; behind these practices.</p>
+
+  <h2>Run, Serve, and Change</h2>
+  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:14px;">Most teams use AI to accelerate Run work &mdash; closing tickets faster, generating boilerplate, shipping more code. AI is exceptionally good at this. The problem is what gets lost.</p>
+
+  <p>When one person works alone with AI, the emphasis shifts entirely to output. Architectural trade-offs, maintainability, and whether we're solving the right problem &mdash; the Serve work &mdash; gets skipped because there's nobody else in the room to ask the hard questions.</p>
+
+  <p>The result is <strong>AI Slop</strong>: code that works today but creates tomorrow's maintenance burden. Technically functional, architecturally poor, understood by nobody.</p>
+
+  <blockquote>"You're not trading Run for Serve. You're doing Run <em>while</em> investing in Serve <em>and</em> running a Change experiment. Three modes, one session, same time budget as solo work."</blockquote>
+
+  <hr class="divider">
 
   <h2>The AI literacy case</h2>
   <p style="font-size:13px; color:var(--ink-dim); margin-bottom:14px;">Gartner (Carlton Sapp, 2025): enterprises need Human-AI Collaboration Curricula with 6 domains. Collaborative AI sessions deliver all 6 by design.</p>
@@ -1317,16 +1200,14 @@ const storage = {
       <tr><td><strong>Executive AI governance</strong></td><td>Red Team role explicitly critiques AI output; deliberateness over impulsiveness</td></tr>
     </table>
   </div>
-  <blockquote>"Human-AI collaboration curricula must be deployed the same way cybersecurity awareness training is &mdash; as a shared, measurable competency tied to business outcomes."<cite>Gartner, Build Human-AI Collaboration Curricula (2025)</cite></blockquote>
-  <p style="font-size:13px; color:var(--ink-dim);">Gartner recommends <strong>tiered learning journeys</strong> (multiple paths to same standard), <strong>hands-on training</strong> (hackathons, AI labs), and <strong>embedding learning into daily workflows</strong>. Collaborative AI sessions are all three at once.</p>
 
   <hr class="divider">
 
   <h2>Evidence from the field</h2>
   <div class="card">
     <h3 style="margin-top:0;">Crisp (Sweden) &mdash; Daily 3hr sessions</h3>
-    <p>AI as "superintelligent advisor &mdash; always available, never tired." Eliminated code reviews, removed key-person dependencies, reduced technical debt.</p>
-    <p style="margin-bottom:0;"><strong>"We tried splitting up to hit a deadline, but reintegration was painful. We're faster together."</strong></p>
+    <p>AI as &ldquo;superintelligent advisor &mdash; always available, never tired.&rdquo; Eliminated code reviews, removed key-person dependencies, reduced technical debt.</p>
+    <p style="margin-bottom:0;"><strong>&ldquo;We tried splitting up to hit a deadline, but reintegration was painful. We're faster together.&rdquo;</strong></p>
   </div>
   <div class="card">
     <h3 style="margin-top:0;">Atlassian &mdash; Define &rarr; Spec &rarr; Generate &rarr; Review &rarr; Iterate</h3>
@@ -1337,7 +1218,7 @@ const storage = {
   <hr class="divider">
 
   <h2>Compound Engineering (deeper practice)</h2>
-  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:14px;">For teams ready to go beyond collaboration sessions &mdash; the emerging paradigm for AI-native development from <a href="https://every.to/p/how-to-build-ai-apps-that-work" target="_blank" style="color:var(--accent);">Every.to's Compound Engineering guide</a>.</p>
+  <p style="font-size:13px; color:var(--ink-dim); margin-bottom:14px;">For teams ready to go beyond collaboration sessions &mdash; the emerging paradigm for AI-native development.</p>
   <div class="card">
     <h3 style="margin-top:0;">The loop: Plan &rarr; Work &rarr; Review &rarr; Compound</h3>
     <div class="flow" style="margin:12px 0;">
@@ -1358,17 +1239,7 @@ const storage = {
         <tr><td><strong>Compound</strong></td><td>Document what worked/failed, update team knowledge base for next iteration</td></tr>
       </table>
     </div>
-    <p style="font-size:13px; color:var(--ink-dim); margin-top:12px; margin-bottom:0;"><strong>Key insight:</strong> Allocate roughly half your time to system improvements (review processes, pattern documentation). The investment compounds &mdash; each cycle gets faster.</p>
-  </div>
-
-  <h3>Beliefs to unlearn</h3>
-  <div class="table-wrap">
-    <table>
-      <tr><th>Old belief</th><th>New reality</th></tr>
-      <tr><td>"Code must be hand-written"</td><td>AI generates, humans curate and validate</td></tr>
-      <tr><td>"Every line needs manual review"</td><td>Specialized review agents catch categories of issues; humans review judgment calls</td></tr>
-      <tr><td>"First attempts should be good"</td><td>~95% garbage rate is normal &mdash; the speed of iteration matters, not first-draft quality</td></tr>
-    </table>
+    <p style="font-size:13px; color:var(--ink-dim); margin-top:12px; margin-bottom:0;"><strong>Key insight:</strong> Allocate roughly half your time to system improvements. The investment compounds &mdash; each cycle gets faster.</p>
   </div>
 </div>
 
@@ -1387,7 +1258,7 @@ const storage = {
   <a class="link-card" href="https://ensembleprogramming.xyz/" target="_blank"><div class="link-tag tag-foundation">Foundation</div><div class="link-info"><div class="link-title">Ensemble Programming Guidebook &mdash; Maaret Pyhajarvi (book)</div><div class="link-url">ensembleprogramming.xyz</div></div></a>
 
   <h2>AI + Collaboration</h2>
-  <a class="link-card" href="https://blog.crisp.se/2025/06/02/michaelgothe/mob-programming-with-ai-inside-a-high-performing-teams-journey" target="_blank"><div class="link-tag tag-ai">AI + Mob</div><div class="link-info"><div class="link-title">Mob Programming with AI &mdash; Crisp (Sweden)</div><div class="link-url">blog.crisp.se &mdash; Daily 3hr sessions, "faster together"</div></div></a>
+  <a class="link-card" href="https://blog.crisp.se/2025/06/02/michaelgothe/mob-programming-with-ai-inside-a-high-performing-teams-journey" target="_blank"><div class="link-tag tag-ai">AI + Mob</div><div class="link-info"><div class="link-title">Mob Programming with AI &mdash; Crisp (Sweden)</div><div class="link-url">blog.crisp.se &mdash; Daily 3hr sessions, &ldquo;faster together&rdquo;</div></div></a>
   <a class="link-card" href="https://www.atlassian.com/blog/atlassian-engineering/mobbing-with-ai" target="_blank"><div class="link-tag tag-ai">AI + Mob</div><div class="link-info"><div class="link-title">Mobbing with AI &mdash; Atlassian</div><div class="link-url">atlassian.com &mdash; Define/Spec/Generate/Review/Iterate</div></div></a>
 
   <h2>Gamification &amp; Facilitation</h2>
@@ -1420,8 +1291,8 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
 });
 
 // ── Working Session Timer ──
-let timerSeconds = 600;
-let timerRemaining = 600;
+let timerSeconds = 1200;
+let timerRemaining = 1200;
 let timerInterval = null;
 let timerRunning = false;
 let team = [];
@@ -1446,8 +1317,8 @@ function updateTimerDisplay() {
   const display = document.getElementById('timer-display');
   display.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
   display.className = 'timer-display';
-  if (timerRemaining <= 30 && timerRemaining > 10) display.classList.add('warning');
-  if (timerRemaining <= 10) display.classList.add('critical');
+  if (timerRemaining <= 60 && timerRemaining > 15) display.classList.add('warning');
+  if (timerRemaining <= 15) display.classList.add('critical');
   updateDriverLabel();
 }
 
@@ -1470,7 +1341,6 @@ function startTimer() {
       clearInterval(timerInterval);
       timerRunning = false;
       document.getElementById('timer-start').textContent = 'Start';
-      // Audio alert — two short beeps
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         [0, 0.25].forEach(delay => {
@@ -1509,7 +1379,6 @@ function nextDriver() {
   currentDriverIndex = (currentDriverIndex + 1) % Math.max(team.length, 1);
   resetTimer();
   updateDriverLabel();
-  // Subtle haptic-like flash
   const display = document.getElementById('timer-display');
   display.style.transition = 'none';
   display.style.color = 'var(--accent)';
