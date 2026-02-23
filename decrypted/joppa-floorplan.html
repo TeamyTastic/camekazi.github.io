@@ -26,6 +26,8 @@
   .legend-dot.auto { background: #d946ef; }
   .legend-dot.meross { background: #10b981; }
   .legend-dot.tuya { background: #ef4444; }
+  .legend-dot.wemo { background: #f97316; }
+  .legend-dot.dyson { background: #06b6d4; }
 
   .floors { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 24px 32px; max-width: 1400px; margin: 0 auto; }
   @media (max-width: 900px) { .floors { grid-template-columns: 1fr; } }
@@ -51,6 +53,8 @@
   .device.auto { background: rgba(217, 70, 239, 0.08); color: #a21caf; border: 1px solid rgba(217, 70, 239, 0.2); }
   .device.meross { background: rgba(16, 185, 129, 0.08); color: #047857; border: 1px solid rgba(16, 185, 129, 0.2); }
   .device.tuya { background: rgba(239, 68, 68, 0.08); color: #b91c1c; border: 1px solid rgba(239, 68, 68, 0.2); }
+  .device.wemo { background: rgba(249, 115, 22, 0.08); color: #c2410c; border: 1px solid rgba(249, 115, 22, 0.2); }
+  .device.dyson { background: rgba(6, 182, 212, 0.08); color: #0e7490; border: 1px solid rgba(6, 182, 212, 0.2); }
 
   .device .icon { font-size: 13px; }
 
@@ -103,12 +107,12 @@
 <header>
   <div>
     <h1>Joppa Road &mdash; Smart Home Device Map</h1>
-    <div class="subtitle">7 WiiM speakers &middot; 20+ Hue lights &middot; Samsung Frame TV &middot; 30+ Lightwave switches &middot; 5 Meross plugs &middot; Tuya radiator &middot; Velux window &middot; Orbi mesh &middot; Alexa voice &middot; 70+ API endpoints &middot; Updated 2026-02-22</div>
+    <div class="subtitle">8 WiiM speakers &middot; 20+ Hue lights &middot; Samsung Frame TV &middot; 30+ Lightwave switches &middot; 5 Meross plugs &middot; WeMo switch &middot; Dyson purifier &middot; Tuya radiator &middot; Velux window &middot; Orbi mesh &middot; Alexa voice &middot; 80+ API endpoints &middot; Updated 2026-02-23</div>
   </div>
 </header>
 
 <div class="legend">
-  <div class="legend-item"><div class="legend-dot wiim"></div> WiiM Speaker</div>
+  <div class="legend-item"><div class="legend-dot wiim"></div> WiiM Speaker (8)</div>
   <div class="legend-item"><div class="legend-dot hue"></div> Philips Hue</div>
   <div class="legend-item"><div class="legend-dot tv"></div> Samsung Frame TV</div>
   <div class="legend-item"><div class="legend-dot lightwave"></div> Lightwave Switch</div>
@@ -118,15 +122,9 @@
   <div class="legend-item"><div class="legend-dot auto"></div> Automation</div>
   <div class="legend-item"><div class="legend-dot meross"></div> Meross Plug</div>
   <div class="legend-item"><div class="legend-dot tuya"></div> Tuya Radiator</div>
+  <div class="legend-item"><div class="legend-dot wemo"></div> WeMo Switch</div>
+  <div class="legend-item"><div class="legend-dot dyson"></div> Dyson Purifier</div>
   <div class="legend-item"><div class="legend-dot infra"></div> Infrastructure</div>
-</div>
-
-<div class="quick-actions">
-  <div class="quick-actions-title">Quick Actions</div>
-  <div class="quick-actions-buttons">
-    <button class="action-btn" onclick="frameNewArt()" id="frame-art-btn">🌊 The Great Wave</button>
-  </div>
-  <div class="action-status" id="action-status"></div>
 </div>
 
 <div class="floors">
@@ -470,6 +468,19 @@
             <div class="tt-row">Feature: -1217-</div>
           </div>
         </div>
+        <div class="device dyson">
+          <span class="icon">&#x1f32a;</span> Dyson Purifier
+          <div class="tooltip">
+            <div class="tt-label">Dyson Air Purifier &mdash; Bedroom</div>
+            <div class="tt-row">Local MQTT control (offline after setup)</div>
+            <div class="tt-row">Fan speed: 1-10 or auto mode</div>
+            <div class="tt-row">Features: oscillation, night mode, filter status</div>
+            <div class="tt-row" style="font-weight:600; color:#2c2416; margin-top:4px;">Controls:</div>
+            <div class="tt-row">/dyson/on/bedroom &middot; /dyson/off/bedroom</div>
+            <div class="tt-row">/dyson/fan/bedroom/&lt;1-10&gt; &middot; /dyson/auto/bedroom</div>
+            <div class="tt-row">/dyson/night/bedroom/on &middot; /dyson/state/bedroom</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -606,6 +617,32 @@
           <div class="tooltip">
             <div class="tt-label">WiiM Mini &mdash; Den</div>
             <div class="tt-row">IP: 10.0.0.201 &middot; MAC: B8:13:32:1D:B9:9C</div>
+          </div>
+        </div>
+        <div class="device wemo">
+          <span class="icon">&#x1f50c;</span> WeMo Switch
+          <div class="tooltip">
+            <div class="tt-label">WeMo Smart Switch &mdash; Den</div>
+            <div class="tt-row">Local UPnP/SOAP control (no cloud)</div>
+            <div class="tt-row">Lightwave trigger: Double-press OFF (Top floor LEDs 1)</div>
+            <div class="tt-row">Auto-off: 2am-8am (night hours)</div>
+            <div class="tt-row" style="font-weight:600; color:#2c2416; margin-top:4px;">Controls:</div>
+            <div class="tt-row">/wemo/on/den &middot; /wemo/off/den</div>
+            <div class="tt-row">/wemo/toggle/den &middot; /wemo/state/den</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="room">
+      <div class="room-name">Room with a View</div>
+      <div class="devices">
+        <div class="device wiim">
+          <span class="icon">&#x1f50a;</span> WiiM Mini
+          <div class="tooltip">
+            <div class="tt-label">WiiM Mini &mdash; Room with a View</div>
+            <div class="tt-row">IP: 10.0.0.160 &middot; MAC: B8:13:32:1D:8A:DC</div>
+            <div class="tt-row">Wi-Fi: Very Good &middot; RSSI: -61 &middot; 351 Mbps &middot; SNR: 30</div>
           </div>
         </div>
       </div>
@@ -1222,6 +1259,7 @@
       <tr><td>WiiM Mini</td><td>Bedroom</td><td class="mono">10.0.0.60</td><td class="mono">B8:13:32:1D:0B:9C</td><td>Bedroom speaker</td></tr>
       <tr><td>WiiM Mini</td><td>Den</td><td class="mono">10.0.0.201</td><td class="mono">B8:13:32:1D:B9:9C</td><td>Den speaker</td></tr>
       <tr><td>WiiM Mini</td><td>Off Suite (2F)</td><td class="mono">10.0.0.223</td><td class="mono">B8:13:32:1E:26:64</td><td>Off suite speaker</td></tr>
+      <tr><td>WiiM Mini</td><td>Room with a View (2F)</td><td class="mono">10.0.0.160</td><td class="mono">B8:13:32:1D:8A:DC</td><td>RWAV speaker</td></tr>
       <tr><td>Samsung Frame TV</td><td>Sitting Room</td><td class="mono">10.0.0.88</td><td class="mono">A0:D0:5B:86:D1:13</td><td>QE55LS03 (WS:8002)</td></tr>
       <tr><td>Hue Bridge</td><td>Off Suite (1F)</td><td class="mono">10.0.0.186</td><td class="mono">&mdash;</td><td>BSB003</td></tr>
       <tr><td>Orbi Router</td><td>Off Suite (1F)</td><td class="mono">&mdash;</td><td class="mono">&mdash;</td><td>Mesh base</td></tr>
@@ -1232,55 +1270,6 @@
     </tbody>
   </table>
 </div>
-
-<script>
-// API configuration
-const BRIDGE_URL = 'https://wiim.contextualcoaching.co.uk';
-
-// Get or prompt for API key
-function getApiKey() {
-  let apiKey = localStorage.getItem('joppa_api_key');
-  if (!apiKey) {
-    apiKey = prompt('Enter your Joppa Bridge API key:');
-    if (apiKey) {
-      localStorage.setItem('joppa_api_key', apiKey);
-    }
-  }
-  return apiKey;
-}
-
-// Frame Art - Push new painting
-async function frameNewArt() {
-  const btn = document.getElementById('frame-art-btn');
-  const status = document.getElementById('action-status');
-  const apiKey = getApiKey();
-
-  if (!apiKey) {
-    status.textContent = '❌ API key required';
-    return;
-  }
-
-  btn.classList.add('loading');
-  btn.disabled = true;
-  status.textContent = '🎨 Selecting new artwork...';
-
-  try {
-    const response = await fetch(`${BRIDGE_URL}/frame/newart?key=${apiKey}`);
-    const data = await response.json();
-
-    if (data.success) {
-      status.textContent = '✅ ' + (data.painting || 'New painting loading on Frame TV (async, check in ~60s)');
-    } else {
-      status.textContent = '❌ ' + (data.error || 'Failed to trigger art rotation');
-    }
-  } catch (error) {
-    status.textContent = '❌ Network error: ' + error.message;
-  } finally {
-    btn.classList.remove('loading');
-    btn.disabled = false;
-  }
-}
-</script>
 
 </body>
 </html>
