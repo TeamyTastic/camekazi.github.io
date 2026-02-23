@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Joppa Road — Smart Home Device Map</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #faf8f5; color: #3d3529; min-height: 100vh; }
+
+  header { padding: 24px 32px; border-bottom: 1px solid #e8e0d4; background: #fff; display: flex; align-items: center; gap: 16px; }
+  header h1 { font-size: 22px; font-weight: 700; color: #2c2416; letter-spacing: -0.3px; }
+  header .subtitle { font-size: 13px; color: #9a8e7e; margin-top: 2px; }
+
+  .legend { display: flex; gap: 20px; padding: 12px 32px; border-bottom: 1px solid #e8e0d4; background: #fff; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #7a6e5e; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .legend-dot.wiim { background: #2a9d8f; }
+  .legend-dot.hue { background: #e9a820; }
+  .legend-dot.tv { background: #7c3aed; }
+  .legend-dot.lightwave { background: #c2410c; }
+  .legend-dot.orbi { background: #2563eb; }
+  .legend-dot.infra { background: #78716c; }
+  .legend-dot.alexa { background: #0891b2; }
+  .legend-dot.velux { background: #059669; }
+  .legend-dot.auto { background: #d946ef; }
+  .legend-dot.meross { background: #10b981; }
+  .legend-dot.tuya { background: #ef4444; }
+
+  .floors { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 24px 32px; max-width: 1400px; margin: 0 auto; }
+  @media (max-width: 900px) { .floors { grid-template-columns: 1fr; } }
+
+  .floor { background: #fff; border: 1px solid #e8e0d4; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .floor-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #b0a28e; margin-bottom: 12px; font-weight: 600; }
+
+  .room { background: #faf8f5; border: 1px solid #e8e0d4; border-radius: 8px; padding: 14px; margin-bottom: 10px; position: relative; }
+  .room:last-child { margin-bottom: 0; }
+  .room-name { font-size: 14px; font-weight: 600; color: #2c2416; margin-bottom: 8px; }
+  .room-dims { font-size: 11px; color: #b0a28e; margin-bottom: 8px; }
+
+  .devices { display: flex; flex-wrap: wrap; gap: 6px; }
+  .device { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: default; position: relative; }
+  .device.wiim { background: rgba(42, 157, 143, 0.1); color: #1a7a6f; border: 1px solid rgba(42, 157, 143, 0.25); }
+  .device.hue { background: rgba(233, 168, 32, 0.1); color: #9a6b0a; border: 1px solid rgba(233, 168, 32, 0.25); }
+  .device.tv { background: rgba(124, 58, 237, 0.08); color: #6d28d9; border: 1px solid rgba(124, 58, 237, 0.2); }
+  .device.lightwave { background: rgba(194, 65, 12, 0.08); color: #b33a06; border: 1px solid rgba(194, 65, 12, 0.2); }
+  .device.orbi { background: rgba(37, 99, 235, 0.08); color: #1d4ed8; border: 1px solid rgba(37, 99, 235, 0.2); }
+  .device.infra { background: rgba(120, 113, 108, 0.08); color: #57534e; border: 1px solid rgba(120, 113, 108, 0.2); }
+  .device.alexa { background: rgba(8, 145, 178, 0.08); color: #0e7490; border: 1px solid rgba(8, 145, 178, 0.2); }
+  .device.velux { background: rgba(5, 150, 105, 0.08); color: #047857; border: 1px solid rgba(5, 150, 105, 0.2); }
+  .device.auto { background: rgba(217, 70, 239, 0.08); color: #a21caf; border: 1px solid rgba(217, 70, 239, 0.2); }
+  .device.meross { background: rgba(16, 185, 129, 0.08); color: #047857; border: 1px solid rgba(16, 185, 129, 0.2); }
+  .device.tuya { background: rgba(239, 68, 68, 0.08); color: #b91c1c; border: 1px solid rgba(239, 68, 68, 0.2); }
+
+  .device .icon { font-size: 13px; }
+
+  .tooltip { display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #fff; border: 1px solid #d4cbb8; border-radius: 8px; padding: 10px 14px; font-size: 11px; white-space: nowrap; z-index: 10; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+  .tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #d4cbb8; }
+  .device:hover .tooltip { display: block; }
+  .tooltip .tt-label { font-weight: 600; color: #2c2416; margin-bottom: 4px; }
+  .tooltip .tt-row { color: #7a6e5e; line-height: 1.6; }
+
+  .wifi-signal { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; margin-left: 4px; }
+  .wifi-signal.good { background: rgba(22, 163, 74, 0.1); color: #15803d; }
+  .wifi-signal.okay { background: rgba(202, 138, 4, 0.1); color: #a16207; }
+  .wifi-signal.weak { background: rgba(220, 38, 38, 0.1); color: #dc2626; }
+
+  .section-break { grid-column: 1 / -1; border-top: 1px solid #e8e0d4; margin: 8px 0; }
+
+  .combo-row { font-size: 12px; line-height: 1.8; padding: 4px 0; border-bottom: 1px solid #f0ebe3; }
+  .combo-row:last-child { border-bottom: none; }
+  .combo-name { font-weight: 600; }
+  .combo-name.lightwave { color: #b33a06; }
+  .combo-name.hue { color: #9a6b0a; }
+  .combo-name.alexa { color: #0e7490; }
+  .combo-name.auto { color: #a21caf; }
+  .combo-name.api { color: #57534e; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 11px; }
+  .combo-detail { color: #9a8e7e; }
+
+  .api-group { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #b0a28e; font-weight: 600; padding: 8px 0 4px; border-bottom: 1px solid #e8e0d4; margin-top: 4px; }
+  .api-group:first-child { margin-top: 0; }
+
+  .quick-actions { padding: 16px 32px; background: #fff; border-bottom: 1px solid #e8e0d4; }
+  .quick-actions-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #b0a28e; margin-bottom: 12px; font-weight: 600; }
+  .quick-actions-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+  .action-btn { padding: 8px 16px; border: 1px solid #7c3aed; background: rgba(124, 58, 237, 0.08); color: #6d28d9; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .action-btn:hover { background: rgba(124, 58, 237, 0.15); transform: translateY(-1px); }
+  .action-btn:active { transform: translateY(0); }
+  .action-btn.loading { opacity: 0.6; cursor: wait; }
+  .action-status { font-size: 11px; color: #9a8e7e; margin-top: 8px; min-height: 16px; }
+
+  .network-table { margin-top: 24px; padding: 0 32px 32px; max-width: 1400px; margin-left: auto; margin-right: auto; }
+  .network-table h2 { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #2c2416; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { text-align: left; padding: 8px 12px; border-bottom: 2px solid #e8e0d4; color: #9a8e7e; font-weight: 500; text-transform: uppercase; font-size: 10px; letter-spacing: 1px; }
+  td { padding: 8px 12px; border-bottom: 1px solid #f0ebe3; }
+  tr:hover td { background: rgba(42, 157, 143, 0.04); }
+  td.mono { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 11px; color: #9a8e7e; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Joppa Road &mdash; Smart Home Device Map</h1>
+    <div class="subtitle">7 WiiM speakers &middot; 20+ Hue lights &middot; Samsung Frame TV &middot; 30+ Lightwave switches &middot; 5 Meross plugs &middot; Tuya radiator &middot; Velux window &middot; Orbi mesh &middot; Alexa voice &middot; 70+ API endpoints &middot; Updated 2026-02-22</div>
+  </div>
+</header>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot wiim"></div> WiiM Speaker</div>
+  <div class="legend-item"><div class="legend-dot hue"></div> Philips Hue</div>
+  <div class="legend-item"><div class="legend-dot tv"></div> Samsung Frame TV</div>
+  <div class="legend-item"><div class="legend-dot lightwave"></div> Lightwave Switch</div>
+  <div class="legend-item"><div class="legend-dot velux"></div> Velux Window</div>
+  <div class="legend-item"><div class="legend-dot orbi"></div> Orbi Mesh Wi-Fi</div>
+  <div class="legend-item"><div class="legend-dot alexa"></div> Alexa Voice</div>
+  <div class="legend-item"><div class="legend-dot auto"></div> Automation</div>
+  <div class="legend-item"><div class="legend-dot meross"></div> Meross Plug</div>
+  <div class="legend-item"><div class="legend-dot tuya"></div> Tuya Radiator</div>
+  <div class="legend-item"><div class="legend-dot infra"></div> Infrastructure</div>
+</div>
+
+<div class="quick-actions">
+  <div class="quick-actions-title">Quick Actions</div>
+  <div class="quick-actions-buttons">
+    <button class="action-btn" onclick="frameNewArt()" id="frame-art-btn">🌊 The Great Wave</button>
+  </div>
+  <div class="action-status" id="action-status"></div>
+</div>
+
+<div class="floors">
+
+  <!-- Ground Floor -->
+  <div class="floor">
+    <div class="floor-label">Ground Floor</div>
+
+    <div class="room">
+      <div class="room-name">Sitting Room</div>
+      <div class="room-dims">3.88m &times; 4.27m</div>
+      <div class="devices">
+        <div class="device wiim">
+          <span class="icon">&#x1f50a;</span> WiiM Amp Ultra
+          <span class="wifi-signal good">Good</span>
+          <div class="tooltip">
+            <div class="tt-label">WiiM Amp Ultra</div>
+            <div class="tt-row">IP: 10.0.0.208 &middot; MAC: 9C:B8:B4:D1:9A:46</div>
+            <div class="tt-row">RSSI: -60 &middot; 360 Mbps</div>
+            <div class="tt-row">Role: Primary stereo amp</div>
+            <div class="tt-row">Brown noise: /play/brownnoise</div>
+            <div class="tt-row">Controls: /next, /prev, /stop, /pause, /play</div>
+          </div>
+        </div>
+        <div class="device wiim">
+          <span class="icon">&#x1f50a;</span> WiiM Pro (Surrounds)
+          <span class="wifi-signal weak">Weak</span>
+          <div class="tooltip">
+            <div class="tt-label">WiiM Pro &mdash; Surrounds</div>
+            <div class="tt-row">IP: 10.0.0.159 &middot; MAC: B8:13:32:D5:9A:0A</div>
+            <div class="tt-row">RSSI: -74 &middot; 292 Mbps</div>
+            <div class="tt-row">/surrounds/follow &mdash; force join sitting room</div>
+          </div>
+        </div>
+        <div class="device tv">
+          <span class="icon">&#x1f5bc;</span> Samsung Frame TV
+          <div class="tooltip">
+            <div class="tt-label">Samsung Frame TV (QE55LS03)</div>
+            <div class="tt-row">IP: 10.0.0.88 &middot; MAC: A0:D0:5B:86:D1:13</div>
+            <div class="tt-row">WebSocket API: port 8002 (local)</div>
+            <div class="tt-row">iSponsorBlock: active</div>
+            <div class="tt-row">Frame Art: daily 8am rotation (45+ artists)</div>
+            <div class="tt-row" style="font-weight:600; color:#2c2416; margin-top:4px;">Status &amp; Detection:</div>
+            <div class="tt-row">/frame/status &mdash; power, art mode, running app</div>
+            <div class="tt-row">Detects: YouTube, Netflix, Disney+, Apple TV, Plex</div>
+            <div class="tt-row" style="font-weight:600; color:#2c2416; margin-top:4px;">Controls:</div>
+            <div class="tt-row">/frame/artmode &middot; /frame/newart &middot; /frame/power</div>
+            <div class="tt-row">/frame/hdmi/1-4 &middot; /frame/home &middot; /frame/mute</div>
+            <div class="tt-row">/frame/key/&lt;any&gt; &middot; /frame/fireplace</div>
+          </div>
+        </div>
+        <div class="device hue">
+          <span class="icon">&#x1f4a1;</span> Hue Group 82 (6 lights)
+          <div class="tooltip">
+            <div class="tt-label">Philips Hue &mdash; Sitting Room (Group 82)</div>
+            <div class="tt-row">Arc lamp, Gold/yellow floor, Black floor</div>
+            <div class="tt-row">White floor, Gold/red floor, Niche artefacts</div>
+            <div class="tt-row">Scenes: Relax (warm), Energise, Concentrate</div>
+            <div class="tt-row">/hue/flash/&lt;device&gt; &mdash; flash any light</div>
+          </div>
+        </div>
+        <div class="device hue">
+          <span class="icon">&#x1f4a1;</span> Hue Group 200 (4 TV lights)
+          <div class="tooltip">
+            <div class="tt-label">Colour TV Entertainment (Group 200)</div>
+            <div class="tt-row">Speaker left, Speaker right</div>
+            <div class="tt-row">Hue Play left, Hue Play right</div>
+            <div class="tt-row">Used by Hue Sync for immersive TV</div>
+            <div class="tt-row">Entertainment API: low-latency UDP/DTLS</div>
+          </div>
+        </div>
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> Ceiling light (A)
+          <div class="tooltip">
+            <div class="tt-label">Sitting Room &mdash; Ceiling Light (Switch A)</div>
+            <div class="tt-row">Feature: -621- / -643-</div>
+            <div class="tt-row">ON &rarr; Art mode (if TV off)</div>
+            <div class="tt-row">Double-tap &rarr; Clive zone</div>
+            <div class="tt-row">A-B-A combo &rarr; Art mode on Frame TV</div>
+          </div>
+        </div>
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> Lamps (B)
+          <div class="tooltip">
+            <div class="tt-label">Sitting Room &mdash; Lamps (Switch B)</div>
+            <div class="tt-row">Feature: -634-</div>
+            <div class="tt-row">ON &rarr; Art mode (if TV off)</div>
+            <div class="tt-row">Double-tap &rarr; Downstairs zone</div>
+            <div class="tt-row">B-A-B combo &rarr; TV off</div>
+          </div>
+        </div>
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> Record player socket
+          <div class="tooltip">
+            <div class="tt-label">Sitting Room Socket &mdash; Record Player</div>
+            <div class="tt-row">Feature: -535-</div>
+            <div class="tt-row">ON &rarr; /record-player/on</div>
+            <div class="tt-row">&nbsp;&nbsp;Downstairs zone + Art mode + mute during boot</div>
+            <div class="tt-row">OFF &rarr; /record-player/off</div>
+            <div class="tt-row">&nbsp;&nbsp;Switch back to Dolby zone</div>
+          </div>
+        </div>
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> Socket 2 (always on)
+          <div class="tooltip">
+            <div class="tt-label">Sitting Room Socket 2</div>
+            <div class="tt-row">Feature: -545-</div>
+            <div class="tt-row">Always on &mdash; powers Hue lights for scenes</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="room">
+      <div class="room-name">Narnita</div>
+      <div class="room-dims">Downstairs cupboard, next to kitchen</div>
+      <div class="devices">
+        <div class="device orbi">
+          <span class="icon">&#x1f4e1;</span> Orbi Satellite "Narnita"
+          <div class="tooltip">
+            <div class="tt-label">Netgear Orbi Satellite &mdash; Narnita</div>
+            <div class="tt-row">Mesh Wi-Fi satellite</div>
+            <div class="tt-row">Cupboard next to kitchen</div>
+          </div>
+        </div>
+        <div class="device hue">
+          <span class="icon">&#x1f4a1;</span> Hue - Narnita
+          <div class="tooltip">
+            <div class="tt-label">Hue &mdash; Narnita</div>
+            <div class="tt-row">Feature: -1135-</div>
+            <div class="tt-row">Hue light in Narnita cupboard</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="room">
+      <div class="room-name">Kitchen</div>
+      <div class="room-dims">3.86m &times; 8.42m (open plan)</div>
+      <div class="devices">
+        <div class="device wiim">
+          <span class="icon">&#x1f50a;</span> WiiM Pro Plus
+          <span class="wifi-signal good">Good</span>
+          <div class="tooltip">
+            <div class="tt-label">WiiM Pro Plus &mdash; Kitchen</div>
+            <div class="tt-row">IP: 10.0.0.111 &middot; MAC: B8:2D:28:58:0A:0A</div>
+            <div class="tt-row">RSSI: -61 &middot; 325 Mbps</div>
+          </div>
+        </div>
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> Kitchen downlights (Pen 1)
+          <div class="tooltip">
+            <div class="tt-label">Peninsula Button 1 &mdash; Kitchen Downlights</div>
+            <div class="tt-row">Feature: -377-</div>
+            <div class="tt-row">Double-tap &rarr; Downstairs zone</div>
+            <div class="tt-row">1-4-1 combo &rarr; Party mode</div>
+          </div>
+        </div>
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> LED strips (Pen 2)
+          <div class="tooltip">
+            <div class="tt-label">Peninsula Button 2 &mdash; Kitchen LED Strips</div>
+            <div class="tt-row">Feature: -390-</div>
+          </div>
+        </div>
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> Counter pendants (Pen 3)
+          <div class="tooltip">
+            <div class="tt-label">Peninsula Button 3 &mdash; Counter Pendants</div>
+            <div class="tt-row">Feature: -403-</div>
+          </div>
+        </div>
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> Play space downlights (Pen 4)
+          <div class="tooltip">
+            <div class="tt-label">Peninsula Button 4 &mdash; Play Space Downlights</div>
+            <div class="tt-row">Feature: -416- / -425-</div>
+            <div class="tt-row">Used in 1-4-1 party mode combo</div>
+            <div class="tt-row">4-4-4 combo &rarr; Mute all speakers</div>
+          </div>
+        </div>
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> Kitchen table (KW1)
+          <div class="tooltip">
+            <div class="tt-label">Kitchen Wall Button 1 &mdash; Kitchen Table</div>
+            <div class="tt-row">Feature: -562-</div>
+          </div>
+        </div>
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> Kitchen counter (KW2)
+          <div class="tooltip">
+            <div class="tt-label">Kitchen Wall Button 2 &mdash; Kitchen Counter</div>
+            <div class="tt-row">Feature: -575-</div>
+          </div>
+        </div>
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> KW3 downlights (Button 3)
+          <div class="tooltip">
+            <div class="tt-label">Kitchen Wall Button 3 &mdash; KW3 Downlights</div>
+            <div class="tt-row">Feature: -584- / -588-</div>
+            <div class="tt-row">Double-tap before 9am &rarr; Morning mode</div>
+            <div class="tt-row">Double-tap after 9am &rarr; Clive zone</div>
+            <div class="tt-row">This is "Button 3" in combo descriptions</div>
+          </div>
+        </div>
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> Ambient lights (KW4)
+          <div class="tooltip">
+            <div class="tt-label">Kitchen Wall Button 4 &mdash; Downstairs Ambient</div>
+            <div class="tt-row">Feature: -601-</div>
+          </div>
+        </div>
+        <div class="device hue">
+          <span class="icon">&#x1f4a1;</span> Hue Peninsula 1
+          <div class="tooltip">
+            <div class="tt-label">Hue &mdash; Peninsula 1</div>
+            <div class="tt-row">Feature: -1143-</div>
+          </div>
+        </div>
+        <div class="device hue">
+          <span class="icon">&#x1f4a1;</span> Hue Peninsula 2
+          <div class="tooltip">
+            <div class="tt-label">Hue &mdash; Peninsula 2</div>
+            <div class="tt-row">Feature: -1109-</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="room">
+      <div class="room-name">Sun Room / Playspace</div>
+      <div class="devices">
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> Sun room left
+          <div class="tooltip">
+            <div class="tt-label">Sun Room Left</div>
+            <div class="tt-row">Feature: -749-</div>
+          </div>
+        </div>
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> Sun room right
+          <div class="tooltip">
+            <div class="tt-label">Sun Room Right</div>
+            <div class="tt-row">Feature: -762-</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="room">
+      <div class="room-name">Front Door / Hallway</div>
+      <div class="devices">
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> Front door left
+          <div class="tooltip">
+            <div class="tt-label">Front Door &mdash; Left</div>
+            <div class="tt-row">Feature: -863-</div>
+          </div>
+        </div>
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> Front door right
+          <div class="tooltip">
+            <div class="tt-label">Front Door &mdash; Right</div>
+            <div class="tt-row">Feature: -876-</div>
+          </div>
+        </div>
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> GFH up 1
+          <div class="tooltip">
+            <div class="tt-label">Ground Floor Hall &mdash; Up 1</div>
+            <div class="tt-row">Feature: -830-</div>
+          </div>
+        </div>
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> GFH up 2
+          <div class="tooltip">
+            <div class="tt-label">Ground Floor Hall &mdash; Up 2</div>
+            <div class="tt-row">Feature: -843-</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="room">
+      <div class="room-name">Downstairs Bathroom</div>
+      <div class="devices">
+        <div class="device tuya">
+          <span class="icon">&#x1f321;</span> Radiator (Tuya)
+          <div class="tooltip">
+            <div class="tt-label">Electric Radiator &mdash; &ldquo;Black as my hair&rdquo;</div>
+            <div class="tt-row">IP: 10.0.0.141 &middot; MAC: B8:06:0D (Tuya)</div>
+            <div class="tt-row">Local control via tinytuya</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="room">
+      <div class="room-name">Utility Room</div>
+      <div class="room-dims">Downstairs, behind kitchen</div>
+      <div class="devices">
+      </div>
+    </div>
+  </div>
+
+  <!-- First Floor -->
+  <div class="floor">
+    <div class="floor-label">First Floor</div>
+
+    <div class="room">
+      <div class="room-name">Bedroom</div>
+      <div class="room-dims">3.88m &times; 4.27m</div>
+      <div class="devices">
+        <div class="device wiim">
+          <span class="icon">&#x1f50a;</span> WiiM Mini
+          <span class="wifi-signal weak">Weak</span>
+          <div class="tooltip">
+            <div class="tt-label">WiiM Mini &mdash; Bedroom</div>
+            <div class="tt-row">IP: 10.0.0.60 &middot; MAC: B8:13:32:1D:0B:9C</div>
+            <div class="tt-row">RSSI: -76 &middot; 13 Mbps</div>
+          </div>
+        </div>
+        <div class="device hue">
+          <span class="icon">&#x1f4a1;</span> Teal pendant
+          <div class="tooltip">
+            <div class="tt-label">Hue &mdash; Bedroom Ceiling Flower (Teal Pendant)</div>
+            <div class="tt-row">Feature: -1030-</div>
+          </div>
+        </div>
+        <div class="device hue">
+          <span class="icon">&#x1f4a1;</span> Moon lamp
+          <div class="tooltip">
+            <div class="tt-label">Hue &mdash; Moon Lamp</div>
+            <div class="tt-row">Feature: -1212-</div>
+          </div>
+        </div>
+        <div class="device hue">
+          <span class="icon">&#x1f4a1;</span> Black table lamp
+          <div class="tooltip">
+            <div class="tt-label">Hue &mdash; Black Table Lamp</div>
+            <div class="tt-row">Feature: -1217-</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="room">
+      <div class="room-name">Bathroom</div>
+      <div class="devices">
+        <div class="device wiim">
+          <span class="icon">&#x1f50a;</span> WiiM Pro Plus
+          <span class="wifi-signal okay">Okay</span>
+          <div class="tooltip">
+            <div class="tt-label">WiiM Pro Plus &mdash; Bathroom</div>
+            <div class="tt-row">IP: 10.0.0.32 &middot; MAC: 50:41:1C:71:90:2E</div>
+            <div class="tt-row">RSSI: -68 &middot; 195 Mbps</div>
+          </div>
+        </div>
+        <div class="device hue">
+          <span class="icon">&#x1f4a1;</span> BathyMcBathFace
+          <div class="tooltip">
+            <div class="tt-label">Hue &mdash; BathyMcBathFace</div>
+            <div class="tt-row">Feature: -1147-</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="room">
+      <div class="room-name">Off Suite</div>
+      <div class="devices">
+        <div class="device wiim">
+          <span class="icon">&#x1f50a;</span> WiiM Mini
+          <span class="wifi-signal weak">Weak</span>
+          <div class="tooltip">
+            <div class="tt-label">WiiM Mini &mdash; Off Suite</div>
+            <div class="tt-row">IP: 10.0.0.223 &middot; MAC: B8:13:32:1E:26:64</div>
+            <div class="tt-row">RSSI: -73 &middot; 130 Mbps</div>
+          </div>
+        </div>
+        <div class="device infra">
+          <span class="icon">&#x1f310;</span> Hue Bridge
+          <div class="tooltip">
+            <div class="tt-label">Philips Hue Bridge (BSB003)</div>
+            <div class="tt-row">IP: 10.0.0.186</div>
+            <div class="tt-row">Controls all Hue lights via REST API (V2)</div>
+            <div class="tt-row">Supports: motion sensors, contact sensors</div>
+            <div class="tt-row">Entertainment API for Hue Sync</div>
+          </div>
+        </div>
+        <div class="device orbi">
+          <span class="icon">&#x1f4e1;</span> Orbi Router
+          <div class="tooltip">
+            <div class="tt-label">Netgear Orbi Router (Main)</div>
+            <div class="tt-row">Mesh Wi-Fi base station</div>
+          </div>
+        </div>
+        <div class="device hue">
+          <span class="icon">&#x1f4a1;</span> Off suite light
+          <div class="tooltip">
+            <div class="tt-label">Hue &mdash; Off Suite Light</div>
+            <div class="tt-row">Feature: -1113-</div>
+          </div>
+        </div>
+        <div class="device meross">
+          <span class="icon">&#x1f50c;</span> Wardrobes
+          <div class="tooltip">
+            <div class="tt-label">Meross Smart Plug &mdash; Wardrobes</div>
+            <div class="tt-row">Model: MSS110 &middot; FW: 6.2.5</div>
+            <div class="tt-row">Cloud control via meross-iot</div>
+            <div class="tt-row">API: /meross/on/wardrobes &middot; /meross/off/wardrobes</div>
+          </div>
+        </div>
+        <div class="device meross">
+          <span class="icon">&#x1f50c;</span> Off suite amp
+          <div class="tooltip">
+            <div class="tt-label">Meross Smart Plug &mdash; Off Suite Amp</div>
+            <div class="tt-row">Model: MSS315 &middot; FW: 9.5.39</div>
+            <div class="tt-row">Powers the WiiM Mini amplifier</div>
+            <div class="tt-row">API: /meross/on/off+suite &middot; /meross/off/off+suite</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="room">
+      <div class="room-name">First Floor Landing</div>
+      <div class="devices">
+        <div class="device hue">
+          <span class="icon">&#x1f4a1;</span> Teal ball
+          <div class="tooltip">
+            <div class="tt-label">Hue &mdash; Teal Ball</div>
+            <div class="tt-row">Feature: -1240-</div>
+          </div>
+        </div>
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> 1F up 1
+          <div class="tooltip">
+            <div class="tt-label">First Floor &mdash; Up 1</div>
+            <div class="tt-row">Feature: -502-</div>
+          </div>
+        </div>
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> 1F up 2
+          <div class="tooltip">
+            <div class="tt-label">First Floor &mdash; Up 2</div>
+            <div class="tt-row">Feature: -515-</div>
+          </div>
+        </div>
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> 1F down 1
+          <div class="tooltip">
+            <div class="tt-label">First Floor &mdash; Down 1</div>
+            <div class="tt-row">Feature: -896-</div>
+          </div>
+        </div>
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> 1F down 2
+          <div class="tooltip">
+            <div class="tt-label">First Floor &mdash; Down 2</div>
+            <div class="tt-row">Feature: -909-</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Second Floor -->
+  <div class="floor">
+    <div class="floor-label">Second Floor</div>
+
+    <div class="room">
+      <div class="room-name">Den</div>
+      <div class="devices">
+        <div class="device wiim">
+          <span class="icon">&#x1f50a;</span> WiiM Mini
+          <div class="tooltip">
+            <div class="tt-label">WiiM Mini &mdash; Den</div>
+            <div class="tt-row">IP: 10.0.0.201 &middot; MAC: B8:13:32:1D:B9:9C</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="room">
+      <div class="room-name">Bathroom</div>
+      <div class="devices">
+        <div class="device velux">
+          <span class="icon">&#x1fa9f;</span> Velux Active
+          <div class="tooltip">
+            <div class="tt-label">Velux Active Electric Roof Window</div>
+            <div class="tt-row">VELUX Active gateway (Netatmo API)</div>
+            <div class="tt-row">HomeKit compatible &middot; rain sensor</div>
+            <div class="tt-row">/velux/open &middot; /velux/close</div>
+            <div class="tt-row">/velux/set/0-100 &middot; /velux/stop</div>
+            <div class="tt-row">/velux/status &mdash; position &amp; reachability</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="room">
+      <div class="room-name">Second Floor Landing</div>
+      <div class="devices">
+        <div class="device hue">
+          <span class="icon">&#x1f4a1;</span> Cone lamp
+          <div class="tooltip">
+            <div class="tt-label">Hue &mdash; Cone Lamp</div>
+            <div class="tt-row">Feature: -1245-</div>
+          </div>
+        </div>
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> Top floor ceiling
+          <div class="tooltip">
+            <div class="tt-label">Top Floor &mdash; Ceiling</div>
+            <div class="tt-row">Feature: -1169-</div>
+          </div>
+        </div>
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> Top floor LEDs 1
+          <div class="tooltip">
+            <div class="tt-label">Top Floor &mdash; LEDs 1</div>
+            <div class="tt-row">Feature: -797-</div>
+          </div>
+        </div>
+        <div class="device lightwave">
+          <span class="icon">&#x1f6d1;</span> Top floor LEDs 2
+          <div class="tooltip">
+            <div class="tt-label">Top Floor &mdash; LEDs 2</div>
+            <div class="tt-row">Feature: -810-</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shed -->
+  <div class="floor">
+    <div class="floor-label">Garden &amp; Shed</div>
+
+    <div class="room">
+      <div class="room-name">Garden</div>
+      <div class="devices">
+        <div class="device meross">
+          <span class="icon">&#x1f50c;</span> Patio Plug
+          <div class="tooltip">
+            <div class="tt-label">Meross Outdoor Smart Plug &mdash; Patio</div>
+            <div class="tt-row">Model: MSS620 &middot; FW: 7.3.8</div>
+            <div class="tt-row">Weatherproof outdoor plug</div>
+            <div class="tt-row">API: /meross/on/patio &middot; /meross/off/patio</div>
+          </div>
+        </div>
+        <div class="device meross">
+          <span class="icon">&#x1f384;</span> Christmas lights
+          <div class="tooltip">
+            <div class="tt-label">Meross Smart Plug &mdash; Christmas Lights</div>
+            <div class="tt-row">Model: MSS315 &middot; FW: 9.5.39</div>
+            <div class="tt-row">API: /meross/on/christmas &middot; /meross/off/christmas</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="room">
+      <div class="room-name">Shed</div>
+      <div class="devices">
+        <div class="device orbi">
+          <span class="icon">&#x1f4e1;</span> Orbi Satellite
+          <div class="tooltip">
+            <div class="tt-label">Netgear Orbi Satellite &mdash; Shed</div>
+            <div class="tt-row">Extends coverage to garden/shed</div>
+          </div>
+        </div>
+        <div class="device hue">
+          <span class="icon">&#x1f4a1;</span> Hue Shed 1
+          <div class="tooltip">
+            <div class="tt-label">Hue &mdash; Shed 1</div>
+            <div class="tt-row">Feature: -1131-</div>
+          </div>
+        </div>
+        <div class="device hue">
+          <span class="icon">&#x1f4a1;</span> Hue Shed 2
+          <div class="tooltip">
+            <div class="tt-label">Hue &mdash; Shed 2</div>
+            <div class="tt-row">Feature: -1122-</div>
+          </div>
+        </div>
+        <div class="device meross">
+          <span class="icon">&#x1f50c;</span> Shed smart extension
+          <div class="tooltip">
+            <div class="tt-label">Meross Smart Power Strip &mdash; Shed</div>
+            <div class="tt-row">Model: MSS420F &middot; FW: 3.2.2</div>
+            <div class="tt-row">4-outlet smart extension lead</div>
+            <div class="tt-row">API: /meross/on/shed &middot; /meross/off/shed</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-break"></div>
+
+  <!-- Automations & Workflows -->
+  <div class="floor">
+    <div class="floor-label">Automations &amp; Workflows</div>
+
+    <div class="room">
+      <div class="room-name">Active Automations</div>
+      <div class="room-dims">Triggered by events, schedules, or API calls</div>
+      <div class="devices" style="flex-direction: column; gap: 2px;">
+        <div class="combo-row">
+          <span class="combo-name auto">Wildlife Alerts</span>
+          <span class="combo-detail"> &mdash; POST /wildlife/alert &rarr; flash Hue lights + chime on speakers + ntfy push notification</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name auto">Aurora Music</span>
+          <span class="combo-detail"> &mdash; AuroraWatch UK poll &rarr; if red + dark + clear sky &rarr; ntfy + POST /music/play (Bj&ouml;rk) + calendar event</span>
+        </div>
+<div class="combo-row">
+          <span class="combo-name auto">Frame Art Rotation</span>
+          <span class="combo-detail"> &mdash; Daily 8am &rarr; push new painting from Wikimedia Commons (45+ artists, Hokusai-weighted)</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name auto">Record Player</span>
+          <span class="combo-detail"> &mdash; Socket on &rarr; Downstairs zone + Frame TV art mode + mute during boot. Socket off &rarr; Dolby zone</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name auto">Brown Noise</span>
+          <span class="combo-detail"> &mdash; GET /play/brownnoise &rarr; sleep aid ambient audio</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name auto">iSponsorBlock</span>
+          <span class="combo-detail"> &mdash; Continuous &rarr; auto-skips YouTube sponsor segments on Frame TV (linked account only)</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name auto">Bridge Digest</span>
+          <span class="combo-detail"> &mdash; GET /bridge/digest &rarr; ntfy summary of events, errors, and circuit breaker status</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="room">
+      <div class="room-name">Lightwave Scenes</div>
+      <div class="room-dims">Save and recall light/switch states</div>
+      <div class="devices" style="flex-direction: column; gap: 2px;">
+        <div class="combo-row">
+          <span class="combo-name lightwave">Save scene</span>
+          <span class="combo-detail"> &mdash; GET /lightwave/scene/save/&lt;name&gt; &rarr; capture current switch states</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name lightwave">Recall scene</span>
+          <span class="combo-detail"> &mdash; GET /lightwave/scene/recall/&lt;name&gt; &rarr; restore saved states</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name lightwave">All lights off</span>
+          <span class="combo-detail"> &mdash; GET /lightwave/all-off &rarr; turn off all Lightwave switches</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Combos & Voice Control -->
+  <div class="floor">
+    <div class="floor-label">Lightwave Combos (Switch Sequences)</div>
+
+    <div class="room">
+      <div class="room-name">Lightwave Switch Combos</div>
+      <div class="room-dims">"Button 3" = Kitchen Wall switch 3 (KW3 downlights)</div>
+      <div class="devices" style="flex-direction: column; gap: 2px;">
+        <div class="combo-row">
+          <span class="combo-name lightwave">Morning mode</span>
+          <span class="combo-detail"> &mdash; Double-tap KW3 (Button 3) before 9am &rarr; Clive zone + preset 6 + morning volume</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name lightwave">Zone Clive</span>
+          <span class="combo-detail"> &mdash; Double-tap KW3 (Button 3) after 9am, or Sitting A &times;2 &rarr; Kitchen + sitting + surrounds</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name lightwave">Zone Downstairs</span>
+          <span class="combo-detail"> &mdash; Double-tap Peninsula 1, or Sitting B &times;2 &rarr; All downstairs speakers</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name lightwave">Party mode</span>
+          <span class="combo-detail"> &mdash; Peninsula 1-4-1 &rarr; Downstairs zone + preset 6 + Hue Energise</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name lightwave">Cozy mode</span>
+          <span class="combo-detail"> &mdash; Fireplace on TV + Dolby zone + cozy volume + Hue Relax (warm amber)</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name lightwave">Art mode</span>
+          <span class="combo-detail"> &mdash; Sitting A-B-A &rarr; Frame TV art mode + Hue Concentrate (gallery)</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name lightwave">TV off</span>
+          <span class="combo-detail"> &mdash; Sitting B-A-B &rarr; Turn off Frame TV</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name lightwave">Mute all</span>
+          <span class="combo-detail"> &mdash; Peninsula 4-4-4 &rarr; Mute all speakers</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name lightwave">Unmute all</span>
+          <span class="combo-detail"> &mdash; Peninsula 1-1-1 &rarr; Unmute all speakers</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="floor">
+    <div class="floor-label">Hue Scenes &amp; Alexa Voice Control</div>
+
+    <div class="room">
+      <div class="room-name">Philips Hue Scenes</div>
+      <div class="room-dims">Sitting Room (Group 82) &mdash; triggered by combos or API</div>
+      <div class="devices" style="flex-direction: column; gap: 2px;">
+        <div class="combo-row">
+          <span class="combo-name hue">Relax</span>
+          <span class="combo-detail"> &mdash; Warm amber. Used by: Cozy mode. Scene ID: 9kgG0Z9SF6LHYJxc</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name hue">Energise</span>
+          <span class="combo-detail"> &mdash; Bright white. Used by: Party mode. Scene ID: 7jbuxZB-Y-y8S8qs</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name hue">Concentrate</span>
+          <span class="combo-detail"> &mdash; Gallery lighting. Used by: Art mode. Scene ID: lTUTzSIU07TEwrjj</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="room">
+      <div class="room-name">Alexa Voice Commands</div>
+      <div class="room-dims">"Alexa, tell house to..." &mdash; via Lambda &rarr; wiim.contextualcoaching.co.uk</div>
+      <div class="devices" style="flex-direction: column; gap: 2px;">
+        <div class="combo-row">
+          <span class="combo-name alexa">activate kitchen</span>
+          <span class="combo-detail"> &mdash; Kitchen speaker only</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name alexa">activate clive</span>
+          <span class="combo-detail"> &mdash; Kitchen + sitting room + surrounds</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name alexa">activate downstairs</span>
+          <span class="combo-detail"> &mdash; All downstairs speakers</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name alexa">activate upstairs / den</span>
+          <span class="combo-detail"> &mdash; Den speaker only</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name alexa">activate dolby / home theatre</span>
+          <span class="combo-detail"> &mdash; Sitting room + surrounds (Dolby)</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name alexa">activate middle</span>
+          <span class="combo-detail"> &mdash; Bedroom + off suite + bathroom</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name alexa">activate sleep / bedtime</span>
+          <span class="combo-detail"> &mdash; Bedroom + off suite</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name alexa">activate everywhere</span>
+          <span class="combo-detail"> &mdash; All speakers</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name alexa">ungroup</span>
+          <span class="combo-detail"> &mdash; Ungroup all speakers</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name alexa">pause</span>
+          <span class="combo-detail"> &mdash; Pause all speakers</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-break"></div>
+
+  <!-- API Quick Reference -->
+  <div class="floor" style="grid-column: 1 / -1;">
+    <div class="floor-label">API Quick Reference &mdash; curl http://localhost:5050/&lt;endpoint&gt;?key=$JOPPA_API_KEY</div>
+
+    <div class="room">
+      <div class="room-name">All 60+ Bridge Endpoints</div>
+      <div class="devices" style="flex-direction: column; gap: 0;">
+
+        <div class="api-group">Audio &amp; Zones</div>
+        <div class="combo-row"><span class="combo-name api">/zone/&lt;name&gt;</span> <span class="combo-detail"> &mdash; Activate zone: kitchen, clive, downstairs, upstairs, dolby, middle, sleep, everywhere</span></div>
+        <div class="combo-row"><span class="combo-name api">/volume/&lt;device&gt;/&lt;0-100&gt;</span> <span class="combo-detail"> &mdash; Set volume on device</span></div>
+        <div class="combo-row"><span class="combo-name api">/volume/low &middot; /volume/medium</span> <span class="combo-detail"> &mdash; Quick volume presets for main area</span></div>
+        <div class="combo-row"><span class="combo-name api">/pause/all &middot; /play/all</span> <span class="combo-detail"> &mdash; Pause or resume main listening devices</span></div>
+        <div class="combo-row"><span class="combo-name api">/next/&lt;device&gt; &middot; /prev/&lt;device&gt; &middot; /stop/&lt;device&gt;</span> <span class="combo-detail"> &mdash; Track controls</span></div>
+        <div class="combo-row"><span class="combo-name api">/solo/&lt;device&gt; &middot; /ungroup/all</span> <span class="combo-detail"> &mdash; Ungroup speaker(s)</span></div>
+        <div class="combo-row"><span class="combo-name api">/play/brownnoise</span> <span class="combo-detail"> &mdash; Brown noise sleep aid</span></div>
+        <div class="combo-row"><span class="combo-name api">/combo/preset/&lt;1-6&gt;</span> <span class="combo-detail"> &mdash; Play WiiM preset by number</span></div>
+
+        <div class="api-group">Samsung Frame TV</div>
+        <div class="combo-row"><span class="combo-name api">/frame/status</span> <span class="combo-detail"> &mdash; Power state, art mode, running app (YouTube/Netflix/Disney+/AppleTV/Plex), device info</span></div>
+        <div class="combo-row"><span class="combo-name api">/frame/artmode &middot; /frame/artmode/off</span> <span class="combo-detail"> &mdash; Art mode on/off + Hue Concentrate</span></div>
+        <div class="combo-row"><span class="combo-name api">/frame/newart</span> <span class="combo-detail"> &mdash; Push new random painting (async)</span></div>
+        <div class="combo-row"><span class="combo-name api">/frame/power &middot; /frame/home &middot; /frame/mute</span> <span class="combo-detail"> &mdash; TV power, home screen, mute toggle</span></div>
+        <div class="combo-row"><span class="combo-name api">/frame/hdmi/&lt;1-4&gt;</span> <span class="combo-detail"> &mdash; Switch HDMI input</span></div>
+        <div class="combo-row"><span class="combo-name api">/frame/key/&lt;key&gt;</span> <span class="combo-detail"> &mdash; Send any remote key (KEY_UP, KEY_ENTER, etc.)</span></div>
+        <div class="combo-row"><span class="combo-name api">/frame/fireplace</span> <span class="combo-detail"> &mdash; Launch fireplace video on TV</span></div>
+
+        <div class="api-group">Velux Window</div>
+        <div class="combo-row"><span class="combo-name api">/velux/open &middot; /velux/close</span> <span class="combo-detail"> &mdash; Fully open (100%) or close (0%) roof window</span></div>
+        <div class="combo-row"><span class="combo-name api">/velux/set/&lt;0-100&gt;</span> <span class="combo-detail"> &mdash; Set to specific position</span></div>
+        <div class="combo-row"><span class="combo-name api">/velux/stop</span> <span class="combo-detail"> &mdash; Stop any current movement</span></div>
+        <div class="combo-row"><span class="combo-name api">/velux/status</span> <span class="combo-detail"> &mdash; Current position, target, reachability, battery</span></div>
+
+        <div class="api-group">Meross Smart Plugs</div>
+        <div class="combo-row"><span class="combo-name api">/meross/list</span> <span class="combo-detail"> &mdash; All Meross devices with on/off state, model, online status</span></div>
+        <div class="combo-row"><span class="combo-name api">/meross/on/&lt;device&gt; &middot; /meross/off/&lt;device&gt;</span> <span class="combo-detail"> &mdash; Partial name match (e.g., &ldquo;patio&rdquo;, &ldquo;christmas&rdquo;, &ldquo;shed&rdquo;)</span></div>
+        <div class="combo-row"><span class="combo-name api">/meross/toggle/&lt;device&gt;</span> <span class="combo-detail"> &mdash; Toggle plug state</span></div>
+        <div class="combo-row"><span class="combo-name api">/meross/power/&lt;device&gt;</span> <span class="combo-detail"> &mdash; Instantaneous watts, volts, amps (if supported)</span></div>
+        <div class="combo-row"><span class="combo-name api">/meross/status/&lt;device&gt;</span> <span class="combo-detail"> &mdash; Full status: on/off + power metrics + online state</span></div>
+        <div class="combo-row"><span class="combo-name api">/meross/health</span> <span class="combo-detail"> &mdash; Cloud connectivity, total/online device count</span></div>
+
+        <div class="api-group">Philips Hue</div>
+        <div class="combo-row"><span class="combo-name api">/hue/on/&lt;device&gt; &middot; /hue/off/&lt;device&gt;</span> <span class="combo-detail"> &mdash; Partial name match (e.g., "arc" for Arc lamp)</span></div>
+        <div class="combo-row"><span class="combo-name api">/hue/brightness/&lt;device&gt;/&lt;0-254&gt;</span> <span class="combo-detail"> &mdash; Set brightness</span></div>
+        <div class="combo-row"><span class="combo-name api">/hue/color_temp/&lt;device&gt;/&lt;153-500&gt;</span> <span class="combo-detail"> &mdash; Color temp in mirek</span></div>
+        <div class="combo-row"><span class="combo-name api">/hue/scene/&lt;group&gt;/&lt;scene_id&gt;</span> <span class="combo-detail"> &mdash; Activate scene by group + ID</span></div>
+        <div class="combo-row"><span class="combo-name api">/hue/flash/&lt;device&gt;</span> <span class="combo-detail"> &mdash; Flash a light (optional count/interval params)</span></div>
+        <div class="combo-row"><span class="combo-name api">/hue/lights &middot; /hue/groups &middot; /hue/scenes</span> <span class="combo-detail"> &mdash; List all lights, groups, scenes</span></div>
+
+        <div class="api-group">Lightwave</div>
+        <div class="combo-row"><span class="combo-name api">/lightwave/on/&lt;device&gt; &middot; /lightwave/off/&lt;device&gt;</span> <span class="combo-detail"> &mdash; Partial name match</span></div>
+        <div class="combo-row"><span class="combo-name api">/lightwave/dim/&lt;device&gt;/&lt;0-100&gt;</span> <span class="combo-detail"> &mdash; Set dimmer level</span></div>
+        <div class="combo-row"><span class="combo-name api">/lightwave/all-off</span> <span class="combo-detail"> &mdash; Turn off all Lightwave switches</span></div>
+        <div class="combo-row"><span class="combo-name api">/lightwave/scene/save/&lt;name&gt; &middot; recall/&lt;name&gt; &middot; delete/&lt;name&gt;</span> <span class="combo-detail"> &mdash; Scene management</span></div>
+        <div class="combo-row"><span class="combo-name api">/lightwave/devices &middot; /lightwave/status</span> <span class="combo-detail"> &mdash; List devices, check states</span></div>
+
+        <div class="api-group">Combos</div>
+        <div class="combo-row"><span class="combo-name api">/combo/party-mode</span> <span class="combo-detail"> &mdash; Downstairs zone + preset 6 + medium vol + Hue Energise</span></div>
+        <div class="combo-row"><span class="combo-name api">/combo/morning-music</span> <span class="combo-detail"> &mdash; Clive zone + morning vol + preset 6</span></div>
+        <div class="combo-row"><span class="combo-name api">/combo/cozy-mode</span> <span class="combo-detail"> &mdash; Fireplace on TV + Dolby zone + cozy vol + Hue Relax</span></div>
+        <div class="combo-row"><span class="combo-name api">/combo/mute-all &middot; /combo/unmute-all</span> <span class="combo-detail"> &mdash; Mute or unmute all speakers</span></div>
+        <div class="combo-row"><span class="combo-name api">/record-player/on &middot; /record-player/off</span> <span class="combo-detail"> &mdash; Record player automation</span></div>
+        <div class="combo-row"><span class="combo-name api">/surrounds/follow</span> <span class="combo-detail"> &mdash; Force surrounds to join sitting room</span></div>
+
+        <div class="api-group">Wildlife &amp; Aurora</div>
+        <div class="combo-row"><span class="combo-name api">POST /wildlife/alert</span> <span class="combo-detail"> &mdash; Flash lights + chime + ntfy on wildlife sighting</span></div>
+        <div class="combo-row"><span class="combo-name api">POST /music/play</span> <span class="combo-detail"> &mdash; Play audio on specified speakers (rooms, volume, context)</span></div>
+
+        <div class="api-group">Observability &amp; Health</div>
+        <div class="combo-row"><span class="combo-name api">/health</span> <span class="combo-detail"> &mdash; Uptime, idle timeout, daemon states (Lightwave, iSponsorBlock), circuit breakers</span></div>
+        <div class="combo-row"><span class="combo-name api">/status</span> <span class="combo-detail"> &mdash; All WiiM devices: power, source, volume, group state, playback info</span></div>
+        <div class="combo-row"><span class="combo-name api">/status/&lt;device&gt;</span> <span class="combo-detail"> &mdash; Single device deep status (e.g., /status/kitchen)</span></div>
+        <div class="combo-row"><span class="combo-name api">/frame/status</span> <span class="combo-detail"> &mdash; TV power, art mode, running app detection, firmware, model</span></div>
+        <div class="combo-row"><span class="combo-name api">/velux/status</span> <span class="combo-detail"> &mdash; Window position, target, reachability, battery, firmware</span></div>
+        <div class="combo-row"><span class="combo-name api">/api/events</span> <span class="combo-detail"> &mdash; Recent events as JSON (params: ?limit=50, ?type=error, ?hours=6)</span></div>
+        <div class="combo-row"><span class="combo-name api">/api/events/summary</span> <span class="combo-detail"> &mdash; Event counts, error rates, daemon health, circuit breaker states</span></div>
+        <div class="combo-row"><span class="combo-name api">/bridge/digest</span> <span class="combo-detail"> &mdash; Trigger immediate ntfy digest: events + errors + daemon status</span></div>
+        <div class="combo-row"><span class="combo-name api">/ntfy/test/&lt;topic&gt;</span> <span class="combo-detail"> &mdash; Test notification (topics: wildlife, meals, home, art, alerts)</span></div>
+        <div class="combo-row"><span class="combo-name api">/hue/lights</span> <span class="combo-detail"> &mdash; All Hue lights with on/off state, brightness, reachability</span></div>
+        <div class="combo-row"><span class="combo-name api">/lightwave/status</span> <span class="combo-detail"> &mdash; All Lightwave switch states (on/off, dim level)</span></div>
+        <div class="combo-row"><span class="combo-name api">/lightwave/devices</span> <span class="combo-detail"> &mdash; All registered Lightwave devices with feature IDs</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Infrastructure -->
+  <div class="floor" style="grid-column: 1 / -1;">
+    <div class="floor-label">Infrastructure (Network &amp; Services)</div>
+
+    <div class="room">
+      <div class="room-name">joppa-bridge Server</div>
+      <div class="room-dims">Mac running Flask on :5050 &mdash; 7 LaunchAgent services</div>
+      <div class="devices">
+        <div class="device infra">
+          <span class="icon">&#x2699;</span> Bridge API (:5050)
+          <div class="tooltip">
+            <div class="tt-label">bridge.py &mdash; Flask API</div>
+            <div class="tt-row">wiim.contextualcoaching.co.uk</div>
+            <div class="tt-row">60+ endpoints across 8 route blueprints</div>
+            <div class="tt-row">Audio, Frame, Hue, Lightwave, Velux,</div>
+            <div class="tt-row">Combos, Media, Observability</div>
+          </div>
+        </div>
+        <div class="device infra">
+          <span class="icon">&#x1f514;</span> ntfy Server (:2586)
+          <div class="tooltip">
+            <div class="tt-label">Self-hosted ntfy v2.17.0</div>
+            <div class="tt-row">ntfy.contextualcoaching.co.uk</div>
+            <div class="tt-row">Topics: wildlife, meals, home, art, alerts</div>
+          </div>
+        </div>
+        <div class="device infra">
+          <span class="icon">&#x1f52c;</span> Lightwave Listener
+          <div class="tooltip">
+            <div class="tt-label">lightwave_listener.py</div>
+            <div class="tt-row">WebSocket &middot; button_mappings.json</div>
+            <div class="tt-row">Combo detection &middot; ntfy crash alerts</div>
+          </div>
+        </div>
+        <div class="device infra">
+          <span class="icon">&#x1f310;</span> Cloudflare Tunnel
+          <div class="tooltip">
+            <div class="tt-label">cloudflared</div>
+            <div class="tt-row">wiim &rarr; :5050 (bridge)</div>
+            <div class="tt-row">alexa &rarr; :5051 (skill backup)</div>
+            <div class="tt-row">ntfy &rarr; :2586 (notifications)</div>
+          </div>
+        </div>
+        <div class="device infra">
+          <span class="icon">&#x1f5bc;</span> Frame Art Server (:8741)
+          <div class="tooltip">
+            <div class="tt-label">Frame Art Server</div>
+            <div class="tt-row">Daily 8am rotation via LaunchAgent</div>
+            <div class="tt-row">45+ artists, Wikimedia Commons source</div>
+            <div class="tt-row">History: ~/frame-art/history.json</div>
+          </div>
+        </div>
+        <div class="device infra">
+          <span class="icon">&#x1f4fa;</span> iSponsorBlockTV
+          <div class="tooltip">
+            <div class="tt-label">iSponsorBlockTV</div>
+            <div class="tt-row">Auto-skips YouTube sponsors on Frame TV</div>
+            <div class="tt-row">Health check: daily LaunchAgent</div>
+            <div class="tt-row">Alerts on 48h no-skip via ntfy</div>
+          </div>
+        </div>
+        <div class="device infra">
+          <span class="icon">&#x1f517;</span> LinkPlus Hub
+          <div class="tooltip">
+            <div class="tt-label">Lightwave LinkPlus</div>
+            <div class="tt-row">Feature: -17-</div>
+            <div class="tt-row">Central hub for 13 switch panels (45+ features)</div>
+          </div>
+        </div>
+        <div class="device alexa">
+          <span class="icon">&#x1f399;</span> Alexa Skill (Lambda)
+          <div class="tooltip">
+            <div class="tt-label">WiiM Bridge Alexa Skill</div>
+            <div class="tt-row">Primary: Lambda &rarr; wiim.contextualcoaching.co.uk</div>
+            <div class="tt-row">Backup: Flask :5051 &rarr; alexa.contextualcoaching.co.uk</div>
+            <div class="tt-row">Voice: "Alexa, tell house to..."</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="room">
+      <div class="room-name">Observability Stack</div>
+      <div class="room-dims">What you can monitor across the house</div>
+      <div class="devices" style="flex-direction: column; gap: 2px;">
+        <div class="combo-row">
+          <span class="combo-name auto">Event Log</span>
+          <span class="combo-detail"> &mdash; Every API call logged with timestamp, endpoint, result, latency. Query via /api/events</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name auto">Daemon Health</span>
+          <span class="combo-detail"> &mdash; Lightwave listener + iSponsorBlock monitored. Crash alerts via ntfy (priority 5)</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name auto">Circuit Breakers</span>
+          <span class="combo-detail"> &mdash; Auto-disable failing endpoints after repeated errors. Self-heal after cooldown</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name auto">TV State Detection</span>
+          <span class="combo-detail"> &mdash; /frame/status: power on/off, art mode, running app (YouTube, Netflix, Disney+, Apple TV, Plex)</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name auto">Window State</span>
+          <span class="combo-detail"> &mdash; /velux/status: current position %, target %, reachable, battery level</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name auto">Speaker State</span>
+          <span class="combo-detail"> &mdash; /status: all 7 WiiMs — power, source, volume, group membership, now playing</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name auto">Lighting State</span>
+          <span class="combo-detail"> &mdash; /hue/lights: 40+ bulbs on/off/brightness. /lightwave/status: all switch states</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name auto">Notifications</span>
+          <span class="combo-detail"> &mdash; ntfy.contextualcoaching.co.uk: 5 topics (wildlife, meals, home, art, alerts). Self-hosted v2.17.0</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name auto">Digest Reports</span>
+          <span class="combo-detail"> &mdash; /bridge/digest: on-demand summary of events, error counts, daemon status pushed to ntfy</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="room">
+      <div class="room-name">LaunchAgent Services (8 running)</div>
+      <div class="room-dims">launchctl list | grep -E "wiim|joppa|frame|aurora"</div>
+      <div class="devices" style="flex-direction: column; gap: 2px;">
+        <div class="combo-row">
+          <span class="combo-name api">com.wiim.bridge</span>
+          <span class="combo-detail"> &mdash; Flask API server on :5050 (main bridge)</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name api">com.wiim.lightwave-listener</span>
+          <span class="combo-detail"> &mdash; WebSocket listener for Lightwave button events + combo detection</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name api">com.joppa.alexa-skill</span>
+          <span class="combo-detail"> &mdash; Flask Alexa skill backup on :5051</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name api">com.joppa.isponsorblock</span>
+          <span class="combo-detail"> &mdash; YouTube sponsor segment auto-skipper</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name api">com.joppa.isponsorblock-health</span>
+          <span class="combo-detail"> &mdash; Daily health check (alerts on 48h no-skip)</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name api">com.frame-art.server</span>
+          <span class="combo-detail"> &mdash; Art server on :8741 (receives painting uploads)</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name api">com.frame-art.daily</span>
+          <span class="combo-detail"> &mdash; Daily 8am art rotation trigger</span>
+        </div>
+        <div class="combo-row">
+          <span class="combo-name api">com.aurora.poll</span>
+          <span class="combo-detail"> &mdash; AuroraWatch UK poll every 15min (red + dark + clear &rarr; alert)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="room">
+      <div class="room-name">Wi-Fi Signal Health</div>
+      <div class="room-dims">RSSI measurements 2026-02-22</div>
+      <div class="devices" style="flex-direction: column; gap: 4px;">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;">
+          <span style="color: #1a7a6f; width: 140px;">Amp Ultra (sitting)</span>
+          <div style="background: #e8e0d4; height: 8px; border-radius: 4px; flex: 1; overflow: hidden;">
+            <div style="background: #15803d; height: 100%; width: 80%; border-radius: 4px;"></div>
+          </div>
+          <span style="color: #9a8e7e; font-size: 10px; width: 80px; text-align: right;">-60 dBm</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;">
+          <span style="color: #1a7a6f; width: 140px;">Pro Plus (kitchen)</span>
+          <div style="background: #e8e0d4; height: 8px; border-radius: 4px; flex: 1; overflow: hidden;">
+            <div style="background: #15803d; height: 100%; width: 78%; border-radius: 4px;"></div>
+          </div>
+          <span style="color: #9a8e7e; font-size: 10px; width: 80px; text-align: right;">-61 dBm</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;">
+          <span style="color: #1a7a6f; width: 140px;">Pro Plus (bath)</span>
+          <div style="background: #e8e0d4; height: 8px; border-radius: 4px; flex: 1; overflow: hidden;">
+            <div style="background: #a16207; height: 100%; width: 64%; border-radius: 4px;"></div>
+          </div>
+          <span style="color: #9a8e7e; font-size: 10px; width: 80px; text-align: right;">-68 dBm</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;">
+          <span style="color: #1a7a6f; width: 140px;">Off Suite (2F)</span>
+          <div style="background: #e8e0d4; height: 8px; border-radius: 4px; flex: 1; overflow: hidden;">
+            <div style="background: #dc2626; height: 100%; width: 54%; border-radius: 4px;"></div>
+          </div>
+          <span style="color: #9a8e7e; font-size: 10px; width: 80px; text-align: right;">-73 dBm</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;">
+          <span style="color: #1a7a6f; width: 140px;">Pro (surrounds)</span>
+          <div style="background: #e8e0d4; height: 8px; border-radius: 4px; flex: 1; overflow: hidden;">
+            <div style="background: #dc2626; height: 100%; width: 52%; border-radius: 4px;"></div>
+          </div>
+          <span style="color: #9a8e7e; font-size: 10px; width: 80px; text-align: right;">-74 dBm</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;">
+          <span style="color: #1a7a6f; width: 140px;">Mini (bedroom)</span>
+          <div style="background: #e8e0d4; height: 8px; border-radius: 4px; flex: 1; overflow: hidden;">
+            <div style="background: #dc2626; height: 100%; width: 48%; border-radius: 4px;"></div>
+          </div>
+          <span style="color: #9a8e7e; font-size: 10px; width: 80px; text-align: right;">-76 dBm</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="network-table">
+  <h2>Full Network Inventory</h2>
+  <table>
+    <thead>
+      <tr><th>Device</th><th>Room</th><th>IP</th><th>MAC</th><th>Type</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>WiiM Amp Ultra</td><td>Sitting Room</td><td class="mono">10.0.0.208</td><td class="mono">9C:B8:B4:D1:9A:46</td><td>Primary amp</td></tr>
+      <tr><td>WiiM Pro Plus</td><td>Kitchen</td><td class="mono">10.0.0.111</td><td class="mono">B8:2D:28:58:0A:0A</td><td>Kitchen speaker</td></tr>
+      <tr><td>WiiM Pro</td><td>Sitting Room</td><td class="mono">10.0.0.159</td><td class="mono">B8:13:32:D5:9A:0A</td><td>Surround speakers</td></tr>
+      <tr><td>WiiM Pro Plus</td><td>Bathroom</td><td class="mono">10.0.0.32</td><td class="mono">50:41:1C:71:90:2E</td><td>Bathroom speaker</td></tr>
+      <tr><td>WiiM Mini</td><td>Bedroom</td><td class="mono">10.0.0.60</td><td class="mono">B8:13:32:1D:0B:9C</td><td>Bedroom speaker</td></tr>
+      <tr><td>WiiM Mini</td><td>Den</td><td class="mono">10.0.0.201</td><td class="mono">B8:13:32:1D:B9:9C</td><td>Den speaker</td></tr>
+      <tr><td>WiiM Mini</td><td>Off Suite (2F)</td><td class="mono">10.0.0.223</td><td class="mono">B8:13:32:1E:26:64</td><td>Off suite speaker</td></tr>
+      <tr><td>Samsung Frame TV</td><td>Sitting Room</td><td class="mono">10.0.0.88</td><td class="mono">A0:D0:5B:86:D1:13</td><td>QE55LS03 (WS:8002)</td></tr>
+      <tr><td>Hue Bridge</td><td>Off Suite (1F)</td><td class="mono">10.0.0.186</td><td class="mono">&mdash;</td><td>BSB003</td></tr>
+      <tr><td>Orbi Router</td><td>Off Suite (1F)</td><td class="mono">&mdash;</td><td class="mono">&mdash;</td><td>Mesh base</td></tr>
+      <tr><td>Orbi Satellite</td><td>Narnita</td><td class="mono">&mdash;</td><td class="mono">&mdash;</td><td>Downstairs cupboard</td></tr>
+      <tr><td>Orbi Satellite</td><td>Shed</td><td class="mono">&mdash;</td><td class="mono">&mdash;</td><td>Garden</td></tr>
+      <tr><td>LinkPlus Hub</td><td>&mdash;</td><td class="mono">&mdash;</td><td class="mono">&mdash;</td><td>Lightwave RF hub</td></tr>
+      <tr><td>Velux Active</td><td>Bathroom (2F)</td><td class="mono">&mdash;</td><td class="mono">&mdash;</td><td>Roof window (Netatmo)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+// API configuration
+const BRIDGE_URL = 'https://wiim.contextualcoaching.co.uk';
+
+// Get or prompt for API key
+function getApiKey() {
+  let apiKey = localStorage.getItem('joppa_api_key');
+  if (!apiKey) {
+    apiKey = prompt('Enter your Joppa Bridge API key:');
+    if (apiKey) {
+      localStorage.setItem('joppa_api_key', apiKey);
+    }
+  }
+  return apiKey;
+}
+
+// Frame Art - Push new painting
+async function frameNewArt() {
+  const btn = document.getElementById('frame-art-btn');
+  const status = document.getElementById('action-status');
+  const apiKey = getApiKey();
+
+  if (!apiKey) {
+    status.textContent = '❌ API key required';
+    return;
+  }
+
+  btn.classList.add('loading');
+  btn.disabled = true;
+  status.textContent = '🎨 Selecting new artwork...';
+
+  try {
+    const response = await fetch(`${BRIDGE_URL}/frame/newart?key=${apiKey}`);
+    const data = await response.json();
+
+    if (data.success) {
+      status.textContent = '✅ ' + (data.painting || 'New painting loading on Frame TV (async, check in ~60s)');
+    } else {
+      status.textContent = '❌ ' + (data.error || 'Failed to trigger art rotation');
+    }
+  } catch (error) {
+    status.textContent = '❌ Network error: ' + error.message;
+  } finally {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }
+}
+</script>
+
+</body>
+</html>
