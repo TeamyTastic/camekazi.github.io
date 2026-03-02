@@ -2,177 +2,531 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Joppa Road — WiiM Network Map</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ewan Cameron — Marathon Build Analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;1,300&family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #1a1a2e; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-  .page { max-width: 1000px; margin: 0 auto; padding: 1.5rem 1rem; }
-
-  h1 { font-size: 1.5rem; font-weight: 300; color: #fff; margin-bottom: 0.2rem; }
-  .subtitle { color: #666; font-size: 0.8rem; margin-bottom: 1.5rem; }
-
-  /* Floorplan with overlay */
-  .floorplan-section {
-    position: relative;
-    display: inline-block;
-    margin-bottom: 2rem;
-  }
-  .floorplan-section img {
-    width: 100%;
-    max-width: 962px;
-    border-radius: 8px;
-    filter: brightness(0.95);
+  :root {
+    --bg: #08080A;
+    --surface: #121215;
+    --surface2: #1C1C21;
+    --border: #2A2A30;
+    --ink: #F0EFE8;
+    --ink-muted: #7A7A85;
+    --accent: #E8510A;
+    --green: #22C55E;
+    --gold: #F59E0B;
   }
 
-  /* WiiM device labels overlaid on floorplan */
-  .wiim-label {
-    position: absolute;
-    background: rgba(10, 15, 30, 0.92);
-    border-radius: 6px;
-    padding: 6px 10px;
-    border-left: 3px solid;
-    font-size: 0.65rem;
-    line-height: 1.5;
-    min-width: 170px;
-    backdrop-filter: blur(4px);
-    pointer-events: none;
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
   }
-  .wiim-label .wname {
-    font-weight: 700;
-    font-size: 0.75rem;
-    margin-bottom: 2px;
+
+  /* HERO */
+  .hero {
+    padding: 80px 40px 60px;
+    max-width: 1100px;
+    margin: 0 auto;
+    border-bottom: 1px solid var(--border);
   }
-  .wiim-label .wmac { font-family: 'SF Mono', Menlo, monospace; color: #aaa; font-size: 0.6rem; }
-  .wiim-label .wstats { color: #888; font-family: 'SF Mono', Menlo, monospace; font-size: 0.6rem; }
-  .wiim-label .wsignal {
-    display: inline-block;
-    font-size: 0.55rem;
-    font-weight: 600;
+  .hero-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 1px 5px;
-    border-radius: 3px;
-    margin-left: 4px;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 300;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .hero-sub {
+    color: var(--ink-muted);
+    font-size: 15px;
+    max-width: 560px;
+  }
+
+  /* MAIN GRID */
+  .main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 40px 80px;
+  }
+
+  .section {
+    margin-top: 64px;
+  }
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* COMPARISON TABLE */
+  .race-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .race-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+  }
+  .race-table th {
+    text-align: left;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    padding: 0 16px 12px 0;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+  .race-table th:last-child { padding-right: 0; }
+  .race-table td {
+    padding: 14px 16px 14px 0;
+    border-top: 1px solid var(--border);
     vertical-align: middle;
+    white-space: nowrap;
+  }
+  .race-table td:last-child { padding-right: 0; }
+  .race-table tr {
+    transition: background 0.15s ease;
+    cursor: default;
+  }
+  .race-table tbody tr:hover td {
+    background: rgba(255,255,255,0.025);
+  }
+  .race-table tbody tr:hover td:first-child {
+    border-radius: 4px 0 0 4px;
   }
 
-  .wiim-label.excellent { border-color: #00d26a; }
-  .wiim-label.excellent .wname { color: #00d26a; }
-  .wiim-label.excellent .wsignal { background: rgba(0,210,106,0.2); color: #00d26a; }
+  .race-name { color: var(--ink); font-weight: 600; }
+  .race-year { color: var(--ink-muted); font-size: 11px; margin-top: 2px; }
 
-  .wiim-label.very-good { border-color: #7ecb20; }
-  .wiim-label.very-good .wname { color: #7ecb20; }
-  .wiim-label.very-good .wsignal { background: rgba(126,203,32,0.2); color: #7ecb20; }
+  .time-cell { font-size: 18px; font-weight: 600; }
+  .time-pb { color: var(--accent); }
+  .time-sub220 { color: var(--green); }
+  .time-slow { color: var(--ink-muted); }
 
-  .wiim-label.okay { border-color: #f5a623; }
-  .wiim-label.okay .wname { color: #f5a623; }
-  .wiim-label.okay .wsignal { background: rgba(245,166,35,0.2); color: #f5a623; }
+  .bar-cell { display: flex; align-items: center; gap: 10px; }
+  .bar-wrap { flex: 1; min-width: 80px; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width 0.8s ease; }
+  .bar-val { font-size: 13px; min-width: 45px; text-align: right; }
 
-  .wiim-label.weak { border-color: #e74c3c; }
-  .wiim-label.weak .wname { color: #e74c3c; }
-  .wiim-label.weak .wsignal { background: rgba(231,76,60,0.2); color: #e74c3c; }
+  .hr-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+  }
+  .hr-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+  }
 
-  /* Positions — percentages of floorplan image
-     Floorplan layout:
-     Top-left: Sitting Room (Ground) | Top-right: Bedroom (Second Floor)
-     Bottom-left: Ground floor detail | Bottom-right: First Floor
-  */
-  .wiim-den       { top: 8%;  left: 2%; }
-  .wiim-rwav      { top: 4%;  left: 55%; }
-  .wiim-bedroom   { top: 22%; left: 55%; }
-  .wiim-bathroom  { top: 54%; left: 58%; }
-  .wiim-offsuite  { top: 68%; left: 58%; }
-
-  /* Summary table below */
-  .summary {
-    background: #16213e;
+  /* INSIGHT CARD */
+  .insight-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
     border-radius: 8px;
-    padding: 1rem 1.2rem;
-    margin-bottom: 1.5rem;
+    padding: 32px;
+    margin-top: 24px;
   }
-  .summary h3 { font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.6rem; }
-  .summary table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
-  .summary th { text-align: left; color: #555; font-weight: 400; padding: 0.35rem 0.5rem; border-bottom: 1px solid #1f2f4f; }
-  .summary td { padding: 0.35rem 0.5rem; color: #ccc; font-family: 'SF Mono', Menlo, monospace; font-size: 0.7rem; border-bottom: 1px solid #1a2540; }
-  .summary .sig { font-weight: 600; font-size: 0.65rem; }
-  .sig-excellent { color: #00d26a; }
-  .sig-very-good { color: #7ecb20; }
-  .sig-okay { color: #f5a623; }
-  .sig-weak { color: #e74c3c; }
-
-  .alert {
-    background: rgba(231,76,60,0.1);
-    border: 1px solid rgba(231,76,60,0.25);
-    border-radius: 6px;
-    padding: 0.7rem 1rem;
-    font-size: 0.8rem;
-    color: #e74c3c;
-    margin-bottom: 1.5rem;
+  .insight-card h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 300;
+    line-height: 1.3;
+    margin-bottom: 14px;
   }
-  .alert strong { color: #ff6b6b; }
+  .insight-card h3 strong {
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .insight-card p {
+    color: var(--ink-muted);
+    font-size: 14px;
+    max-width: 640px;
+    line-height: 1.7;
+  }
+  .insight-card p + p { margin-top: 10px; }
 
-  footer { color: #333; font-size: 0.65rem; text-align: center; padding-top: 1rem; }
+  /* SESSION COMPARISON */
+  .session-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 24px;
+  }
+  @media (max-width: 600px) {
+    .session-compare { grid-template-columns: 1fr; }
+  }
+  .scomp-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+  }
+  .scomp-card.good { border-color: rgba(34,197,94,0.3); }
+  .scomp-card.bad  { border-color: rgba(239,68,68,0.25); }
+  .scomp-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .scomp-card.good .scomp-label { color: var(--green); }
+  .scomp-card.bad  .scomp-label { color: #EF4444; }
+  .scomp-stat { font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 600; }
+  .scomp-card.good .scomp-stat { color: var(--green); }
+  .scomp-card.bad  .scomp-stat { color: #EF4444; }
+  .scomp-desc { font-size: 13px; color: var(--ink-muted); margin-top: 6px; }
+
+  /* CONSTANTS */
+  .constants {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 24px;
+  }
+  @media (max-width: 700px) { .constants { grid-template-columns: 1fr; } }
+  .const-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+  }
+  .const-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+  .const-title {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    font-weight: 300;
+    margin-bottom: 8px;
+  }
+  .const-body { font-size: 13px; color: var(--ink-muted); line-height: 1.6; }
+
+  /* TAPER CHART */
+  .taper-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 24px;
+  }
+  .taper-row { display: flex; align-items: center; gap: 16px; }
+  .taper-race-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-muted);
+    min-width: 120px;
+  }
+  .taper-race-label span { display: block; font-size: 13px; color: var(--ink); font-weight: 600; }
+  .taper-bars { display: flex; gap: 6px; flex: 1; align-items: flex-end; height: 48px; }
+  .taper-bar-group { display: flex; flex-direction: column; align-items: center; flex: 1; gap: 4px; }
+  .taper-bar-fill {
+    width: 100%;
+    border-radius: 3px 3px 0 0;
+    transition: height 0.6s ease;
+  }
+  .taper-bar-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--ink-muted); }
+  .taper-drop {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    min-width: 60px;
+    text-align: right;
+  }
+
+  /* VERDICT */
+  .verdict {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 40px;
+    margin-top: 24px;
+  }
+  .verdict h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 300;
+    line-height: 1.3;
+    margin-bottom: 20px;
+  }
+  .verdict p {
+    color: var(--ink-muted);
+    font-size: 14px;
+    line-height: 1.75;
+    max-width: 700px;
+  }
+  .verdict p + p { margin-top: 12px; }
+  .verdict strong { color: var(--ink); }
+
+  /* FOOTER */
+  .footer {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 24px 40px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-muted);
+  }
+
+  /* ANIMATE IN */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .hero, .section { animation: fadeUp 0.5s ease both; }
+  .section:nth-child(2) { animation-delay: 0.1s; }
+  .section:nth-child(3) { animation-delay: 0.2s; }
+  .section:nth-child(4) { animation-delay: 0.3s; }
+  .section:nth-child(5) { animation-delay: 0.4s; }
+  .section:nth-child(6) { animation-delay: 0.5s; }
+
+  @media (max-width: 600px) {
+    .hero, .main { padding-left: 20px; padding-right: 20px; }
+    .hero { padding-top: 48px; }
+    .footer { flex-direction: column; gap: 8px; padding: 20px; }
+  }
 </style>
 </head>
 <body>
-<div class="page">
 
-  <h1>Joppa Road — WiiM Network Map</h1>
-  <p class="subtitle">5 devices · "tell my wifi love her" · 5 GHz · AP 28:94:01:5F:76:BC · 2026-02-23</p>
+<div class="hero">
+  <div class="hero-label">Coaching Analysis · 16-Week Build Comparison</div>
+  <h1>What built<br><em>sub 2:20</em></h1>
+  <p class="hero-sub">Five marathons. One athlete. A decade of data. This is what the 16 weeks before each race actually looked like.</p>
+</div>
 
-  <div class="floorplan-section">
-    <img src="Joppa%20floorplan.png" alt="Joppa Road floorplan">
+<div class="main">
 
-    <div class="wiim-label excellent wiim-den">
-      <div class="wname">Den <span class="wsignal">Excellent</span></div>
-      <div class="wmac">B8:13:32:1D:B9:9C · 10.0.0.194</div>
-      <div class="wstats">RSSI -24 · 433 Mbps · SNR 35</div>
-    </div>
-
-    <div class="wiim-label very-good wiim-rwav">
-      <div class="wname">Room with a View <span class="wsignal">Very Good</span></div>
-      <div class="wmac">B8:13:32:1D:8A:DC · 10.0.0.160</div>
-      <div class="wstats">RSSI -61 · 351 Mbps · SNR 30</div>
-    </div>
-
-    <div class="wiim-label weak wiim-bedroom">
-      <div class="wname">Bedroom <span class="wsignal">Weak</span></div>
-      <div class="wmac">B8:13:32:1D:0B:9C · 10.0.0.60</div>
-      <div class="wstats">RSSI -76 · 13 Mbps · SNR 16</div>
-    </div>
-
-    <div class="wiim-label okay wiim-bathroom">
-      <div class="wname">Bathroom <span class="wsignal">Okay</span></div>
-      <div class="wmac">50:41:1C:71:90:2E · 10.0.0.32</div>
-      <div class="wstats">RSSI -68 · 195 Mbps · SNR 25</div>
-    </div>
-
-    <div class="wiim-label weak wiim-offsuite">
-      <div class="wname">Offsuite <span class="wsignal">Weak</span></div>
-      <div class="wmac">B8:13:32:1E:26:64 · 10.0.0.223</div>
-      <div class="wstats">RSSI -73 · 130 Mbps · SNR 19</div>
+  <!-- TABLE -->
+  <div class="section">
+    <div class="section-label">Performance Overview</div>
+    <div class="race-table-wrap">
+      <table class="race-table">
+        <thead>
+          <tr>
+            <th>Race</th>
+            <th>Finish</th>
+            <th style="min-width:180px">16-wk Volume</th>
+            <th>Peak Week</th>
+            <th>Avg Weekly</th>
+            <th>Sessions/wk</th>
+            <th>Avg HR</th>
+            <th>Longest Run</th>
+          </tr>
+        </thead>
+        <tbody id="race-rows"></tbody>
+      </table>
     </div>
   </div>
 
-  <div class="alert">
-    <strong>Bedroom:</strong> 13 Mbps / SNR 16 — will drop audio. Needs mesh node on first floor landing or Ethernet backhaul to second floor.
+  <!-- KEY INSIGHT -->
+  <div class="section">
+    <div class="section-label">Key Finding</div>
+    <div class="insight-card">
+      <h3><strong>Volume per session</strong>, not volume per week,<br>predicts marathon outcome.</h3>
+      <p>The 2019 build had the highest session frequency (13.2/week) but averaged only 7.9 km per run — and produced the slowest time by 3+ minutes. Every build that broke 2:20 averaged 11.3 km or more per session.</p>
+      <p>The target for the next build: maintain 11–13 sessions/week but protect average session length at 12 km+. Better to cut a session entirely than run a junk 5 km.</p>
+    </div>
+
+    <div class="session-compare">
+      <div class="scomp-card bad">
+        <div class="scomp-label">2019 Build (slowest)</div>
+        <div class="scomp-stat">7.9 km</div>
+        <div class="scomp-desc">avg session length · 13.2 sessions/week · 2:22:18</div>
+      </div>
+      <div class="scomp-card good">
+        <div class="scomp-label">Top 4 builds (all sub-2:22)</div>
+        <div class="scomp-stat">11.3+ km</div>
+        <div class="scomp-desc">avg session length · 11–13 sessions/week · sub 2:21:32</div>
+      </div>
+    </div>
   </div>
 
-  <div class="summary">
-    <h3>Quick Reference</h3>
-    <table>
-      <tr><th>Room</th><th>Floor</th><th>MAC</th><th>IP</th><th>RSSI</th><th>Mbps</th><th>SNR</th><th>Signal</th></tr>
-      <tr><td>Den</td><td>G</td><td>B8:13:32:1D:B9:9C</td><td>.194</td><td>-24</td><td>433</td><td>35</td><td><span class="sig sig-excellent">Excellent</span></td></tr>
-      <tr><td>Room with a View</td><td>2</td><td>B8:13:32:1D:8A:DC</td><td>.160</td><td>-61</td><td>351</td><td>30</td><td><span class="sig sig-very-good">Very Good</span></td></tr>
-      <tr><td>Bathroom</td><td>1</td><td>50:41:1C:71:90:2E</td><td>.32</td><td>-68</td><td>195</td><td>25</td><td><span class="sig sig-okay">Okay</span></td></tr>
-      <tr><td>Offsuite</td><td>1</td><td>B8:13:32:1E:26:64</td><td>.223</td><td>-73</td><td>130</td><td>19</td><td><span class="sig sig-weak">Weak</span></td></tr>
-      <tr><td>Bedroom</td><td>2</td><td>B8:13:32:1D:0B:9C</td><td>.60</td><td>-76</td><td>13</td><td>16</td><td><span class="sig sig-weak">Weak</span></td></tr>
-    </table>
+  <!-- CONSTANTS -->
+  <div class="section">
+    <div class="section-label">What Was Consistent Across All 5 Builds</div>
+    <div class="constants">
+      <div class="const-card">
+        <div class="const-num">01 / Constant</div>
+        <div class="const-title">Race-length long runs</div>
+        <div class="const-body">Every build's longest single run landed between 39.3–42.8 km. No exceptions. This is not conventional — it's aggressive and apparently non-negotiable for Ewan.</div>
+      </div>
+      <div class="const-card">
+        <div class="const-num">02 / Constant</div>
+        <div class="const-title">Double-digit weekly sessions</div>
+        <div class="const-body">All 5 builds averaged 11+ sessions/week. Even the leanest (Valencia 2023 at 11.2/week) never dropped below 10 in any single training week.</div>
+      </div>
+      <div class="const-card">
+        <div class="const-num">03 / Constant</div>
+        <div class="const-title">Hard taper, 3 weeks out</div>
+        <div class="const-body">Volume drops sharply and consistently in the final 3 weeks across all 5 builds, with the steepest cut in the final 7 days. The mechanism varies; the pattern doesn't.</div>
+      </div>
+    </div>
   </div>
 
-  <footer>Bathroom WiiM has different OUI (50:41:1C vs B8:13:32) — different model</footer>
+  <!-- TAPER -->
+  <div class="section">
+    <div class="section-label">The Taper — Final 3 Weeks</div>
+    <div class="taper-grid" id="taper-grid"></div>
+  </div>
+
+  <!-- VERDICT -->
+  <div class="section">
+    <div class="section-label">Coaching Verdict</div>
+    <div class="verdict">
+      <h3>The aerobic engine is there.<br>The question is what a realistic next build looks like.</h3>
+      <p>Average HR across the build blocks tells an encouraging story. The two fastest builds sit at 121–128 bpm average. The COVID volume surge (2020–21) genuinely built the aerobic base — it wasn't junk miles. That base hasn't decayed dramatically in the HR data.</p>
+      <p>Valencia 2023 equalled Valencia 2021's time on <strong>221 km less volume</strong>, which suggests improved running economy (RE 0.981 vs 0.956 at Goodwood). The next breakthrough is more likely to come from <strong>race-day execution and power output</strong> than from adding more kilometres.</p>
+      <p>The Goodwood 2020 power output of 5.31 W/kg has never been matched since. That's the target — not 2,300 km of build volume, but arriving at the start line with that engine primed.</p>
+    </div>
+  </div>
 
 </div>
+
+<div class="footer">
+  <span>Source: data/coaching_data.db · 4,537 activities · 2016–2026</span>
+  <span>Generated March 2026</span>
+</div>
+
+<script>
+const races = [
+  { name: "Goodwood",  year: 2020, time: "2:19:17", totalKm: 2296, peakKm: 175.0, avgKm: 143.5, sessions: 12.7, hr: 128, longest: 39.3, rank: 1 },
+  { name: "Valencia",  year: 2021, time: "2:19:46", totalKm: 2294, peakKm: 179.6, avgKm: 153.0, sessions: 12.8, hr: 121, longest: 42.8, rank: 2 },
+  { name: "Valencia",  year: 2023, time: "2:19:57", totalKm: 2073, peakKm: 161.5, avgKm: 129.6, sessions: 11.2, hr: 126, longest: 39.3, rank: 3 },
+  { name: "Valencia",  year: 2022, time: "2:21:32", totalKm: 2188, peakKm: 171.2, avgKm: 136.8, sessions: 11.7, hr: 122, longest: 39.5, rank: 4 },
+  { name: "Valencia",  year: 2019, time: "2:22:18", totalKm: 1780, peakKm: 144.1, avgKm: 104.7, sessions: 13.2, hr: 130, longest: 39.8, rank: 5 },
+];
+
+const taper = [
+  { name: "Goodwood", year: 2020, w3: 179.0, w2: 153.9, w1: 128.2, drop: -28 },
+  { name: "Valencia", year: 2021, w3: 164.5, w2: 167.6, w1: 145.7, drop: -11 },
+  { name: "Valencia", year: 2023, w3: 164.0, w2: 154.1, w1: 127.9, drop: -22 },
+  { name: "Valencia", year: 2022, w3: 167.6, w2: 161.1, w1: 144.2, drop: -14 },
+  { name: "Valencia", year: 2019, w3: 145.7, w2: 146.0, w1: 112.5, drop: -23 },
+];
+
+const maxKm = Math.max(...races.map(r => r.totalKm));
+const hrColors = {
+  121: '#22C55E', 122: '#22C55E', 126: '#F59E0B',
+  128: '#F59E0B', 130: '#EF4444'
+};
+
+function hrColor(hr) {
+  if (hr <= 124) return '#22C55E';
+  if (hr <= 128) return '#F59E0B';
+  return '#EF4444';
+}
+
+function timeClass(rank) {
+  if (rank === 1) return 'time-pb';
+  if (rank <= 3) return 'time-sub220';
+  return 'time-slow';
+}
+
+// Build table
+const tbody = document.getElementById('race-rows');
+races.forEach(r => {
+  const pct = (r.totalKm / maxKm * 100).toFixed(1);
+  const barColor = r.rank <= 2 ? 'var(--accent)' : r.rank === 3 ? 'var(--gold)' : 'var(--border)';
+  tbody.innerHTML += `
+    <tr>
+      <td>
+        <div class="race-name">${r.name} ${r.year}</div>
+      </td>
+      <td class="time-cell ${timeClass(r.rank)}">${r.time}</td>
+      <td>
+        <div class="bar-cell">
+          <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
+          <span class="bar-val">${r.totalKm.toLocaleString()}</span>
+        </div>
+      </td>
+      <td style="font-family:'JetBrains Mono',monospace">${r.peakKm}</td>
+      <td style="font-family:'JetBrains Mono',monospace">${r.avgKm}</td>
+      <td style="font-family:'JetBrains Mono',monospace">${r.sessions}</td>
+      <td>
+        <span class="hr-badge">
+          <span class="hr-dot" style="background:${hrColor(r.hr)}"></span>
+          <span style="font-family:'JetBrains Mono',monospace">${r.hr}</span>
+        </span>
+      </td>
+      <td style="font-family:'JetBrains Mono',monospace">${r.longest}</td>
+    </tr>
+  `;
+});
+
+// Build taper chart
+const maxTaper = 180;
+const taperGrid = document.getElementById('taper-grid');
+taper.forEach(t => {
+  const dropColor = t.drop <= -25 ? '#22C55E' : t.drop <= -15 ? '#F59E0B' : '#888';
+  const h3 = Math.round((t.w3 / maxTaper) * 44);
+  const h2 = Math.round((t.w2 / maxTaper) * 44);
+  const h1 = Math.round((t.w1 / maxTaper) * 44);
+  taperGrid.innerHTML += `
+    <div class="taper-row">
+      <div class="taper-race-label">
+        <span>${t.name}</span>${t.year}
+      </div>
+      <div class="taper-bars">
+        <div class="taper-bar-group">
+          <div class="taper-bar-fill" style="height:${h3}px;background:var(--surface2);border:1px solid var(--border)"></div>
+          <div class="taper-bar-label">W−3</div>
+          <div class="taper-bar-label" style="color:var(--ink-muted);font-size:10px">${t.w3}</div>
+        </div>
+        <div class="taper-bar-group">
+          <div class="taper-bar-fill" style="height:${h2}px;background:var(--surface2);border:1px solid var(--border)"></div>
+          <div class="taper-bar-label">W−2</div>
+          <div class="taper-bar-label" style="color:var(--ink-muted);font-size:10px">${t.w2}</div>
+        </div>
+        <div class="taper-bar-group">
+          <div class="taper-bar-fill" style="height:${h1}px;background:var(--accent);opacity:0.8"></div>
+          <div class="taper-bar-label">W−1</div>
+          <div class="taper-bar-label" style="color:var(--accent);font-size:10px">${t.w1}</div>
+        </div>
+      </div>
+      <div class="taper-drop" style="color:${dropColor}">${t.drop}%</div>
+    </div>
+  `;
+});
+</script>
 </body>
 </html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Joppa Road — WiiM Network Map</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1a1a2e; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .page { max-width: 1000px; margin: 0 auto; padding: 1.5rem 1rem; }
+
+  h1 { font-size: 1.5rem; font-weight: 300; color: #fff; margin-bottom: 0.2rem; }
+  .subtitle { color: #666; font-size: 0.8rem; margin-bottom: 1.5rem; }
+
+  /* Floorplan with overlay */
+  .floorplan-section {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 2rem;
+  }
+  .floorplan-section img {
+    width: 100%;
+    max-width: 962px;
+    border-radius: 8px;
+    filter: brightness(0.95);
+  }
+
+  /* WiiM device labels overlaid on floorplan */
+  .wiim-label {
+    position: absolute;
+    background: rgba(10, 15, 30, 0.92);
+    border-radius: 6px;
+    padding: 6px 10px;
+    border-left: 3px solid;
+    font-size: 0.65rem;
+    line-height: 1.5;
+    min-width: 170px;
+    backdrop-filter: blur(4px);
+    pointer-events: none;
+  }
+  .wiim-label .wname {
+    font-weight: 700;
+    font-size: 0.75rem;
+    margin-bottom: 2px;
+  }
+  .wiim-label .wmac { font-family: 'SF Mono', Menlo, monospace; color: #aaa; font-size: 0.6rem; }
+  .wiim-label .wstats { color: #888; font-family: 'SF Mono', Menlo, monospace; font-size: 0.6rem; }
+  .wiim-label .wsignal {
+    display: inline-block;
+    font-size: 0.55rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+
+  .wiim-label.excellent { border-color: #00d26a; }
+  .wiim-label.excellent .wname { color: #00d26a; }
+  .wiim-label.excellent .wsignal { background: rgba(0,210,106,0.2); color: #00d26a; }
+
+  .wiim-label.very-good { border-color: #7ecb20; }
+  .wiim-label.very-good .wname { color: #7ecb20; }
+  .wiim-label.very-good .wsignal { background: rgba(126,203,32,0.2); color: #7ecb20; }
+
+  .wiim-label.okay { border-color: #f5a623; }
+  .wiim-label.okay .wname { color: #f5a623; }
+  .wiim-label.okay .wsignal { background: rgba(245,166,35,0.2); color: #f5a623; }
+
+  .wiim-label.weak { border-color: #e74c3c; }
+  .wiim-label.weak .wname { color: #e74c3c; }
+  .wiim-label.weak .wsignal { background: rgba(231,76,60,0.2); color: #e74c3c; }
+
+  /* Positions — percentages of floorplan image
+     Floorplan layout:
+     Top-left: Sitting Room (Ground) | Top-right: Bedroom (Second Floor)
+     Bottom-left: Ground floor detail | Bottom-right: First Floor
+  */
+  .wiim-den       { top: 8%;  left: 2%; }
+  .wiim-rwav      { top: 4%;  left: 55%; }
+  .wiim-bedroom   { top: 22%; left: 55%; }
+  .wiim-bathroom  { top: 54%; left: 58%; }
+  .wiim-offsuite  { top: 68%; left: 58%; }
+
+  /* Summary table below */
+  .summary {
+    background: #16213e;
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    margin-bottom: 1.5rem;
+  }
+  .summary h3 { font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.6rem; }
+  .summary table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+  .summary th { text-align: left; color: #555; font-weight: 400; padding: 0.35rem 0.5rem; border-bottom: 1px solid #1f2f4f; }
+  .summary td { padding: 0.35rem 0.5rem; color: #ccc; font-family: 'SF Mono', Menlo, monospace; font-size: 0.7rem; border-bottom: 1px solid #1a2540; }
+  .summary .sig { font-weight: 600; font-size: 0.65rem; }
+  .sig-excellent { color: #00d26a; }
+  .sig-very-good { color: #7ecb20; }
+  .sig-okay { color: #f5a623; }
+  .sig-weak { color: #e74c3c; }
+
+  .alert {
+    background: rgba(231,76,60,0.1);
+    border: 1px solid rgba(231,76,60,0.25);
+    border-radius: 6px;
+    padding: 0.7rem 1rem;
+    font-size: 0.8rem;
+    color: #e74c3c;
+    margin-bottom: 1.5rem;
+  }
+  .alert strong { color: #ff6b6b; }
+
+  footer { color: #333; font-size: 0.65rem; text-align: center; padding-top: 1rem; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>Joppa Road — WiiM Network Map</h1>
+  <p class="subtitle">5 devices · "tell my wifi love her" · 5 GHz · AP 28:94:01:5F:76:BC · 2026-02-23</p>
+
+  <div class="floorplan-section">
+    <img src="Joppa%20floorplan.png" alt="Joppa Road floorplan">
+
+    <div class="wiim-label excellent wiim-den">
+      <div class="wname">Den <span class="wsignal">Excellent</span></div>
+      <div class="wmac">B8:13:32:1D:B9:9C · 10.0.0.194</div>
+      <div class="wstats">RSSI -24 · 433 Mbps · SNR 35</div>
+    </div>
+
+    <div class="wiim-label very-good wiim-rwav">
+      <div class="wname">Room with a View <span class="wsignal">Very Good</span></div>
+      <div class="wmac">B8:13:32:1D:8A:DC · 10.0.0.160</div>
+      <div class="wstats">RSSI -61 · 351 Mbps · SNR 30</div>
+    </div>
+
+    <div class="wiim-label weak wiim-bedroom">
+      <div class="wname">Bedroom <span class="wsignal">Weak</span></div>
+      <div class="wmac">B8:13:32:1D:0B:9C · 10.0.0.60</div>
+      <div class="wstats">RSSI -76 · 13 Mbps · SNR 16</div>
+    </div>
+
+    <div class="wiim-label okay wiim-bathroom">
+      <div class="wname">Bathroom <span class="wsignal">Okay</span></div>
+      <div class="wmac">50:41:1C:71:90:2E · 10.0.0.32</div>
+      <div class="wstats">RSSI -68 · 195 Mbps · SNR 25</div>
+    </div>
+
+    <div class="wiim-label weak wiim-offsuite">
+      <div class="wname">Offsuite <span class="wsignal">Weak</span></div>
+      <div class="wmac">B8:13:32:1E:26:64 · 10.0.0.223</div>
+      <div class="wstats">RSSI -73 · 130 Mbps · SNR 19</div>
+    </div>
+  </div>
+
+  <div class="alert">
+    <strong>Bedroom:</strong> 13 Mbps / SNR 16 — will drop audio. Needs mesh node on first floor landing or Ethernet backhaul to second floor.
+  </div>
+
+  <div class="summary">
+    <h3>Quick Reference</h3>
+    <table>
+      <tr><th>Room</th><th>Floor</th><th>MAC</th><th>IP</th><th>RSSI</th><th>Mbps</th><th>SNR</th><th>Signal</th></tr>
+      <tr><td>Den</td><td>G</td><td>B8:13:32:1D:B9:9C</td><td>.194</td><td>-24</td><td>433</td><td>35</td><td><span class="sig sig-excellent">Excellent</span></td></tr>
+      <tr><td>Room with a View</td><td>2</td><td>B8:13:32:1D:8A:DC</td><td>.160</td><td>-61</td><td>351</td><td>30</td><td><span class="sig sig-very-good">Very Good</span></td></tr>
+      <tr><td>Bathroom</td><td>1</td><td>50:41:1C:71:90:2E</td><td>.32</td><td>-68</td><td>195</td><td>25</td><td><span class="sig sig-okay">Okay</span></td></tr>
+      <tr><td>Offsuite</td><td>1</td><td>B8:13:32:1E:26:64</td><td>.223</td><td>-73</td><td>130</td><td>19</td><td><span class="sig sig-weak">Weak</span></td></tr>
+      <tr><td>Bedroom</td><td>2</td><td>B8:13:32:1D:0B:9C</td><td>.60</td><td>-76</td><td>13</td><td>16</td><td><span class="sig sig-weak">Weak</span></td></tr>
+    </table>
+  </div>
+
+  <footer>Bathroom WiiM has different OUI (50:41:1C vs B8:13:32) — different model</footer>
+
+</div>
+</body>
+</html>
