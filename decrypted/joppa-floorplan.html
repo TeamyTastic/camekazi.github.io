@@ -28,6 +28,19 @@
   .legend-dot.tuya { background: #ef4444; }
   .legend-dot.wemo { background: #f97316; }
   .legend-dot.dyson { background: #06b6d4; }
+  .legend-dot.schedule { background: #6366f1; }
+
+  .schedule-row { display: flex; align-items: baseline; gap: 8px; font-size: 12px; line-height: 2; padding: 2px 0; border-bottom: 1px solid #f0ebe3; }
+  .schedule-row:last-child { border-bottom: none; }
+  .schedule-time { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 11px; color: #4f46e5; font-weight: 600; min-width: 52px; }
+  .schedule-name { font-weight: 600; color: #2c2416; }
+  .schedule-detail { color: #9a8e7e; }
+  .schedule-badge { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-left: 4px; }
+  .schedule-badge.persistent { background: rgba(22,163,74,0.1); color: #15803d; }
+  .schedule-badge.interval { background: rgba(99,102,241,0.1); color: #4f46e5; }
+  .schedule-badge.daily { background: rgba(234,179,8,0.1); color: #a16207; }
+  .schedule-badge.weekly { background: rgba(8,145,178,0.1); color: #0e7490; }
+  .schedule-badge.monthly { background: rgba(168,85,247,0.1); color: #7c3aed; }
 
   .floors { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 24px 32px; max-width: 1400px; margin: 0 auto; }
   @media (max-width: 900px) { .floors { grid-template-columns: 1fr; } }
@@ -125,6 +138,7 @@
   <div class="legend-item"><div class="legend-dot wemo"></div> WeMo Switch</div>
   <div class="legend-item"><div class="legend-dot dyson"></div> Dyson Purifier</div>
   <div class="legend-item"><div class="legend-dot infra"></div> Infrastructure</div>
+  <div class="legend-item"><div class="legend-dot schedule"></div> Scheduled Tasks</div>
 </div>
 
 <div class="floors">
@@ -1036,7 +1050,7 @@
 
     <div class="room">
       <div class="room-name">joppa-bridge Server</div>
-      <div class="room-dims">Mac running Flask on :5050 &mdash; 7 LaunchAgent services</div>
+      <div class="room-dims">Mac running Flask on :5050 &mdash; 8 persistent services</div>
       <div class="devices">
         <div class="device infra">
           <span class="icon">&#x2699;</span> Bridge API (:5050)
@@ -1155,40 +1169,180 @@
     </div>
 
     <div class="room">
-      <div class="room-name">LaunchAgent Services (8 running)</div>
-      <div class="room-dims">launchctl list | grep -E "wiim|joppa|frame|aurora"</div>
+      <div class="room-name">Always On <span class="schedule-badge persistent">persistent</span></div>
+      <div class="room-dims">KeepAlive=true &mdash; auto-restart on crash</div>
       <div class="devices" style="flex-direction: column; gap: 2px;">
-        <div class="combo-row">
-          <span class="combo-name api">com.wiim.bridge</span>
-          <span class="combo-detail"> &mdash; Flask API server on :5050 (main bridge)</span>
+        <div class="schedule-row">
+          <span class="schedule-name">WiiM Bridge</span>
+          <span class="schedule-detail"> &mdash; Flask API :5050 (main hub)</span>
         </div>
-        <div class="combo-row">
-          <span class="combo-name api">com.wiim.lightwave-listener</span>
-          <span class="combo-detail"> &mdash; WebSocket listener for Lightwave button events + combo detection</span>
+        <div class="schedule-row">
+          <span class="schedule-name">Lightwave Listener</span>
+          <span class="schedule-detail"> &mdash; WebSocket button events + combo detection</span>
         </div>
-        <div class="combo-row">
-          <span class="combo-name api">com.joppa.alexa-skill</span>
-          <span class="combo-detail"> &mdash; Flask Alexa skill backup on :5051</span>
+        <div class="schedule-row">
+          <span class="schedule-name">Alexa Skill</span>
+          <span class="schedule-detail"> &mdash; Flask :5051 (Lambda backup)</span>
         </div>
-        <div class="combo-row">
-          <span class="combo-name api">com.joppa.isponsorblock</span>
-          <span class="combo-detail"> &mdash; YouTube sponsor segment auto-skipper</span>
+        <div class="schedule-row">
+          <span class="schedule-name">iSponsorBlockTV</span>
+          <span class="schedule-detail"> &mdash; YouTube sponsor auto-skipper</span>
         </div>
-        <div class="combo-row">
-          <span class="combo-name api">com.joppa.isponsorblock-health</span>
-          <span class="combo-detail"> &mdash; Daily health check (alerts on 48h no-skip)</span>
+        <div class="schedule-row">
+          <span class="schedule-name">Cloudflare Tunnel</span>
+          <span class="schedule-detail"> &mdash; wiim / alexa / ntfy public URLs</span>
         </div>
-        <div class="combo-row">
-          <span class="combo-name api">com.frame-art.server</span>
-          <span class="combo-detail"> &mdash; Art server on :8741 (receives painting uploads)</span>
+        <div class="schedule-row">
+          <span class="schedule-name">Frame Art Server</span>
+          <span class="schedule-detail"> &mdash; Painting uploads :8741</span>
         </div>
-        <div class="combo-row">
-          <span class="combo-name api">com.frame-art.daily</span>
-          <span class="combo-detail"> &mdash; Daily 8am art rotation trigger</span>
+        <div class="schedule-row">
+          <span class="schedule-name">MacWhisper Webhook</span>
+          <span class="schedule-detail"> &mdash; Transcription auto-ingest</span>
         </div>
-        <div class="combo-row">
-          <span class="combo-name api">com.aurora.poll</span>
-          <span class="combo-detail"> &mdash; AuroraWatch UK poll every 15min (red + dark + clear &rarr; alert)</span>
+        <div class="schedule-row">
+          <span class="schedule-name">MiniDLNA</span>
+          <span class="schedule-detail"> &mdash; Media server for local network</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="room">
+      <div class="room-name">Polling Intervals <span class="schedule-badge interval">recurring</span></div>
+      <div class="room-dims">Run continuously at fixed intervals</div>
+      <div class="devices" style="flex-direction: column; gap: 2px;">
+        <div class="schedule-row">
+          <span class="schedule-time">5 min</span>
+          <span class="schedule-name">Wildlife Poll</span>
+          <span class="schedule-detail"> &mdash; 7 sources: eBird, iNat, WhaleTrack, GBIF, Bluesky, Reddit, Mastodon</span>
+        </div>
+        <div class="schedule-row">
+          <span class="schedule-time">15 min</span>
+          <span class="schedule-name">Aurora Poll</span>
+          <span class="schedule-detail"> &mdash; AuroraWatch UK (red + dark + clear &rarr; ntfy alert)</span>
+        </div>
+        <div class="schedule-row">
+          <span class="schedule-time">15 min</span>
+          <span class="schedule-name">ISS Poll</span>
+          <span class="schedule-detail"> &mdash; Visible pass predictions for Edinburgh</span>
+        </div>
+        <div class="schedule-row">
+          <span class="schedule-time">30 min</span>
+          <span class="schedule-name">Bedroom Idle Reset</span>
+          <span class="schedule-detail"> &mdash; Reset bedroom WiiM volume to 15% after 10 min idle</span>
+        </div>
+        <div class="schedule-row">
+          <span class="schedule-time">3 min</span>
+          <span class="schedule-name">Meeting Coach</span>
+          <span class="schedule-detail"> &mdash; Detects active meetings, triggers live coaching prep</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="room">
+      <div class="room-name">Daily Schedule <span class="schedule-badge daily">daily</span></div>
+      <div class="room-dims">Runs once per day at the specified time</div>
+      <div class="devices" style="flex-direction: column; gap: 2px;">
+        <div class="schedule-row">
+          <span class="schedule-time">06:00</span>
+          <span class="schedule-name">Morning Artmode</span>
+          <span class="schedule-detail"> &mdash; Activate Frame TV art mode (if TV on + not already showing art)</span>
+        </div>
+        <div class="schedule-row">
+          <span class="schedule-time">07:00</span>
+          <span class="schedule-name">ISS Digest</span>
+          <span class="schedule-detail"> &mdash; Daily visible pass summary via ntfy</span>
+        </div>
+        <div class="schedule-row">
+          <span class="schedule-time">08:00</span>
+          <span class="schedule-name">Daily Brief</span>
+          <span class="schedule-detail"> &mdash; Morning summary to ntfy</span>
+        </div>
+        <div class="schedule-row">
+          <span class="schedule-time">08:00</span>
+          <span class="schedule-name">Frame Art Rotation</span>
+          <span class="schedule-detail"> &mdash; Push new artwork from 45+ artist collection</span>
+        </div>
+        <div class="schedule-row">
+          <span class="schedule-time">10:00</span>
+          <span class="schedule-name">iSponsorBlock Health</span>
+          <span class="schedule-detail"> &mdash; Alert on 48h no-skip via ntfy</span>
+        </div>
+        <div class="schedule-row">
+          <span class="schedule-time">17:00</span>
+          <span class="schedule-name">Meeting Coach Watcher</span>
+          <span class="schedule-detail"> &mdash; End-of-day meeting reflection check</span>
+        </div>
+        <div class="schedule-row">
+          <span class="schedule-time">20:00</span>
+          <span class="schedule-name">Run Window Notify</span>
+          <span class="schedule-detail"> &mdash; Weather forecast for Ewan + Emily run windows</span>
+        </div>
+        <div class="schedule-row">
+          <span class="schedule-time">21:00</span>
+          <span class="schedule-name">Auto Meeting Prep</span>
+          <span class="schedule-detail"> &mdash; Research &amp; brief for next 48h calendar events &rarr; Apple Notes</span>
+        </div>
+        <div class="schedule-row">
+          <span class="schedule-time">23:30</span>
+          <span class="schedule-name">Tag Migration</span>
+          <span class="schedule-detail"> &mdash; Obsidian tag standardisation (nightly)</span>
+        </div>
+        <div class="schedule-row">
+          <span class="schedule-time">02:00</span>
+          <span class="schedule-name">Sort Transcripts</span>
+          <span class="schedule-detail"> &mdash; File meeting transcripts into correct folders</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="room">
+      <div class="room-name">Weekly &amp; Monthly <span class="schedule-badge weekly">weekly</span> <span class="schedule-badge monthly">monthly</span></div>
+      <div class="room-dims">Less frequent maintenance and digest tasks</div>
+      <div class="devices" style="flex-direction: column; gap: 2px;">
+        <div class="api-group">Sunday</div>
+        <div class="schedule-row">
+          <span class="schedule-time">06:00</span>
+          <span class="schedule-name">Google Token Refresh</span>
+          <span class="schedule-detail"> &mdash; OAuth credential renewal</span>
+        </div>
+        <div class="schedule-row">
+          <span class="schedule-time">09:00</span>
+          <span class="schedule-name">Learning Maintenance</span>
+          <span class="schedule-detail"> &mdash; Curate learnings.md, promote stale patterns</span>
+        </div>
+        <div class="schedule-row">
+          <span class="schedule-time">09:00</span>
+          <span class="schedule-name">Wildlife Digest</span>
+          <span class="schedule-detail"> &mdash; Weekly sightings map (Leaflet.js) &rarr; ntfy</span>
+        </div>
+        <div class="schedule-row">
+          <span class="schedule-time">09:00</span>
+          <span class="schedule-name">Kids Milestones</span>
+          <span class="schedule-detail"> &mdash; Developmental milestone calendar events</span>
+        </div>
+        <div class="schedule-row">
+          <span class="schedule-time">20:00</span>
+          <span class="schedule-name">Cloud Pattern Backfill</span>
+          <span class="schedule-detail"> &mdash; Analyse cloud sessions for learning patterns</span>
+        </div>
+        <div class="api-group">Friday</div>
+        <div class="schedule-row">
+          <span class="schedule-time">17:00</span>
+          <span class="schedule-name">PR Merge Learnings</span>
+          <span class="schedule-detail"> &mdash; Extract learnings from merged PRs</span>
+        </div>
+        <div class="api-group">12th of Month</div>
+        <div class="schedule-row">
+          <span class="schedule-time">09:00</span>
+          <span class="schedule-name">Obsidian Orphan Detection</span>
+          <span class="schedule-detail"> &mdash; Find unlinked notes in vault</span>
+        </div>
+        <div class="api-group">1st of Month</div>
+        <div class="schedule-row">
+          <span class="schedule-time">09:00</span>
+          <span class="schedule-name">Translation Layer Audit</span>
+          <span class="schedule-detail"> &mdash; Swarm scan for manual bridging patterns to automate</span>
         </div>
       </div>
     </div>
