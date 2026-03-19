@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Joppa — Automation Schedule</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #21262d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --orange: #d29922;
+    --purple: #bc8cff;
+    --red: #f85149;
+    --yellow: #e3b341;
+    --teal: #39d353;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 0 0 80px;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 24px 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -60px; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 200px;
+    background: radial-gradient(ellipse, rgba(88,166,255,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  .header h1 span { color: var(--accent); }
+  .header p {
+    color: var(--muted);
+    margin-top: 6px;
+    font-size: 15px;
+  }
+  .pulse {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    margin-right: 6px;
+    animation: pulse 2s ease-in-out infinite;
+    vertical-align: middle;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(63,185,80,0.4); }
+    50% { opacity: 0.8; box-shadow: 0 0 0 6px rgba(63,185,80,0); }
+  }
+
+  /* Stats bar */
+  .stats {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .stat { text-align: center; }
+  .stat-value { font-size: 24px; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; }
+
+  /* Main layout */
+  .container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 0; }
+
+  /* Section */
+  .section { margin-bottom: 40px; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-header h2 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .section-header .badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .badge-always { background: rgba(63,185,80,0.15); color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
+  .badge-frequent { background: rgba(88,166,255,0.12); color: var(--accent); border: 1px solid rgba(88,166,255,0.25); }
+  .badge-daily { background: rgba(210,153,34,0.12); color: var(--yellow); border: 1px solid rgba(210,153,34,0.25); }
+  .badge-weekly { background: rgba(188,140,255,0.12); color: var(--purple); border: 1px solid rgba(188,140,255,0.25); }
+  .badge-monthly { background: rgba(248,81,73,0.1); color: var(--red); border: 1px solid rgba(248,81,73,0.2); }
+
+  /* Always-on grid */
+  .always-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .always-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    position: relative;
+    transition: border-color 0.15s;
+  }
+  .always-card:hover { border-color: rgba(63,185,80,0.4); }
+  .always-card .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    display: inline-block;
+    margin-right: 6px;
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+  .always-card .name {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text);
+  }
+  .always-card .desc {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  .always-card .port {
+    position: absolute;
+    top: 10px; right: 12px;
+    font-size: 10px;
+    color: var(--muted);
+    font-family: monospace;
+    background: var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  /* Timeline / table */
+  .timeline { display: flex; flex-direction: column; gap: 6px; }
+  .row {
+    display: grid;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 10px 14px;
+    transition: border-color 0.15s;
+    gap: 12px;
+  }
+  .row:hover { border-color: rgba(88,166,255,0.3); }
+  .row-frequent { grid-template-columns: 80px 1fr auto; }
+  .row-daily    { grid-template-columns: 60px 1fr auto; }
+  .row-weekly   { grid-template-columns: 120px 1fr auto; }
+  .row-monthly  { grid-template-columns: 100px 1fr auto; }
+
+  .time {
+    font-family: monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .task-name { font-weight: 500; color: var(--text); font-size: 13px; }
+  .task-desc { color: var(--muted); font-size: 12px; margin-top: 1px; }
+  .label-tag {
+    font-size: 10px;
+    font-family: monospace;
+    color: var(--muted);
+    background: var(--border);
+    padding: 2px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  /* Day-view for daily schedule */
+  .day-timeline {
+    position: relative;
+    padding-left: 24px;
+  }
+  .day-timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px; top: 8px; bottom: 8px;
+    width: 1px;
+    background: var(--border);
+  }
+
+  /* Clock visual */
+  .clock-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .clock-dial {
+    flex-shrink: 0;
+    position: relative;
+    width: 80px; height: 80px;
+  }
+  .clock-dial svg { width: 100%; height: 100%; }
+  .clock-info h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .clock-info p { color: var(--muted); font-size: 12px; }
+
+  /* Frequency chips */
+  .freq-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .freq-5m  { background: rgba(63,185,80,0.1); color: var(--green); }
+  .freq-15m { background: rgba(88,166,255,0.1); color: var(--accent); }
+  .freq-30m { background: rgba(210,153,34,0.1); color: var(--yellow); }
+  .freq-3m  { background: rgba(57,211,83,0.1); color: var(--teal); }
+
+  /* Section icon */
+  .section-icon {
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 32px 24px 0;
+    color: var(--muted);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 48px;
+  }
+  .footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 600px) {
+    .always-grid { grid-template-columns: 1fr 1fr; }
+    .row-frequent, .row-daily, .row-weekly, .row-monthly { grid-template-columns: 1fr; }
+    .label-tag { display: none; }
+    .stats { gap: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1><span>Joppa</span> — Automation Schedule</h1>
+  <p><span class="pulse"></span>Live automation stack · Edinburgh · Updated 2026-03-19</p>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-value">8</div>
+    <div class="stat-label">Always Running</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">6</div>
+    <div class="stat-label">Polling Services</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">9</div>
+    <div class="stat-label">Daily Tasks</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">7</div>
+    <div class="stat-label">Weekly Tasks</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">1</div>
+    <div class="stat-label">Monthly Tasks</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">31+</div>
+    <div class="stat-label">Total Automations</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Always On -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">⚡</span>
+      <h2>Always On</h2>
+      <span class="badge badge-always">KeepAlive · crash-recovery</span>
+    </div>
+    <div class="always-grid">
+      <div class="always-card">
+        <span class="dot"></span><span class="name">WiiM Bridge</span>
+        <span class="port">:5050</span>
+        <div class="desc">Smart speaker control — zones, volume, grouping, DLNA playback</div>
+      </div>
+      <div class="always-card">
+        <span class="dot"></span><span class="name">Lightwave Listener</span>
+        <div class="desc">WebSocket listener for physical switches → home automations</div>
+      </div>
+      <div class="always-card">
+        <span class="dot"></span><span class="name">Alexa Skill</span>
+        <span class="port">:5051</span>
+        <div class="desc">Voice control endpoint for smart home commands</div>
+      </div>
+      <div class="always-card">
+        <span class="dot"></span><span class="name">iSponsorBlockTV</span>
+        <div class="desc">Auto-skips YouTube sponsors on Samsung Frame TV</div>
+      </div>
+      <div class="always-card">
+        <span class="dot"></span><span class="name">Cloudflare Tunnel</span>
+        <div class="desc">Secure public exposure for bridge, Alexa, ntfy, Proof</div>
+      </div>
+      <div class="always-card">
+        <span class="dot"></span><span class="name">Frame Art Server</span>
+        <span class="port">:8741</span>
+        <div class="desc">Serves curated artwork to Samsung Frame TV art mode</div>
+      </div>
+      <div class="always-card">
+        <span class="dot"></span><span class="name">ntfy Server</span>
+        <span class="port">:2586</span>
+        <div class="desc">Local push notification hub for all system alerts</div>
+      </div>
+      <div class="always-card">
+        <span class="dot"></span><span class="name">MacWhisper Webhook</span>
+        <div class="desc">Receives transcription events from MacWhisper for processing</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Frequent Polling -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🔁</span>
+      <h2>Frequent Polling</h2>
+      <span class="badge badge-frequent">every few minutes</span>
+    </div>
+    <div class="timeline">
+      <div class="row row-frequent">
+        <span class="freq-chip freq-3m">↻ 3 min</span>
+        <div>
+          <div class="task-name">Meeting Coach Auto-start</div>
+          <div class="task-desc">Detects calendar events and starts live coaching session automatically</div>
+        </div>
+        <span class="label-tag">meeting-coach.auto-start</span>
+      </div>
+      <div class="row row-frequent">
+        <span class="freq-chip freq-5m">↻ 5 min</span>
+        <div>
+          <div class="task-name">Wildlife Poll</div>
+          <div class="task-desc">7 sources — eBird, iNaturalist, WhaleTrack, GBIF, Bluesky, Reddit, Mastodon · ntfy on dolphins/whales/otters</div>
+        </div>
+        <span class="label-tag">wildlife.poll</span>
+      </div>
+      <div class="row row-frequent">
+        <span class="freq-chip freq-15m">↻ 15 min</span>
+        <div>
+          <div class="task-name">Aurora Poll</div>
+          <div class="task-desc">Checks Kp index and local cloud cover — alerts when visible from Edinburgh</div>
+        </div>
+        <span class="label-tag">aurora.poll</span>
+      </div>
+      <div class="row row-frequent">
+        <span class="freq-chip freq-15m">↻ 15 min</span>
+        <div>
+          <div class="task-name">ISS Pass Poll</div>
+          <div class="task-desc">Tracks ISS overhead passes — alert when visible from home</div>
+        </div>
+        <span class="label-tag">iss.poll</span>
+      </div>
+      <div class="row row-frequent">
+        <span class="freq-chip freq-15m">↻ 15 min</span>
+        <div>
+          <div class="task-name">Device Health Check</div>
+          <div class="task-desc">Probes all devices in parallel: Hue, WiiM, Roborock, SureFlap, Dyson, radiator, Lightwave WS, Frame TV WS</div>
+        </div>
+        <span class="label-tag">joppa.device-health</span>
+      </div>
+      <div class="row row-frequent">
+        <span class="freq-chip freq-15m">↻ 15 min</span>
+        <div>
+          <div class="task-name">Tunnel Health Check</div>
+          <div class="task-desc">Checks Cloudflare-exposed services (bridge, Alexa, ntfy, Proof) — ntfy alert on failure</div>
+        </div>
+        <span class="label-tag">joppa.tunnel-health</span>
+      </div>
+      <div class="row row-frequent">
+        <span class="freq-chip freq-30m">↻ 30 min</span>
+        <div>
+          <div class="task-name">Bedroom Idle Volume Reset</div>
+          <div class="task-desc">Resets bedroom speaker volume after idle period — prevents overnight blaring</div>
+        </div>
+        <span class="label-tag">joppa.bedroom-idle-reset</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Daily -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🗓</span>
+      <h2>Daily</h2>
+      <span class="badge badge-daily">every day</span>
+    </div>
+    <div class="timeline">
+      <div class="row row-daily">
+        <span class="time">06:00</span>
+        <div>
+          <div class="task-name">Morning Art Mode</div>
+          <div class="task-desc">Switches Frame TV to art mode — starts the day with a painting</div>
+        </div>
+        <span class="label-tag">joppa.morning-artmode</span>
+      </div>
+      <div class="row row-daily">
+        <span class="time">07:00</span>
+        <div>
+          <div class="task-name">ISS Digest</div>
+          <div class="task-desc">Summary of ISS passes visible overnight and upcoming</div>
+        </div>
+        <span class="label-tag">iss.digest</span>
+      </div>
+      <div class="row row-daily">
+        <span class="time">08:00</span>
+        <div>
+          <div class="task-name">Daily Brief + Art Rotation</div>
+          <div class="task-desc">AI-generated day summary (weather, calendar, tasks) · rotates Frame TV artwork</div>
+        </div>
+        <span class="label-tag">claude.daily-brief · frame-art.daily</span>
+      </div>
+      <div class="row row-daily">
+        <span class="time">10:00</span>
+        <div>
+          <div class="task-name">iSponsorBlock Health</div>
+          <div class="task-desc">Checks sponsor-skipping is still active — alerts if 48h with no skips</div>
+        </div>
+        <span class="label-tag">joppa.isponsorblock-health</span>
+      </div>
+      <div class="row row-daily">
+        <span class="time">17:00</span>
+        <div>
+          <div class="task-name">Meeting Coach Watcher</div>
+          <div class="task-desc">Monitors for unprocessed meeting transcripts, triggers debriefs</div>
+        </div>
+        <span class="label-tag">claude.meeting-coach-watcher</span>
+      </div>
+      <div class="row row-daily">
+        <span class="time">20:00</span>
+        <div>
+          <div class="task-name">Run Window Notify</div>
+          <div class="task-desc">Alerts Ewan + Emily of optimal running window based on weather forecast</div>
+        </div>
+        <span class="label-tag">claude.run-window-notify-all</span>
+      </div>
+      <div class="row row-daily">
+        <span class="time">21:00</span>
+        <div>
+          <div class="task-name">Auto Meeting Prep</div>
+          <div class="task-desc">Prepares briefing notes for next-day meetings — LinkedIn, Companies House, ONA research</div>
+        </div>
+        <span class="label-tag">claude.auto-meeting-prep</span>
+      </div>
+      <div class="row row-daily">
+        <span class="time">23:30</span>
+        <div>
+          <div class="task-name">Obsidian Tag Migration</div>
+          <div class="task-desc">Normalises tags across the personal knowledge base — runs overnight</div>
+        </div>
+        <span class="label-tag">eobsidian.tag-migration</span>
+      </div>
+      <div class="row row-daily">
+        <span class="time">02:00</span>
+        <div>
+          <div class="task-name">Sort Transcripts</div>
+          <div class="task-desc">Routes MacWhisper transcripts to the right place — work, coaching, personal</div>
+        </div>
+        <span class="label-tag">meeting-coach.sort-transcripts</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weekly -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">📅</span>
+      <h2>Weekly</h2>
+      <span class="badge badge-weekly">Sunday · Friday · 12th</span>
+    </div>
+    <div class="timeline">
+      <div class="row row-weekly">
+        <span class="time">Sun 06:00</span>
+        <div>
+          <div class="task-name">Google OAuth Refresh</div>
+          <div class="task-desc">Rotates and refreshes Google API tokens (Gmail, Calendar, Notion) before they expire</div>
+        </div>
+        <span class="label-tag">claude.google-refresh-tokens</span>
+      </div>
+      <div class="row row-weekly">
+        <span class="time">Sun 09:00</span>
+        <div>
+          <div class="task-name">Learning Maintenance</div>
+          <div class="task-desc">Prunes stale learnings, updates applied counts, promotes 3× patterns to rules</div>
+        </div>
+        <span class="label-tag">claude.learning-maintenance</span>
+      </div>
+      <div class="row row-weekly">
+        <span class="time">Sun 09:00</span>
+        <div>
+          <div class="task-name">Wildlife Digest</div>
+          <div class="task-desc">Weekly summary of notable sightings — HTML map with Leaflet.js sent via ntfy</div>
+        </div>
+        <span class="label-tag">wildlife.digest</span>
+      </div>
+      <div class="row row-weekly">
+        <span class="time">Sun 09:00</span>
+        <div>
+          <div class="task-name">Kids Milestones</div>
+          <div class="task-desc">Generates developmental milestone calendar entries for the week ahead</div>
+        </div>
+        <span class="label-tag">kids.milestones-notify</span>
+      </div>
+      <div class="row row-weekly">
+        <span class="time">Sun 20:00</span>
+        <div>
+          <div class="task-name">Cloud Pattern Backfill</div>
+          <div class="task-desc">Analyses recent Claude sessions and backfills pattern application counts</div>
+        </div>
+        <span class="label-tag">claude.cloud-pattern-backfill</span>
+      </div>
+      <div class="row row-weekly">
+        <span class="time">Fri 17:00</span>
+        <div>
+          <div class="task-name">PR Merge Learnings</div>
+          <div class="task-desc">Extracts engineering learnings from merged PRs into the knowledge base</div>
+        </div>
+        <span class="label-tag">claude.pr-merge-learnings</span>
+      </div>
+      <div class="row row-weekly">
+        <span class="time">12th 09:00</span>
+        <div>
+          <div class="task-name">Obsidian Orphan Detection</div>
+          <div class="task-desc">Finds notes with no incoming links — flags for review or deletion</div>
+        </div>
+        <span class="label-tag">eobsidian.orphan-detection</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monthly -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🗃</span>
+      <h2>Monthly</h2>
+      <span class="badge badge-monthly">1st of month</span>
+    </div>
+    <div class="timeline">
+      <div class="row row-monthly">
+        <span class="time">1st 09:00</span>
+        <div>
+          <div class="task-name">Translation Layer Audit</div>
+          <div class="task-desc">Swarm of agents scans for manual connective work (patterns where a human is routing between systems) — surfaces automation candidates</div>
+        </div>
+        <span class="label-tag">claude.translation-layer-audit</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <p>
+    Joppa smart home · Edinburgh · All tasks run as macOS LaunchAgents ·
+    Alerts via <a href="#">ntfy</a> ·
+    Built with <a href="#">Claude Code</a>
+  </p>
+  <p style="margin-top: 6px; color: #484f58;">Generated 2026-03-19</p>
+</div>
+
+</body>
+</html>
