@@ -280,11 +280,11 @@
 
 <div class="stats">
   <div class="stat">
-    <div class="stat-value">8</div>
+    <div class="stat-value">11</div>
     <div class="stat-label">Always Running</div>
   </div>
   <div class="stat">
-    <div class="stat-value">6</div>
+    <div class="stat-value">5</div>
     <div class="stat-label">Polling Services</div>
   </div>
   <div class="stat">
@@ -300,7 +300,7 @@
     <div class="stat-label">Monthly Tasks</div>
   </div>
   <div class="stat">
-    <div class="stat-value">31+</div>
+    <div class="stat-value">33+</div>
     <div class="stat-label">Total Automations</div>
   </div>
 </div>
@@ -351,6 +351,18 @@
         <span class="dot"></span><span class="name">MacWhisper Webhook</span>
         <div class="desc">Receives transcription events from MacWhisper for processing</div>
       </div>
+      <div class="always-card">
+        <span class="dot"></span><span class="name">Telegram Gateway</span>
+        <div class="desc">Routes inbound Telegram messages to the right Claude session (home, work, coaching)</div>
+      </div>
+      <div class="always-card">
+        <span class="dot"></span><span class="name">Claude Home Session</span>
+        <div class="desc">Persistent headless Claude (Sonnet) for home automation + personal life — restart loop via tmux</div>
+      </div>
+      <div class="always-card">
+        <span class="dot"></span><span class="name">Session Watchdog</span>
+        <div class="desc">Checks every 60s that claude-home tmux session has Claude running — restarts if dead, alerts after 3 failures</div>
+      </div>
     </div>
   </div>
 
@@ -362,14 +374,6 @@
       <span class="badge badge-frequent">every few minutes</span>
     </div>
     <div class="timeline">
-      <div class="row row-frequent">
-        <span class="freq-chip freq-3m">↻ 3 min</span>
-        <div>
-          <div class="task-name">Meeting Coach Auto-start</div>
-          <div class="task-desc">Detects calendar events and starts live coaching session automatically</div>
-        </div>
-        <span class="label-tag">meeting-coach.auto-start</span>
-      </div>
       <div class="row row-frequent">
         <span class="freq-chip freq-5m">↻ 5 min</span>
         <div>
