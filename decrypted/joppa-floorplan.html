@@ -69,6 +69,43 @@
   .wifi-signal.okay { background: rgba(202, 138, 4, 0.1); color: #a16207; }
   .wifi-signal.weak { background: rgba(220, 38, 38, 0.1); color: #dc2626; }
 
+  /* Bridge Status Strip — claude-hud-style ambient overlay */
+  #status-strip { position: fixed; top: 16px; right: 16px; width: 268px; background: #fff; border: 1px solid #e8e0d4; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); font-size: 11px; z-index: 100; }
+  #status-strip.collapsed { width: 152px; }
+  #status-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; cursor: pointer; user-select: none; }
+  #status-header:hover { background: rgba(0,0,0,0.02); border-radius: 12px 12px 0 0; }
+  #status-strip.collapsed #status-header { border-radius: 12px; }
+  .bridge-label { display: flex; align-items: center; gap: 6px; font-weight: 600; color: #2c2416; font-size: 11px; }
+  #bridge-dot { width: 7px; height: 7px; border-radius: 50%; background: #b0a28e; flex-shrink: 0; }
+  #bridge-dot.green { background: #15803d; }
+  #bridge-dot.amber { background: #d97706; animation: pulse-amber 2s infinite; }
+  #bridge-dot.red { background: #dc2626; }
+  @keyframes pulse-amber { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+  #strip-toggle { font-size: 9px; color: #b0a28e; }
+  #status-body { border-top: 1px solid #f0ebe3; padding: 10px 14px 12px; }
+  #status-strip.collapsed #status-body { display: none; }
+  .srow { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+  .srow .slabel { color: #b0a28e; }
+  .srow .sval { color: #3d3529; font-weight: 500; }
+  #events-section { margin-top: 8px; padding-top: 8px; border-top: 1px solid #f0ebe3; }
+  .esection-label { color: #b0a28e; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; font-size: 10px; margin-bottom: 5px; }
+  .erow { display: flex; gap: 6px; margin-bottom: 3px; }
+  .etime { color: #b0a28e; min-width: 38px; flex-shrink: 0; }
+  .eendpoint { color: #2c2416; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .eresult { font-size: 10px; flex-shrink: 0; }
+  .eresult.ok { color: #15803d; }
+  .eresult.err { color: #dc2626; }
+  #strip-footer { margin-top: 8px; display: flex; justify-content: space-between; align-items: center; }
+  #strip-updated { color: #b0a28e; font-size: 10px; }
+  #strip-refresh-btn { color: #9a8e7e; font-size: 10px; cursor: pointer; background: none; border: none; padding: 0; }
+  #strip-refresh-btn:hover { color: #2a9d8f; }
+  #config-area { padding: 10px 14px 12px; border-top: 1px solid #f0ebe3; }
+  #config-area p { color: #7a6e5e; margin-bottom: 6px; line-height: 1.5; }
+  #api-key-input { width: 100%; padding: 6px 8px; border: 1px solid #e8e0d4; border-radius: 5px; font-size: 11px; outline: none; }
+  #api-key-input:focus { border-color: #2a9d8f; }
+  #config-connect { margin-top: 6px; width: 100%; padding: 6px; background: rgba(42,157,143,0.1); border: 1px solid rgba(42,157,143,0.3); color: #1a7a6f; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; }
+  #config-connect:hover { background: rgba(42,157,143,0.18); }
+
   .section-break { grid-column: 1 / -1; border-top: 1px solid #e8e0d4; margin: 8px 0; }
 
   .combo-row { font-size: 12px; line-height: 1.8; padding: 4px 0; border-bottom: 1px solid #f0ebe3; }
@@ -1282,6 +1319,141 @@
     </tbody>
   </table>
 </div>
+
+<!-- Bridge Status Strip (claude-hud pattern: ambient context overlay) -->
+<div id="status-strip" class="collapsed">
+  <div id="status-header" onclick="stripToggle()">
+    <div class="bridge-label">
+      <div id="bridge-dot"></div>
+      Bridge Status
+    </div>
+    <span id="strip-toggle">▶</span>
+  </div>
+  <div id="config-area" style="display:none">
+    <p>Enter JOPPA_API_KEY to connect live bridge data.</p>
+    <input type="password" id="api-key-input" placeholder="API key…" onkeydown="if(event.key==='Enter')stripConnect()">
+    <button id="config-connect" onclick="stripConnect()">Connect</button>
+  </div>
+  <div id="status-body" style="display:none">
+    <div class="srow"><span class="slabel">Heartbeat</span><span class="sval" id="s-heartbeat">—</span></div>
+    <div class="srow"><span class="slabel">Active devices</span><span class="sval" id="s-devices">—</span></div>
+    <div id="events-section">
+      <div class="esection-label">Recent Events</div>
+      <div id="events-container"><div style="color:#b0a28e">Loading…</div></div>
+    </div>
+    <div id="strip-footer">
+      <span id="strip-updated">—</span>
+      <button id="strip-refresh-btn" onclick="stripFetch()">↻ refresh</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const BASE = 'https://wiim.contextualcoaching.co.uk';
+  const KEY_NAME = 'joppa_api_key';
+  let timer = null;
+  let collapsed = true;
+
+  function key() { return localStorage.getItem(KEY_NAME); }
+
+  window.stripToggle = function() {
+    collapsed = !collapsed;
+    const strip = document.getElementById('status-strip');
+    const tog = document.getElementById('strip-toggle');
+    if (collapsed) {
+      strip.classList.add('collapsed');
+      tog.textContent = '▶';
+    } else {
+      strip.classList.remove('collapsed');
+      tog.textContent = '▼';
+      // Show correct panel
+      if (key()) {
+        document.getElementById('config-area').style.display = 'none';
+        document.getElementById('status-body').style.display = 'block';
+        if (!timer) stripFetch();
+      } else {
+        document.getElementById('config-area').style.display = 'block';
+        document.getElementById('status-body').style.display = 'none';
+      }
+    }
+  };
+
+  window.stripConnect = function() {
+    const val = document.getElementById('api-key-input').value.trim();
+    if (!val) return;
+    localStorage.setItem(KEY_NAME, val);
+    document.getElementById('config-area').style.display = 'none';
+    document.getElementById('status-body').style.display = 'block';
+    stripFetch();
+  };
+
+  window.stripFetch = async function() {
+    if (timer) { clearTimeout(timer); timer = null; }
+    const k = key();
+    if (!k) return;
+    const dot = document.getElementById('bridge-dot');
+    const headers = { 'X-API-Key': k };
+
+    // --- Health ping via /status ---
+    try {
+      const res = await fetch(BASE + '/status', { headers, signal: AbortSignal.timeout(6000) });
+      if (res.status === 401 || res.status === 403) {
+        dot.className = 'amber';
+        document.getElementById('s-heartbeat').textContent = 'Auth failed';
+        document.getElementById('s-devices').textContent = '—';
+      } else if (!res.ok) {
+        throw new Error('bad status ' + res.status);
+      } else {
+        const data = await res.json();
+        dot.className = 'green';
+        const devs = Array.isArray(data) ? data : Object.values(data);
+        const active = devs.filter(d => (d.power || d.status || '').toLowerCase() === 'on').length;
+        document.getElementById('s-heartbeat').textContent = 'Online';
+        document.getElementById('s-devices').textContent = active + ' / ' + devs.length + ' on';
+      }
+    } catch (e) {
+      dot.className = 'red';
+      document.getElementById('s-heartbeat').textContent = 'Offline';
+      document.getElementById('s-devices').textContent = '—';
+    }
+
+    // --- Recent events via /api/events ---
+    try {
+      const res = await fetch(BASE + '/api/events?limit=5', { headers, signal: AbortSignal.timeout(6000) });
+      if (res.ok) {
+        const payload = await res.json();
+        const list = Array.isArray(payload) ? payload.slice(0,5)
+                   : (payload.events || payload.items || []).slice(0,5);
+        const container = document.getElementById('events-container');
+        if (!list.length) {
+          container.innerHTML = '<div style="color:#b0a28e">No events yet</div>';
+        } else {
+          container.innerHTML = list.map(e => {
+            const t = e.timestamp ? new Date(e.timestamp * (e.timestamp < 1e12 ? 1000 : 1))
+                                      .toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
+            const ep = (e.endpoint || e.path || e.url || '—').replace(/^\//, '/');
+            const ok = e.success !== false && !e.error;
+            return `<div class="erow"><span class="etime">${t}</span><span class="eendpoint">${ep}</span><span class="eresult ${ok ? 'ok' : 'err'}">${ok ? '✓' : '✗'}</span></div>`;
+          }).join('');
+        }
+      }
+    } catch (_) { /* events are optional — fail silently */ }
+
+    // Footer timestamp
+    document.getElementById('strip-updated').textContent =
+      'Updated ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+
+    // Schedule next refresh
+    timer = setTimeout(stripFetch, 30000);
+  };
+
+  // Init: if key exists, show connected state (still collapsed — user opens it)
+  if (key()) {
+    document.getElementById('bridge-dot').className = 'amber'; // unknown until first fetch
+  }
+})();
+</script>
 
 </body>
 </html>
