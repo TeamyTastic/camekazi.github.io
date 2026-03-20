@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ONA Network Explorer — Ewan Cameron</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #0d0d14;
+  --bg2: #14141f;
+  --bg3: #1c1c2e;
+  --fg: #e0e0f0;
+  --fg2: #8888aa;
+  --accent: #6c63ff;
+  --bcorp: #22c55e;
+  --health: #38bdf8;
+  --tech: #a78bfa;
+  --finance: #f59e0b;
+  --social: #f472b6;
+  --ecosystem: #34d399;
+  --other: #9ca3af;
+  --ewan: #ff6b35;
+  /* floating panel vars */
+  --panel-bg: rgba(20,20,31,0.92);
+  --panel-border: rgba(255,255,255,0.10);
+  --panel-text: var(--fg);
+  --panel-muted: var(--fg2);
+  --panel-item-bg: rgba(255,255,255,0.04);
+  --panel-item-hover: rgba(255,255,255,0.08);
+  --link-stroke: rgba(255,255,255,0.08);
+  --label-fill: rgba(255,255,255,0.7);
+  --node-stroke: rgba(0,0,0,0.3);
+  --divider: rgba(255,255,255,0.07);
+}
+[data-theme="light"] {
+  --bg: #f0f0f5;
+  --bg2: #ffffff;
+  --bg3: #e4e4ec;
+  --fg: #1a1a2e;
+  --fg2: #5a5a7a;
+  --accent: #5048e5;
+  --panel-bg: rgba(255,255,255,0.96);
+  --panel-border: rgba(0,0,0,0.10);
+  --panel-text: #1a1a2e;
+  --panel-muted: #6b6b8a;
+  --panel-item-bg: rgba(0,0,0,0.04);
+  --panel-item-hover: rgba(0,0,0,0.08);
+  --link-stroke: rgba(0,0,0,0.18);
+  --label-fill: #1a1a2e;
+  --node-stroke: rgba(255,255,255,0.8);
+  --other: #7c8494;
+  --divider: rgba(0,0,0,0.08);
+}
+body { background: var(--bg); color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; height: 100vh; overflow: hidden; transition: background 0.2s, color 0.2s; }
+
+#app { display: flex; height: 100vh; }
+
+/* SIDEBAR */
+#sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  background: var(--bg2);
+  border-right: 1px solid var(--divider);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+#sidebar h1 { font-size: 14px; font-weight: 700; padding: 16px; color: var(--fg); border-bottom: 1px solid var(--divider); }
+#sidebar h1 span { color: var(--fg2); font-weight: 400; font-size: 12px; display: block; margin-top: 2px; }
+
+.section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; color: var(--fg2); text-transform: uppercase; padding: 12px 16px 6px; }
+
+/* FILTERS */
+#filters { padding: 0 16px 12px; }
+.filter-group { margin-bottom: 12px; }
+.filter-group label { font-size: 11px; color: var(--fg2); display: block; margin-bottom: 6px; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  color: var(--fg2);
+  transition: all 0.15s;
+  user-select: none;
+}
+.chip:hover { background: rgba(255,255,255,0.08); color: var(--fg); }
+.chip.active { color: #fff; border-color: transparent; }
+.chip[data-group="bcorp"].active { background: var(--bcorp); }
+.chip[data-group="health"].active { background: var(--health); color: #000; }
+.chip[data-group="tech"].active { background: var(--tech); }
+.chip[data-group="finance"].active { background: var(--finance); color: #000; }
+.chip[data-group="social"].active { background: var(--social); }
+.chip[data-group="ecosystem"].active { background: var(--ecosystem); color: #000; }
+.chip[data-group="other"].active { background: var(--other); color: #000; }
+.chip[data-type="person"].active { background: #6b7280; }
+.chip[data-type="organization"].active { background: #4b5563; }
+.chip[data-tier="0"].active, .chip[data-tier="1"].active { background: var(--accent); }
+.chip[data-tier="2"].active { background: #64748b; }
+.chip[data-tier="3"].active { background: #374151; }
+
+/* PATH FINDER */
+#path-section { padding: 0 16px 12px; }
+#path-input {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--bg3);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  color: var(--fg);
+  font-size: 12px;
+  outline: none;
+  margin-bottom: 6px;
+}
+#path-input:focus { border-color: var(--accent); }
+#path-result {
+  font-size: 11px;
+  color: var(--fg2);
+  line-height: 1.6;
+  min-height: 40px;
+}
+#path-result .path-node { color: var(--fg); font-weight: 600; }
+#path-result .path-sep { color: var(--fg2); }
+#clear-path {
+  font-size: 11px;
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 4px;
+  display: none;
+}
+#clear-path:hover { text-decoration: underline; }
+
+/* DETAIL PANEL */
+#detail {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  border-top: 1px solid var(--divider);
+}
+#detail.empty { display: flex; align-items: center; justify-content: center; color: var(--fg2); font-size: 12px; text-align: center; }
+#detail h2 { font-size: 15px; font-weight: 700; color: var(--fg); margin-bottom: 4px; }
+#detail .detail-role { font-size: 12px; color: var(--fg2); margin-bottom: 10px; }
+.detail-row { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.detail-row .k { color: var(--fg2); }
+.detail-row .v { color: var(--fg); font-weight: 500; text-align: right; max-width: 140px; word-break: break-word; }
+.tag-list { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 8px; }
+.tag { padding: 2px 6px; border-radius: 8px; font-size: 10px; background: rgba(255,255,255,0.06); color: var(--fg2); }
+
+/* CANVAS */
+#canvas-wrap { flex: 1; position: relative; overflow: hidden; }
+svg { width: 100%; height: 100%; }
+
+/* Legend */
+#legend {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 11px;
+  backdrop-filter: blur(8px);
+}
+#legend h4 { color: var(--fg2); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+.legend-item { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; color: var(--fg2); }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+/* Stats bar */
+#stats { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 20px; padding: 5px 14px; font-size: 11px; color: var(--fg2); backdrop-filter: blur(8px); white-space: nowrap; }
+
+/* Tooltip */
+#tooltip {
+  position: fixed;
+  pointer-events: none;
+  background: var(--bg2);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  max-width: 220px;
+  opacity: 0;
+  transition: opacity 0.12s;
+  z-index: 100;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+}
+#tooltip.visible { opacity: 1; }
+#tooltip .tt-name { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+#tooltip .tt-sub { color: var(--fg2); font-size: 11px; }
+/* SEARCH */
+#node-search { width:100%; padding:8px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.14); background:var(--bg3); color:var(--fg); font-size:13px; box-sizing:border-box; transition: border-color 0.15s; }
+#node-search:focus { outline:none; border-color:var(--accent); }
+#node-search::placeholder { color: var(--fg2); }
+/* STATUS PILLS */
+.status-pill { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:12px; font-size:11px; cursor:pointer; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:var(--fg2); transition:opacity 0.15s; }
+.status-pill:hover { background:rgba(255,255,255,0.08); color:var(--fg); }
+.status-pill.active { border-color:transparent; color:#fff; background:rgba(255,255,255,0.12); }
+.status-pill .sdot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.status-pill .scount { opacity:0.65; font-size:10px; }
+#status-controls { display:flex; gap:4px; margin-bottom:6px; }
+.status-ctrl-btn { font-size:10px; padding:2px 8px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); background:transparent; color:var(--fg2); cursor:pointer; }
+.status-ctrl-btn:hover { color:var(--fg); background:rgba(255,255,255,0.06); }
+#status-pills { display:flex; flex-wrap:wrap; gap:4px; }
+
+/* ── LIGHT MODE OVERRIDES ─────────────────────────────────────────────────── */
+/* sidebar dividers handled by --divider variable */
+[data-theme="light"] .chip { border-color: rgba(0,0,0,0.15); background: rgba(0,0,0,0.03); color: var(--fg2); }
+[data-theme="light"] .chip:hover { background: rgba(0,0,0,0.07); }
+[data-theme="light"] #path-input { border-color: rgba(0,0,0,0.15); background: var(--bg3); }
+/* #detail border handled by --divider variable */
+[data-theme="light"] .detail-row { border-bottom-color: rgba(0,0,0,0.05); }
+[data-theme="light"] .tag { background: rgba(0,0,0,0.06); }
+/* legend and stats handled by --panel-bg / --panel-border variables */
+[data-theme="light"] #tooltip { background: var(--bg2); border-color: rgba(0,0,0,0.12); box-shadow: 0 8px 32px rgba(0,0,0,0.15); }
+[data-theme="light"] .section-label { color: var(--fg2); }
+[data-theme="light"] .status-pill { border-color: rgba(0,0,0,0.15); background: rgba(0,0,0,0.03); }
+[data-theme="light"] .status-pill:hover { background: rgba(0,0,0,0.07); }
+[data-theme="light"] .status-ctrl-btn { border-color: rgba(0,0,0,0.15); color: var(--fg2); }
+[data-theme="light"] .status-ctrl-btn:hover { background: rgba(0,0,0,0.06); }
+[data-theme="light"] #node-search { border-color: rgba(0,0,0,0.15); }
+
+/* ── THEME TOGGLE ─────────────────────────────────────────────────────────── */
+#theme-toggle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--fg2);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s;
+  white-space: nowrap;
+  z-index: 10;
+}
+#theme-toggle:hover { background: rgba(255,255,255,0.12); color: var(--fg); }
+[data-theme="light"] #theme-toggle { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.12); color: var(--fg2); }
+[data-theme="light"] #theme-toggle:hover { background: rgba(0,0,0,0.09); color: var(--fg); }
+
+/* ── FLOATING PANELS ──────────────────────────────────────────────────────── */
+.floating-panel {
+  position: absolute;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 12px;
+  max-width: 230px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.28), 0 1px 4px rgba(0,0,0,0.16);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.floating-panel h4 {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--panel-text);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+/* What Should I Do Next */
+.fp-action-panel {
+  top: 48px;
+  right: 16px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.fp-action-item {
+  padding: 7px 9px;
+  margin-bottom: 5px;
+  background: var(--panel-item-bg);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-left: 3px solid var(--accent);
+}
+.fp-action-item:hover { background: var(--panel-item-hover); }
+.fp-action-item.stale { border-left-color: #ef4444; }
+.fp-action-item.meeting { border-left-color: #3b82f6; }
+.fp-action-item.priority { border-left-color: #f59e0b; }
+.fp-action-item-name { font-weight: 600; color: var(--panel-text); margin-bottom: 2px; font-size: 12px; }
+.fp-action-item-reason { font-size: 11px; color: var(--panel-muted); }
+.fp-refresh-btn {
+  width: 100%;
+  padding: 6px;
+  margin-top: 8px;
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  background: var(--panel-item-bg);
+  color: var(--panel-muted);
+  cursor: pointer;
+  font-size: 11px;
+  transition: all 0.15s;
+}
+.fp-refresh-btn:hover { background: var(--panel-item-hover); color: var(--panel-text); }
+.fp-no-items { color: var(--panel-muted); font-style: italic; font-size: 11px; }
+/* Upcoming Meetings */
+.fp-meetings-panel {
+  bottom: 182px;
+  right: 16px;
+  max-height: 190px;
+  overflow-y: auto;
+}
+.fp-meeting-item {
+  padding: 7px 9px;
+  margin-bottom: 5px;
+  background: var(--panel-item-bg);
+  border-radius: 6px;
+  border-left: 3px solid #3b82f6;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.fp-meeting-item:hover { background: var(--panel-item-hover); }
+.fp-meeting-name { font-weight: 600; color: var(--panel-text); font-size: 12px; }
+.fp-meeting-date { font-size: 11px; color: #3b82f6; }
+/* Network Health */
+.fp-health-panel {
+  bottom: 16px;
+  right: 16px;
+}
+.fp-insight-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--panel-border);
+}
+.fp-insight-row:last-child { border-bottom: none; }
+.fp-insight-label { color: var(--panel-muted); }
+.fp-insight-value { font-weight: 700; color: var(--panel-text); }
+.fp-insight-value.success { color: #22c55e; }
+.fp-insight-value.warning { color: #f59e0b; }
+.fp-insight-value.urgent  { color: #ef4444; }
+
+/* ── STATUS LEGEND ────────────────────────────────────────────────────────── */
+#status-legend { padding: 0 16px 14px; }
+.status-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+  font-size: 11px;
+  color: var(--fg2);
+}
+.status-legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="sidebar">
+    <h1 style="position:relative;">ONA Network Explorer<span>Ewan Cameron · 328 nodes</span>
+      <button id="theme-toggle" title="Toggle light/dark mode">☀️ Light</button>
+    </h1>
+
+    <div style="padding:10px 16px 4px;">
+      <input type="text" id="node-search" placeholder="Search people &amp; orgs…">
+    </div>
+
+    <div class="section-label">Filter by Sector</div>
+    <div id="filters">
+      <div class="chip-row" id="sector-chips">
+        <span class="chip active" data-group="all">All</span>
+        <span class="chip" data-group="bcorp">B Corp</span>
+        <span class="chip" data-group="health">Health</span>
+        <span class="chip" data-group="tech">Tech</span>
+        <span class="chip" data-group="finance">Finance</span>
+        <span class="chip" data-group="social">Social</span>
+        <span class="chip" data-group="ecosystem">Ecosystem</span>
+        <span class="chip" data-group="other">Other</span>
+      </div>
+    </div>
+
+    <div class="section-label">Filter by Type</div>
+    <div id="filters">
+      <div class="chip-row" id="type-chips">
+        <span class="chip active" data-type="all">All</span>
+        <span class="chip" data-type="person">People</span>
+        <span class="chip" data-type="organization">Orgs</span>
+      </div>
+    </div>
+
+    <div class="section-label">Filter by Tier</div>
+    <div id="filters">
+      <div class="chip-row" id="tier-chips">
+        <span class="chip active" data-tier="all">All</span>
+        <span class="chip" data-tier="0">Ego (0)</span>
+        <span class="chip" data-tier="1">Tier 1</span>
+        <span class="chip" data-tier="2">Tier 2</span>
+        <span class="chip" data-tier="3">Tier 3</span>
+      </div>
+    </div>
+
+    <div class="section-label">Filter by Status</div>
+    <div style="padding:0 16px 12px;">
+      <div id="status-controls">
+        <button class="status-ctrl-btn" id="status-all-btn">All</button>
+        <button class="status-ctrl-btn" id="status-none-btn">None</button>
+      </div>
+      <div id="status-pills"></div>
+    </div>
+
+    <div class="section-label">Find Path from Ewan</div>
+    <div id="path-section">
+      <input id="path-input" type="text" placeholder="Type name or org..." list="node-names" autocomplete="off" />
+      <datalist id="node-names"></datalist>
+      <div id="path-result">Click a node or type above to find shortest warm path.</div>
+      <button id="clear-path">Clear path</button>
+    </div>
+
+    <div class="section-label" style="border-top:1px solid var(--divider); padding-top:12px;">What the Colours Mean</div>
+    <div id="status-legend">
+      <div class="status-legend-item"><div class="status-legend-dot" style="background:#4CAF50"></div>&#x2713; In touch — warm relationship</div>
+      <div class="status-legend-item"><div class="status-legend-dot" style="background:#FFA726"></div>&#x23F3; Pending — intro in progress</div>
+      <div class="status-legend-item"><div class="status-legend-dot" style="background:#42A5F5"></div>&#x1F3AF; Target — not yet contacted</div>
+      <div class="status-legend-item"><div class="status-legend-dot" style="background:#C45D4A"></div>&#x23F8; Parked — on hold for now</div>
+      <div class="status-legend-item"><div class="status-legend-dot" style="background:#ef4444"></div>&#x1F534; Needs attention now</div>
+    </div>
+
+    <div class="section-label" style="border-top:1px solid var(--divider); padding-top:12px;">Node Detail</div>
+    <div id="detail" class="empty">Click any node to see details</div>
+  </div>
+
+  <div id="canvas-wrap">
+    <svg id="svg"></svg>
+    <div id="stats">Loading...</div>
+    <div id="legend">
+      <h4>Sectors</h4>
+      <div class="legend-item"><div class="legend-dot" style="background:#ff6b35"></div> Ewan (ego)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#E8E8E8;border:1px solid #ccc"></div> Person</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#4C9BE8"></div> Tech</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#7B68EE"></div> Fintech</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#32CD32"></div> Investment</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#FF8C00"></div> Social</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#20B2AA"></div> Ecosystem Support</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#FF6B6B"></div> Healthcare</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#DA70D6"></div> Life Sciences</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#FFD700"></div> Education</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#CD853F"></div> Retail</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#87CEEB"></div> Travel</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#8FBC8F"></div> Property</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#708090"></div> Insurance</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#A9A9A9"></div> Other</div>
+    </div>
+    <div id="tooltip"><div class="tt-name"></div><div class="tt-sub"></div></div>
+
+    <!-- Floating panel: What Should I Do Next -->
+    <div class="floating-panel fp-action-panel" id="fp-action-panel">
+      <h4>&#x1F680; What Should I Do Next?</h4>
+      <div id="fp-action-list"><p class="fp-no-items">Calculating…</p></div>
+      <button class="fp-refresh-btn" id="fp-refresh-actions">&#x21BB; Refresh</button>
+    </div>
+
+    <!-- Floating panel: Upcoming Meetings -->
+    <div class="floating-panel fp-meetings-panel" id="fp-meetings-panel">
+      <h4>&#x1F4C5; Upcoming Meetings</h4>
+      <div id="fp-meetings-list"><p class="fp-no-items">No upcoming meetings scheduled</p></div>
+    </div>
+
+    <!-- Floating panel: Network Health -->
+    <div class="floating-panel fp-health-panel" id="fp-health-panel">
+      <h4>&#x1F3AF; Your Network Health</h4>
+      <div class="fp-insight-row" title="People with status 'active'">
+        <span class="fp-insight-label">Warm relationships</span>
+        <span class="fp-insight-value success" id="fp-health-warm">—</span>
+      </div>
+      <div class="fp-insight-row" title="People with status 'pending'">
+        <span class="fp-insight-label">In the works</span>
+        <span class="fp-insight-value warning" id="fp-health-inworks">—</span>
+      </div>
+      <div class="fp-insight-row" title="Tier 1-2 contacts not contacted in 90+ days">
+        <span class="fp-insight-label">Priority contacts</span>
+        <span class="fp-insight-value urgent" id="fp-health-priority">—</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const RAW_NODES = [{"id": "eoghan", "name": "Eoghan Mackie", "type": "person", "sector": "social", "bcorp": false, "tier": 1, "status": "active", "role": "Challenges Group (CEO)", "tags": ["pending", "social", "tier-1", "companies-house-verified"], "last_contact": null, "sector_group": "social"}, {"id": "david_tuck", "name": "David Tuck", "type": "person", "sector": "tech", "bcorp": false, "tier": 2, "status": "new", "role": "Waracle CEO, ex-Kin+Carta", "tags": ["new", "tier-2", "scaleup", "warm-intro", "edinburgh"], "last_contact": null, "sector_group": "tech"}, {"id": "gill_mudie", "name": "Gill Mudie", "type": "person", "sector": null, "bcorp": false, "tier": 2, "status": "active", "role": "Macs Adventure (part-time), Dribble Founder, ex-Management Consultant", "tags": ["active", "tier-2", "ex-colleague", "women-in-work"], "last_contact": null, "sector_group": "other"}, {"id": "lauren_tag", "name": "Lauren", "type": "person", "sector": "tech", "bcorp": false, "tier": 2, "status": "dormant", "role": "Unknown, TAG", "tags": ["tag-adaptavist"], "last_contact": null, "sector_group": "tech"}, {"id": "dame_ann_gloag", "name": "Dame Ann Gloag", "type": "person", "sector": "transport, investment", "bcorp": false, "tier": 2, "status": "target", "role": "Investor, Philanthropist (Stagecoach co-founder)", "tags": ["target", "transport", "investment", "tier-2", "companies-house-verified", "high-net-worth"], "last_contact": null, "sector_group": "finance"}, {"id": "ana_stewart", "name": "Ana Stewart", "type": "person", "sector": "fintech", "bcorp": false, "tier": 1, "status": "target", "role": "CEO, SNIB", "tags": ["target", "fintech", "tier-1"], "last_contact": null, "sector_group": "finance"}, {"id": "kate_forbes", "name": "Kate Forbes", "type": "person", "sector": null, "bcorp": false, "tier": 2, "status": "target", "role": "Deputy First Minister", "tags": ["target", "tier-2"], "last_contact": null, "sector_group": "other"}, {"id": "alastair_natwest", "name": "Alastair Cameron", "type": "person", "sector": "fintech", "bcorp": false, "tier": 2, "status": "active", "role": "NatWest Group", "tags": ["active", "fintech", "tier-2", "running"], "last_contact": null, "sector_group": "finance"}, {"id": "colin_mclellan", "name": "Colin McLellan", "type": "person", "sector": null, "bcorp": false, "tier": 2, "status": "target", "role": "CreateFuture (Director)", "tags": ["target", "tier-2"], "last_contact": null, "sector_group": "other"}, {"id": "ben", "name": "Ben Harrison", "type": "person", "sector": "healthcare", "bcorp": false, "tier": 1, "status": "active", "role": "Problem Shared (CFO)", "tags": ["active", "healthcare", "tier-1", "companies-house-verified"], "last_contact": null, "sector_group": "health"}, {"id": "rowland_fraser", "name": "Rowland Hill Fraser", "type": "person", "sector": "deeptech", "bcorp": false, "tier": 2, "status": "target", "role": "Aurora Avionics (Co-founder/Director)", "tags": ["target", "deeptech", "tier-2", "scaleup", "companies-house-discovery"], "last_contact": null, "sector_group": "tech"}, {"id": "colin_scott", "name": "Colin Scott", "type": "person", "sector": "fintech", "bcorp": false, "tier": 2, "status": "active", "role": "NatWest Group", "tags": ["active", "fintech", "tier-2", "running"], "last_contact": null, "sector_group": "finance"}, {"id": "susie_walker", "name": "Susie Walker", "type": "person", "sector": "tech", "bcorp": false, "tier": 2, "status": "active", "role": "People Director, Nile HQ", "tags": ["active", "tech", "tier-2", "people-ops"], "last_contact": null, "sector_group": "tech"}, {"id": "sharon_gillies", "name": "Sharon Gillies", "type": "person", "sector": "social", "bcorp": false, "tier": 2, "status": "target", "role": "Social Investment Scotland (COO)", "tags": ["target", "social", "tier-2"], "last_contact": null, "sector_group": "social"}, {"id": "sherry_coutu", "name": "Sherry Coutu", "type": "person", "sector": null, "bcorp": false, "tier": 1, "status": "target", "role": "ScaleUp Institute Founder", "tags": ["target", "tier-1", "scaleup"], "last_contact": null, "sector_group": "other"}, {"id": "alastair_davis", "name": "Alastair Davis OBE", "type": "person", "sector": "social", "bcorp": false, "tier": 1, "status": "target", "role": "Social Investment Scotland (CEO)", "tags": ["target", "social", "tier-1"], "last_contact": null, "sector_group": "social"}, {"id": "chun_ong", "name": "Chun Ong", "type": "person", "sector": "fintech", "bcorp": false, "tier": 2, "status": "target", "role": "BR-DGE (COO)", "tags": ["target", "fintech", "tier-2"], "last_contact": null, "sector_group": "finance"}, {"id": "nick", "name": "Nick Nabarro", "type": "person", "sector": "healthcare", "bcorp": false, "tier": 1, "status": "active", "role": "Problem Shared (Founder/CEO)", "tags": ["active", "healthcare", "tier-1", "scaleup", "priority-action", "companies-house-verified"], "last_contact": null, "sector_group": "health"}, {"id": "richard_george", "name": "Richard George", "type": "person", "sector": "tech", "bcorp": false, "tier": 2, "status": "active", "role": "Ways of Working Advisor / informal Change capacity at TAG \u2014 runs PMO workshops, advises ScriptRunner JS, John Moore's informal partner", "tags": ["tag-adaptavist", "advisor", "warm-peer"], "last_contact": null, "sector_group": "tech"}, {"id": "rebecca_moore", "name": "Rebecca Moore", "type": "person", "sector": null, "bcorp": false, "tier": 2, "status": "opportunity", "role": "COO at Macs Adventure (full-time), ex-COO Simple Online Healthcare", "tags": ["target", "tier-2", "scaleup", "ex-skyscanner"], "last_contact": null, "sector_group": "other"}, {"id": "mark_mclauchlan", "name": "Mark McLauchlan", "type": "person", "sector": null, "bcorp": false, "tier": 3, "status": "active", "role": "Drone startup founder (Middle East)", "tags": ["active", "tier-3", "ecorner"], "last_contact": null, "sector_group": "other"}, {"id": "claudia_wilson", "name": "Claudia Wilson", "type": "person", "sector": "tech", "bcorp": false, "tier": 2, "status": "new", "role": "Head of Talent Attraction, Waracle", "tags": ["new", "tier-2", "waracle", "hiring"], "last_contact": null, "sector_group": "tech"}, {"id": "lasbo", "name": "Lasbo", "type": "person", "sector": "tech", "bcorp": false, "tier": 2, "status": "dormant", "role": "Unknown, TAG", "tags": ["tag-adaptavist"], "last_contact": null, "sector_group": "tech"}, {"id": "gunars", "name": "Gunars", "type": "person", "sector": "tech", "bcorp": false, "tier": 2, "status": "active", "role": "UX/Research, TAG Services", "tags": ["active", "tag-adaptavist", "systems-thinker", "boundary-spanner"], "last_contact": "2026-02-02", "sector_group": "tech"}, {"id": "helen_tate", "name": "Helen Tate", "type": "person", "sector": "healthcare", "bcorp": false, "tier": 2, "status": "target", "role": "Barclays Eagle Labs - Head of Medtech Strategy & Partnerships", "tags": ["target", "healthcare", "tier-2", "eagle-labs"], "last_contact": null, "sector_group": "health"}, {"id": "nick_fine", "name": "Nick Fine", "type": "person", "sector": "tech", "bcorp": false, "tier": 2, "status": "active", "role": "UX Research / Product Development, TAG", "tags": ["tag-adaptavist", "ux-research", "product-development", "intelligence-source"], "last_contact": "2026-02-16", "sector_group": "tech"}, {"id": "jessica_lamb", "name": "Jessica Lamb", "type": "person", "sector": "healthcare", "bcorp": false, "tier": 3, "status": "target", "role": "Problem Shared (Director)", "tags": ["target", "healthcare", "tier-3", "companies-house-verified"], "last_contact": null, "sector_group": "health"}, {"id": "euan_andrews", "name": "Euan Andrews", "type": "person", "sector": null, "bcorp": false, "tier": 1, "status": "parked", "role": "CreateFuture CEO (50-75% owner)", "tags": ["parked", "tier-1", "scaleup"], "last_contact": null, "sector_group": "other"}, {"id": "shw", "name": "Simon Haighton-Williams", "type": "person", "sector": "tech", "bcorp": false, "tier": 2, "status": "dormant", "role": "CEO, Adaptavist / TAG", "tags": ["tag-adaptavist", "ceo"], "last_contact": null, "sector_group": "tech"}, {"id": "jonas", "name": "Jonas", "type": "person", "sector": "fintech", "bcorp": false, "tier": 3, "status": "active", "role": "Lloyds Banking Group", "tags": ["active", "fintech", "tier-3"], "last_contact": null, "sector_group": "finance"}, {"id": "dag_lee", "name": "Dag Lee", "type": "person", "sector": "tech, digital", "bcorp": false, "tier": 2, "status": "target", "role": "Nile HQ (CEO/Chairman)", "tags": ["target", "tech", "digital", "tier-2", "companies-house-verified", "scaleup"], "last_contact": null, "sector_group": "tech"}, {"id": "dave_mclure", "name": "Dave McLure", "type": "person", "sector": null, "bcorp": false, "tier": 1, "status": "target", "role": "GlobalScot Network", "tags": ["target", "tier-1"], "last_contact": null, "sector_group": "other"}, {"id": "kristina_philip", "name": "Kristina Philip", "type": "person", "sector": null, "bcorp": false, "tier": 2, "status": "pending", "role": "CreateFuture Head of Product (Director)", "tags": ["pending", "tier-2", "scaleup", "createfuture"], "last_contact": null, "sector_group": "other"}, {"id": "jonas_twitchen", "name": "Jonas Twitchen", "type": "person", "sector": "finance", "bcorp": false, "tier": 2, "status": "active", "role": "Group Innovation, Lloyds Banking Group", "tags": ["active", "finance", "tier-2", "innovation", "experimentation"], "last_contact": null, "sector_group": "finance"}, {"id": "ivo_fiennes", "name": "Ivo Fiennes", "type": "person", "sector": "healthcare, investment", "bcorp": false, "tier": 3, "status": "target", "role": "Problem Shared (Director)", "tags": ["target", "healthcare", "investment", "tier-3", "companies-house-verified", "notable-family"], "last_contact": null, "sector_group": "finance"}, {"id": "brian_coburn", "name": "Brian Coburn", "type": "person", "sector": "fintech", "bcorp": false, "tier": 2, "status": "target", "role": "BR-DGE (Founder)", "tags": ["target", "fintech", "tier-2"], "last_contact": null, "sector_group": "finance"}, {"id": "thomas_gillan", "name": "Thomas Gillan", "type": "person", "sector": "fintech", "bcorp": false, "tier": 2, "status": "target", "role": "BR-DGE (CEO)", "tags": ["target", "fintech", "tier-2"], "last_contact": null, "sector_group": "finance"}, {"id": "ewan", "name": "Ewan Cameron", "type": "person", "sector": "scale-up-operations", "bcorp": false, "tier": 0, "status": "self", "role": "VP Org Ops / Chief of Staff (seeking)", "tags": ["self", "ego-node", "tier-0"], "last_contact": null, "sector_group": "other"}, {"id": "mark_logan", "name": "Mark Logan", "type": "person", "sector": null, "bcorp": false, "tier": 1, "status": "target", "role": "Panel Vice-Chair, ex-Skyscanner CTO", "tags": ["target", "tier-1", "scaleup"], "last_contact": null, "sector_group": "other"}, {"id": "heather_tag", "name": "Heather", "type": "person", "sector": "tech", "bcorp": false, "tier": 2, "status": "dormant", "role": "Unknown, TAG", "tags": ["tag-adaptavist"], "last_contact": null, "sector_group": "tech"}, {"id": "charlie_johnston", "name": "Charlie Johnston", "type": "person", "sector": "healthcare", "bcorp": false, "tier": 2, "status": "pending", "role": "AROai Health / Paratus Executive", "tags": ["pending", "healthcare", "tier-2"], "last_contact": null, "sector_group": "health"}, {"id": "stuart_codebase", "name": "Stuart Chalmers", "type": "person", "sector": null, "bcorp": false, "tier": 2, "status": "target", "role": "CodeBase CEO", "tags": ["target", "tier-2"], "last_contact": null, "sector_group": "other"}, {"id": "graham_jones", "name": "Dr Graham Jones", "type": "person", "sector": "healthcare", "bcorp": false, "tier": 2, "status": "target", "role": "Care Sourcer/KareHero - COO", "tags": ["target", "healthcare", "tier-2", "scaleup", "eagle-labs"], "last_contact": null, "sector_group": "health"}, {"id": "bill", "name": "Bill", "type": "person", "sector": null, "bcorp": false, "tier": 3, "status": "active", "role": "Ex-Police/Scotland Yard", "tags": ["active", "tier-3"], "last_contact": null, "sector_group": "other"}, {"id": "paul_cutting", "name": "Paul Cutting", "type": "person", "sector": "tech", "bcorp": false, "tier": 1, "status": "active", "role": "Leadership, Upscale BU", "tags": ["active", "coachee", "tier-1", "tag-adaptavist"], "last_contact": "2026-03-11", "sector_group": "tech"}, {"id": "addy", "name": "Ahdul Farooq Mohammed", "type": "person", "sector": "healthcare", "bcorp": false, "tier": 2, "status": "parked", "role": "Simple Online Healthcare (CEO/Co-Founder)", "tags": ["parked", "healthcare", "tier-2", "scaleup"], "last_contact": null, "sector_group": "health"}, {"id": "dave_frontier", "name": "David Lyons (Dave)", "type": "person", "sector": "social", "bcorp": false, "tier": 2, "status": "active", "role": "Multimedia Reporter, Pioneers Post", "tags": ["active", "social", "tier-2", "media", "coll-diaspora"], "last_contact": null, "sector_group": "social"}, {"id": "morgan_kainth", "name": "Morgan Kainth", "type": "person", "sector": "tech", "bcorp": false, "tier": 2, "status": "active", "role": "Director of Strategy, Waracle", "tags": ["active", "tier-2", "warm-intro", "waracle", "ex-kc"], "last_contact": null, "sector_group": "tech"}, {"id": "martin_boyle", "name": "Martin Boyle", "type": "person", "sector": null, "bcorp": false, "tier": 2, "status": "target", "role": "CodeBase - VP Transformation", "tags": ["target", "tier-2"], "last_contact": null, "sector_group": "other"}, {"id": "russ_barr", "name": "Russ Barr", "type": "person", "sector": "saas", "bcorp": false, "tier": 2, "status": "active", "role": "", "tags": ["tag", "scriptrunner", "gm", "atlassian-ecosystem", "author"], "last_contact": null, "sector_group": "tech"}, {"id": "teeps", "name": "Teeps", "type": "person", "sector": null, "bcorp": false, "tier": 2, "status": "active", "role": "Friend, connector", "tags": ["active", "tier-2", "friend", "connector"], "last_contact": null, "sector_group": "other"}, {"id": "oren", "name": "Oren Smith-Carpenter", "type": "person", "sector": "deeptech", "bcorp": false, "tier": 2, "status": "target", "role": "Aurora Avionics (Co-founder/Director)", "tags": ["target", "deeptech", "tier-2", "scaleup", "companies-house-verified"], "last_contact": null, "sector_group": "tech"}, {"id": "sophie_tag", "name": "Sophie", "type": "person", "sector": "tech", "bcorp": false, "tier": 1, "status": "active", "role": "Chief of Staff to SHW, TAG", "tags": ["tag-adaptavist", "chief-of-staff", "intelligence-source"], "last_contact": "2026-02-05", "sector_group": "tech"}, {"id": "yari", "name": "Yari", "type": "person", "sector": "tech", "bcorp": false, "tier": 2, "status": "active", "role": "GM, Product at TAG", "tags": ["tag-adaptavist", "gm"], "last_contact": null, "sector_group": "tech"}, {"id": "sarah_stock", "name": "Sarah Stock", "type": "person", "sector": "healthcare, research, innovation", "bcorp": false, "tier": 1, "status": "active", "role": "Professor of Maternal & Fetal Health / Wellcome Leap Program Director", "tags": ["active", "healthcare", "research", "innovation", "tier-1", "companies-house-verified", "priority-action", "neighbour", "wellcome"], "last_contact": null, "sector_group": "health"}, {"id": "brian_holland", "name": "Brian Holland", "type": "person", "sector": "fintech", "bcorp": false, "tier": 2, "status": "active", "role": "NatWest Group (Consumer Duty)", "tags": ["active", "fintech", "tier-2", "running"], "last_contact": null, "sector_group": "finance"}, {"id": "shane", "name": "Shane Corstorphine", "type": "person", "sector": null, "bcorp": false, "tier": 1, "status": "parked", "role": "NowScaleIt Founder, ex-Skyscanner CGO", "tags": ["parked", "tier-1", "scaleup"], "last_contact": null, "sector_group": "other"}, {"id": "laura_thom", "name": "Laura Thom", "type": "person", "sector": "insurance", "bcorp": false, "tier": 2, "status": "pending", "role": "esure - TBC", "tags": ["target", "tier-2", "insurance", "glasgow", "warm-lead"], "last_contact": null, "sector_group": "other"}, {"id": "aleks_tomczyk", "name": "Aleks Tomczyk", "type": "person", "sector": "fintech", "bcorp": false, "tier": 1, "status": "pending", "role": "FinTech Scotland (CEO)", "tags": ["pending", "fintech", "tier-1"], "last_contact": null, "sector_group": "finance"}, {"id": "caroline_wylie", "name": "Caroline Wylie", "type": "person", "sector": "social", "bcorp": false, "tier": 2, "status": "target", "role": "Challenges Group (COO)", "tags": ["target", "social", "tier-2"], "last_contact": null, "sector_group": "social"}, {"id": "evelyn_simpson", "name": "Evelyn Simpson", "type": "person", "sector": "finance", "bcorp": false, "tier": 2, "status": "target", "role": "Investing Women Angels - Managing Director", "tags": ["target", "finance", "tier-2", "angel-investor", "eagle-labs"], "last_contact": null, "sector_group": "finance"}, {"id": "david_lowe", "name": "Prof. David Lowe", "type": "person", "sector": "healthcare", "bcorp": false, "tier": 1, "status": "pending", "role": "UoG / Scottish Govt / NHS", "tags": ["pending", "healthcare", "tier-1", "priority-action"], "last_contact": null, "sector_group": "health"}, {"id": "jamie_murray", "name": "Jamie Murray", "type": "person", "sector": "tech", "bcorp": false, "tier": 2, "status": "active", "role": "Client Partner, Waracle", "tags": ["active", "tier-2", "warm-intro", "edinburgh", "waracle"], "last_contact": null, "sector_group": "tech"}, {"id": "gael_drummond", "name": "Gael Drummond", "type": "person", "sector": "social", "bcorp": false, "tier": 2, "status": "target", "role": "Firstport (Group CEO)", "tags": ["target", "social", "tier-2"], "last_contact": null, "sector_group": "social"}, {"id": "gib_bulloch", "name": "Gib Bulloch", "type": "person", "sector": "social", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Founder, Craigberoch Decelerator / Author \"The Intrapreneur\"", "tags": ["ecosystem", "social", "tier-3"], "last_contact": null, "sector_group": "social"}, {"id": "myles", "name": "Myles Bax", "type": "person", "sector": "deeptech", "bcorp": false, "tier": 2, "status": "active", "role": "Aurora Avionics - Commercial Lead", "tags": ["active", "deeptech", "tier-2"], "last_contact": null, "sector_group": "tech"}, {"id": "yasmin", "name": "Yasmin Sulaiman", "type": "person", "sector": null, "bcorp": false, "tier": 1, "status": "active", "role": "CodeBase - SVP Strategic Partnerships", "tags": ["active", "tier-1"], "last_contact": null, "sector_group": "other"}, {"id": "joe_tebbutt", "name": "Joe Tebbutt", "type": "person", "sector": null, "bcorp": false, "tier": 2, "status": "target", "role": "CreateFuture Board (PE representative)", "tags": ["target", "tier-2"], "last_contact": null, "sector_group": "other"}, {"id": "sarah_ronald", "name": "Sarah Ronald", "type": "person", "sector": "tech, digital", "bcorp": false, "tier": 2, "status": "target", "role": "Nile HQ (Founder)", "tags": ["target", "tech", "digital", "tier-2", "companies-house-verified", "scaleup", "founder"], "last_contact": null, "sector_group": "tech"}, {"id": "datalab", "name": "The Data Lab", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "target", "role": "Data Science Innovation Centre", "tags": ["target", "tier-2"], "last_contact": null, "sector_group": "other"}, {"id": "scaleup_panel", "name": "Scottish Scale-Up Panel", "type": "organization", "sector": null, "bcorp": false, "tier": 1, "status": "active", "role": "Ecosystem Advisory Body", "tags": ["active", "tier-1", "scaleup"], "last_contact": null, "sector_group": "other"}, {"id": "dsl_business_finance", "name": "DSL Business Finance", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Investor", "tags": ["ecosystem", "investor"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "esure", "name": "esure Group", "type": "organization", "sector": "insurance", "bcorp": false, "tier": 2, "status": "active", "role": "Insurance - Digital Personal Lines", "tags": ["active", "tier-2", "insurance", "glasgow", "acquired"], "last_contact": null, "sector_group": "other"}, {"id": "tribe_porty", "name": "Tribe Porty", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Coworking", "tags": ["ecosystem", "coworking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "scaleup_institute", "name": "ScaleUp Institute", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "target", "role": "Methodology & Benchmarking", "tags": ["target", "tier-2", "scaleup"], "last_contact": null, "sector_group": "other"}, {"id": "endura", "name": "Endura ltd", "type": "organization", "sector": "other", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "other"], "last_contact": null, "sector_group": "bcorp"}, {"id": "vegware", "name": "Vegware", "type": "organization", "sector": "other", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "other"], "last_contact": null, "sector_group": "bcorp"}, {"id": "nmis", "name": "National Manufacturing Institute Scotland", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Manufacturing", "tags": ["ecosystem", "manufacturing"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "higgs_centre", "name": "The Higgs Centre for Innovation", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Space", "tags": ["ecosystem", "space"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "source_developments_scotland", "name": "Source Developments Scotland Ltd.", "type": "organization", "sector": "other", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "other"], "last_contact": null, "sector_group": "bcorp"}, {"id": "tbco_retail", "name": "TBCo Retail Ltd", "type": "organization", "sector": "retail", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "retail"], "last_contact": null, "sector_group": "bcorp"}, {"id": "biodundee", "name": "BioDundee", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "hunter_foundation", "name": "The Hunter Foundation", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "target", "role": "Scale-Up Leadership Programme", "tags": ["target", "tier-2", "scaleup"], "last_contact": null, "sector_group": "other"}, {"id": "growbiz", "name": "GrowBiz Scotland", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "peoples_postcode_lottery", "name": "People's Postcode Lottery", "type": "organization", "sector": "social", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Charity Lottery / Social Enterprise Funder", "tags": ["ecosystem", "social", "investor", "tier-3"], "last_contact": null, "sector_group": "social"}, {"id": "the_dragonfly_agency", "name": "The Dragonfly Agency Limited", "type": "organization", "sector": "tech", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "tech"], "last_contact": null, "sector_group": "bcorp"}, {"id": "iod_scotland", "name": "Institute of Directors Scotland", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "location_data_scotland", "name": "Location Data Scotland", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Data", "tags": ["ecosystem", "data"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "uk_export_finance", "name": "UK Export Finance", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Public Sector", "tags": ["ecosystem", "public_sector"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "effective_hospitality_management", "name": "Effective Hospitality Management Ltd.", "type": "organization", "sector": "food_drink", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "food-drink"], "last_contact": null, "sector_group": "bcorp"}, {"id": "scottish_space_network", "name": "Scottish Space Network", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Space", "tags": ["ecosystem", "space"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "informatics_ventures", "name": "Informatics Ventures / EIE", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "target", "role": "Investor Network", "tags": ["target", "tier-2"], "last_contact": null, "sector_group": "other"}, {"id": "xdesign", "name": "CreateFuture (fka xDesign)", "type": "organization", "sector": null, "bcorp": false, "tier": 1, "status": "parked", "role": "Digital Transformation (PE-backed)", "tags": ["parked", "tier-1", "scaleup"], "last_contact": null, "sector_group": "other"}, {"id": "sulsa", "name": "Scottish Universities Life Sciences Alliance", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Life Sciences", "tags": ["ecosystem", "life_sciences"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "brdge", "name": "BR-DGE (Comcarde Ltd)", "type": "organization", "sector": "fintech", "bcorp": false, "tier": 1, "status": "target", "role": "Payment Orchestration Fintech", "tags": ["target", "fintech", "tier-1", "scaleup", "priority-action"], "last_contact": null, "sector_group": "finance"}, {"id": "fdf_scotland", "name": "Food and Drink Federation Scotland", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Food Drink", "tags": ["ecosystem", "food_drink"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "innovate_uk", "name": "Innovate UK", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Public Sector", "tags": ["ecosystem", "public_sector"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "mint_ventures", "name": "Mint Ventures", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Investor", "tags": ["ecosystem", "investor"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "business_gateway", "name": "Business Gateway", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Public Sector", "tags": ["ecosystem", "public_sector"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "gabriel_investments", "name": "Gabriel Investments", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Investor", "tags": ["ecosystem", "investor"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "rabbie_s", "name": "Rabbie's", "type": "organization", "sector": "other", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "other"], "last_contact": null, "sector_group": "bcorp"}, {"id": "sruc", "name": "Scotland's Rural College", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Agriculture", "tags": ["ecosystem", "agriculture"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "coco_chocolatier_up_up_otherly", "name": "COCO Chocolatier / UP-UP / OTHERLY", "type": "organization", "sector": "other", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "other"], "last_contact": null, "sector_group": "bcorp"}, {"id": "ceis", "name": "CEIS", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Social Enterprise", "tags": ["ecosystem", "social_enterprise"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "gcid", "name": "Glasgow City Innovation District", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Innovation", "tags": ["ecosystem", "innovation"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "womens_enterprise_scotland", "name": "Women's Enterprise Scotland", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "scale_up_scotland", "name": "Scale Up Scotland", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Scaleup", "tags": ["ecosystem", "scaleup"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "aurora", "name": "Aurora Avionics", "type": "organization", "sector": "deeptech", "bcorp": false, "tier": 2, "status": "active", "role": "Space Tech Scale-Up", "tags": ["active", "deeptech", "tier-2", "scaleup", "companies-house-verified"], "last_contact": null, "sector_group": "tech"}, {"id": "entrepreneurial_scotland", "name": "Entrepreneurial Scotland", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "target", "role": "Leadership Network", "tags": ["target", "tier-2"], "last_contact": null, "sector_group": "other"}, {"id": "rbs_accelerator", "name": "The Royal Bank of Scotland Accelerator", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Accelerator", "tags": ["ecosystem", "accelerator"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "strathclyde_gap", "name": "Strathclyde GAP", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "target", "role": "Growth Advantage Programme", "tags": ["target", "tier-2"], "last_contact": null, "sector_group": "other"}, {"id": "scottish_chambers", "name": "Scottish Chambers of Commerce", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "alpha_data_parallel", "name": "Alpha Data Parallel Systems", "type": "organization", "sector": "deeptech", "bcorp": false, "tier": 3, "status": "target", "role": "Computing Hardware/IT Services", "tags": ["target", "deeptech", "tier-3", "scaleup", "companies-house-discovery"], "last_contact": null, "sector_group": "tech"}, {"id": "business_women_scotland", "name": "Business Women Scotland", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "illuminate_technology", "name": "Illuminate Technology", "type": "organization", "sector": "tech", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "tech"], "last_contact": null, "sector_group": "bcorp"}, {"id": "inverclyde_council", "name": "Business Development Team - Inverclyde Council", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Public Sector", "tags": ["ecosystem", "public_sector"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "knowvate_hub", "name": "KnowVate Hub", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "gsen", "name": "Glasgow Social Enterprise Network", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Social Enterprise", "tags": ["ecosystem", "social_enterprise"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "startup_grind_glasgow", "name": "Startup Grind Glasgow", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "bawe_scotland", "name": "British Association of Women Entrepreneurs Scotland", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "venture_scotland", "name": "Venture Scotland", "type": "organization", "sector": "social_enterprise", "bcorp": false, "tier": 3, "status": "", "role": "accelerator", "tags": ["social-enterprise", "charity"], "last_contact": null, "sector_group": "social"}, {"id": "the_hive", "name": "The HIVE", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Accelerator", "tags": ["ecosystem", "accelerator"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "scotlandis", "name": "ScotlandIS", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "target", "role": "Tech Trade Body", "tags": ["target", "tier-2"], "last_contact": null, "sector_group": "other"}, {"id": "democratic_finance", "name": "Democratic Finance Scotland", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Investor", "tags": ["ecosystem", "investor"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "good_loop", "name": "Good-Loop", "type": "organization", "sector": "tech", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "tech"], "last_contact": null, "sector_group": "bcorp"}, {"id": "ou_scotland", "name": "The Open University in Scotland", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "University", "tags": ["ecosystem", "university"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "axios_systems", "name": "Axios Systems", "type": "organization", "sector": null, "bcorp": false, "tier": 3, "status": "target", "role": "Software Development", "tags": ["target", "tier-3", "scaleup", "companies-house-discovery"], "last_contact": null, "sector_group": "other"}, {"id": "creative_scotland", "name": "Creative Scotland", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Creative", "tags": ["ecosystem", "creative"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "pioneers_post", "name": "Pioneers Post", "type": "organization", "sector": "social", "bcorp": false, "tier": 3, "status": "context", "role": "", "tags": ["social", "media", "context"], "last_contact": null, "sector_group": "social"}, {"id": "mys_asset_management", "name": "Mys Asset Management", "type": "organization", "sector": "property", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "property"], "last_contact": null, "sector_group": "bcorp"}, {"id": "scottish_business_network", "name": "Scottish Business Network", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "sose", "name": "South of Scotland Enterprise", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Public Sector", "tags": ["ecosystem", "public_sector"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "creative_edinburgh", "name": "Creative Edinburgh", "type": "organization", "sector": "Support", "bcorp": false, "tier": 3, "status": "context", "role": "Creative Industries Network", "tags": ["context", "tier-3", "creative", "edinburgh", "charity"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "sisaltech", "name": "Sisaltech Ltd.", "type": "organization", "sector": "other", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "other"], "last_contact": null, "sector_group": "bcorp"}, {"id": "techscaler", "name": "TechScaler", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "target", "role": "Talent Development", "tags": ["target", "tier-2"], "last_contact": null, "sector_group": "other"}, {"id": "east_renfrewshire_accelerator", "name": "East Renfrewshire Accelerator", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Accelerator", "tags": ["ecosystem", "accelerator"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "farrpoint", "name": "FarrPoint", "type": "organization", "sector": "tech", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "tech"], "last_contact": null, "sector_group": "bcorp"}, {"id": "equity_gap", "name": "Equity Gap", "type": "organization", "sector": "Investment", "bcorp": false, "tier": 2, "status": "target", "role": "Angel Investment Syndicate", "tags": ["target", "tier-2", "investor", "edinburgh", "angel"], "last_contact": null, "sector_group": "finance"}, {"id": "strathclyde_inspire", "name": "Strathclyde Inspire", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "University", "tags": ["ecosystem", "university"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "pathways_forward", "name": "Pathways Forward", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "travelnest", "name": "TravelNest", "type": "organization", "sector": "travel", "bcorp": false, "tier": 3, "status": "context", "role": "Travel Tech (Acquired)", "tags": ["context", "travel", "tier-3", "acquired"], "last_contact": null, "sector_group": "other"}, {"id": "bobbai", "name": "BobbAI", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Ai", "tags": ["ecosystem", "ai"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "horizon_scotland", "name": "Horizon Scotland", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Coworking", "tags": ["ecosystem", "coworking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "lane_media", "name": "Lane Media", "type": "organization", "sector": "tech", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "tech"], "last_contact": null, "sector_group": "bcorp"}, {"id": "techstart_ventures", "name": "Techstart Ventures", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Investor", "tags": ["ecosystem", "investor"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "macs_adventure", "name": "Macs Adventure", "type": "organization", "sector": "travel", "bcorp": false, "tier": 1, "status": "opportunity", "role": "Self-Guided Adventure Tours", "tags": ["tier-1", "scaleup", "travel", "opportunity", "hot-lead"], "last_contact": null, "sector_group": "other"}, {"id": "mdmc", "name": "Medical Device Manufacturing Centre", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Medtech", "tags": ["ecosystem", "medtech"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "love_electric_financial_services", "name": "Love Electric Financial Services Ltd", "type": "organization", "sector": "other", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "other"], "last_contact": null, "sector_group": "bcorp"}, {"id": "mercat_tours", "name": "Mercat Tours Ltd", "type": "organization", "sector": "other", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "other"], "last_contact": null, "sector_group": "bcorp"}, {"id": "bioliberty", "name": "Bioliberty", "type": "organization", "sector": "healthcare", "bcorp": false, "tier": 2, "status": "target", "role": "Rehabilitative Robotics", "tags": ["target", "healthcare", "tier-2", "scaleup"], "last_contact": null, "sector_group": "health"}, {"id": "abventures", "name": "ABVentures - University of Aberdeen", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "University", "tags": ["ecosystem", "university"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "simple_online", "name": "Simple Online Healthcare", "type": "organization", "sector": "healthcare", "bcorp": false, "tier": 1, "status": "parked", "role": "Digital Pharmacy (Debt-free)", "tags": ["parked", "healthcare", "tier-1", "scaleup"], "last_contact": null, "sector_group": "health"}, {"id": "firstport", "name": "Firstport", "type": "organization", "sector": "social", "bcorp": false, "tier": 2, "status": "target", "role": "Social Enterprise Support", "tags": ["target", "social", "tier-2"], "last_contact": null, "sector_group": "social"}, {"id": "uoe_innovation", "name": "The University of Edinburgh", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "University", "tags": ["ecosystem", "university"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "skillfluence", "name": "Skillfluence", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Education", "tags": ["ecosystem", "education"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "elevator", "name": "Elevator", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Accelerator", "tags": ["ecosystem", "accelerator"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "peer_works", "name": "Peer Works", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "scottish_enterprise", "name": "Scottish Enterprise", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "target", "role": "Economic Development Agency", "tags": ["target", "tier-2"], "last_contact": null, "sector_group": "other"}, {"id": "censis", "name": "CENSIS", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Iot", "tags": ["ecosystem", "iot"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "beer52", "name": "Beer52", "type": "organization", "sector": "retail", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "retail"], "last_contact": null, "sector_group": "bcorp"}, {"id": "nature_inspired", "name": "Nature Inspired LTD t/a Zebra Growth", "type": "organization", "sector": "tech", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "tech"], "last_contact": null, "sector_group": "bcorp"}, {"id": "aridhia", "name": "Aridhia", "type": "organization", "sector": "healthcare", "bcorp": false, "tier": 2, "status": "target", "role": "Health Data Analytics Platform", "tags": ["target", "healthcare", "tier-2", "scaleup"], "last_contact": null, "sector_group": "health"}, {"id": "pawprint", "name": "Pawprint", "type": "organization", "sector": "tech", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "tech"], "last_contact": null, "sector_group": "bcorp"}, {"id": "greenbackers", "name": "Greenbackers Investment Capital", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Investor", "tags": ["ecosystem", "investor"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "problem_shared", "name": "Problem Shared", "type": "organization", "sector": "healthcare", "bcorp": false, "tier": 1, "status": "active", "role": "Healthcare Scale-Up", "tags": ["active", "healthcare", "tier-1", "scaleup", "companies-house-verified"], "last_contact": null, "sector_group": "health"}, {"id": "rationale", "name": "Rationale", "type": "organization", "sector": "tech", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "tech"], "last_contact": null, "sector_group": "bcorp"}, {"id": "chamber", "name": "Edinburgh Chamber", "type": "organization", "sector": null, "bcorp": false, "tier": 3, "status": "target", "role": "Business Network", "tags": ["target", "tier-3"], "last_contact": null, "sector_group": "other"}, {"id": "natwest", "name": "NatWest Group", "type": "organization", "sector": "fintech", "bcorp": false, "tier": 2, "status": "active", "role": "Enterprise Financial Services", "tags": ["active", "fintech", "tier-2"], "last_contact": null, "sector_group": "finance"}, {"id": "scfdi", "name": "Scottish Centre for Food Development and Innovation", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Food Drink", "tags": ["ecosystem", "food_drink"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "beyond_green_advisors", "name": "Beyond Green Advisors Ltd", "type": "organization", "sector": "tech", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "tech"], "last_contact": null, "sector_group": "bcorp"}, {"id": "soho_square_capital", "name": "Soho Square Capital LLP", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "target", "role": "Private Equity (CreateFuture backer)", "tags": ["target", "tier-2"], "last_contact": null, "sector_group": "other"}, {"id": "social_hub_glasgow", "name": "The Social Hub Glasgow", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Coworking", "tags": ["ecosystem", "coworking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "par_equity", "name": "Par Equity", "type": "organization", "sector": "Investment", "bcorp": true, "tier": 2, "status": "target", "role": "Venture Capital Firm", "tags": ["target", "tier-2", "investor", "vc", "edinburgh", "bcorp"], "last_contact": null, "sector_group": "bcorp"}, {"id": "discovery_investment", "name": "Discovery Investment Fund", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Investor", "tags": ["ecosystem", "investor"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "dhi", "name": "Digital Health & Care Innovation Centre", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Health", "tags": ["ecosystem", "health"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "vianet", "name": "Vianet", "type": "organization", "sector": null, "bcorp": false, "tier": 3, "status": "target", "role": "Data Processing/Hosting", "tags": ["target", "tier-3", "scaleup", "companies-house-discovery"], "last_contact": null, "sector_group": "other"}, {"id": "flexible_working_scotland", "name": "Flexible Working Scotland", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "ecorner", "name": "eCorner", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "active", "role": "Weekly Networking", "tags": ["active", "tier-2"], "last_contact": null, "sector_group": "other"}, {"id": "stoane_lighting", "name": "Stoane Lighting", "type": "organization", "sector": "other", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "other"], "last_contact": null, "sector_group": "bcorp"}, {"id": "aroai", "name": "AROai Health", "type": "organization", "sector": "healthcare", "bcorp": false, "tier": 2, "status": "pending", "role": "Healthcare / Wellbeing Tech", "tags": ["pending", "healthcare", "tier-2"], "last_contact": null, "sector_group": "health"}, {"id": "forge_holiday", "name": "Forge Holiday Group (Sykes)", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "parked", "role": "Holiday Rentals (PE-backed)", "tags": ["parked", "tier-2", "scaleup"], "last_contact": null, "sector_group": "other"}, {"id": "social_enterprise_scotland", "name": "Social Enterprise Scotland", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Social Enterprise", "tags": ["ecosystem", "social_enterprise"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "snib", "name": "SNIB", "type": "organization", "sector": "fintech", "bcorp": false, "tier": 1, "status": "target", "role": "Scottish National Investment Bank", "tags": ["target", "fintech", "tier-1"], "last_contact": null, "sector_group": "finance"}, {"id": "dasa", "name": "Defence and Security Accelerator", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Defence", "tags": ["ecosystem", "defence"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "always_be_content", "name": "Always Be Content Limited", "type": "organization", "sector": "tech", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "tech"], "last_contact": null, "sector_group": "bcorp"}, {"id": "best", "name": "Built Environment - Smarter Transformation", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Construction", "tags": ["ecosystem", "construction"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "converge", "name": "Converge", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "target", "role": "University Spin-Out Support", "tags": ["target", "tier-2"], "last_contact": null, "sector_group": "other"}, {"id": "ventures_lab", "name": "The Ventures Lab by Challenges Group", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Accelerator", "tags": ["ecosystem", "accelerator"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "pioneer_group", "name": "Pioneer Group", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Innovation", "tags": ["ecosystem", "innovation"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "sis", "name": "Social Investment Scotland", "type": "organization", "sector": "social", "bcorp": false, "tier": 2, "status": "target", "role": "Social Finance", "tags": ["target", "social", "tier-2"], "last_contact": null, "sector_group": "social"}, {"id": "occupancy_marketing", "name": "Occupancy Marketing Ltd. T/A 80 DAYS", "type": "organization", "sector": "tech", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "tech"], "last_contact": null, "sector_group": "bcorp"}, {"id": "ycf_scotland", "name": "Young Company Finance Scotland", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Investor", "tags": ["ecosystem", "investor"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "civtech", "name": "CivTech", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "target", "role": "Gov Tech Accelerator", "tags": ["target", "tier-2"], "last_contact": null, "sector_group": "other"}, {"id": "uog_research", "name": "University of Glasgow", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "University", "tags": ["ecosystem", "university"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "albany_hr", "name": "Albany HR", "type": "organization", "sector": "tech", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "tech"], "last_contact": null, "sector_group": "bcorp"}, {"id": "maven", "name": "Maven Capital Partners", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Investor", "tags": ["ecosystem", "investor"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "sabc", "name": "Scottish Asian Business Chamber", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "canongate_books", "name": "Canongate Books", "type": "organization", "sector": "other", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "other"], "last_contact": null, "sector_group": "bcorp"}, {"id": "consider_it", "name": "Consider IT", "type": "organization", "sector": "tech", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "tech"], "last_contact": null, "sector_group": "bcorp"}, {"id": "cyberquarter", "name": "Abertay cyberQuarter", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Cyber", "tags": ["ecosystem", "cyber"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "lsip", "name": "London & Scottish Investment Partners", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Investor", "tags": ["ecosystem", "investor"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "james_hutton_institute", "name": "The James Hutton Institute", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Coworking", "tags": ["ecosystem", "coworking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "extraordinary_managed_services", "name": "Extraordinary Managed Services", "type": "organization", "sector": null, "bcorp": false, "tier": 3, "status": "target", "role": "Data Hosting/Managed Services", "tags": ["target", "tier-3", "scaleup", "companies-house-discovery"], "last_contact": null, "sector_group": "other"}, {"id": "angel_capital_scotland", "name": "Angel Capital Scotland", "type": "organization", "sector": "Investment", "bcorp": false, "tier": 3, "status": "target", "role": "Business Angel Network", "tags": ["target", "tier-3", "investor", "network"], "last_contact": null, "sector_group": "finance"}, {"id": "skyscanner", "name": "Skyscanner", "type": "organization", "sector": null, "bcorp": false, "tier": 1, "status": "target", "role": "Travel Tech Unicorn (Scottish Success Story)", "tags": ["tier-1", "scaleup", "alumni-network"], "last_contact": null, "sector_group": "other"}, {"id": "appointedd", "name": "Appointedd", "type": "organization", "sector": "tech", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "tech"], "last_contact": null, "sector_group": "bcorp"}, {"id": "foxglove_offices", "name": "Foxglove Offices", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Coworking", "tags": ["ecosystem", "coworking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "ceteris", "name": "Ceteris", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Support", "tags": ["ecosystem", "support"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "rgu_eig", "name": "RGU Entrepreneurship & Innovation Group", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "University", "tags": ["ecosystem", "university"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "nztc", "name": "Net Zero Technology Centre", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Energy", "tags": ["ecosystem", "energy"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "sds", "name": "Skills Development Scotland", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "target", "role": "National Skills Agency", "tags": ["target", "tier-2"], "last_contact": null, "sector_group": "other"}, {"id": "ibioic", "name": "Industrial Biotechnology Innovation Centre", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Biotech", "tags": ["ecosystem", "biotech"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "one_tech_hub", "name": "ONE Tech Hub", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Tech", "tags": ["ecosystem", "tech"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "foresight_group", "name": "Foresight Group", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Investor", "tags": ["ecosystem", "investor"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "kings_trust_scotland", "name": "The King's Trust Scotland", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Youth", "tags": ["ecosystem", "youth"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "women_ahead", "name": "Women Ahead", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "muckle_brig", "name": "Muckle Brig", "type": "organization", "sector": "other", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "other"], "last_contact": null, "sector_group": "bcorp"}, {"id": "adaptavist_tag", "name": "Adaptavist / TAG", "type": "organization", "sector": "tech", "bcorp": false, "tier": 1, "status": "active", "role": "AI Innovation Hub / Atlassian Ecosystem", "tags": ["active", "client", "tier-1", "tag-adaptavist"], "last_contact": null, "sector_group": "tech"}, {"id": "venture_cafe", "name": "Venture Cafe Edinburgh", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "target", "role": "Networking Event", "tags": ["target", "tier-2", "networking"], "last_contact": null, "sector_group": "other"}, {"id": "st_andrews_innovation", "name": "St Andrews Innovation", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "University", "tags": ["ecosystem", "university"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "melting_pot", "name": "The Melting Pot", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Coworking", "tags": ["ecosystem", "coworking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "heriot_watt", "name": "Heriot-Watt University", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "University", "tags": ["ecosystem", "university"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "live_it_group", "name": "LIVE IT GROUP", "type": "organization", "sector": "tech", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "tech"], "last_contact": null, "sector_group": "bcorp"}, {"id": "muckle_media", "name": "Muckle media", "type": "organization", "sector": "other", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "other"], "last_contact": null, "sector_group": "bcorp"}, {"id": "scottish_edge", "name": "Scottish Edge", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "target", "role": "Scale-Up Competition/Funding", "tags": ["target", "tier-2"], "last_contact": null, "sector_group": "other"}, {"id": "ryden", "name": "Ryden", "type": "organization", "sector": "tech", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "tech"], "last_contact": null, "sector_group": "bcorp"}, {"id": "eagle_labs", "name": "Barclays Eagle Labs", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "active", "role": "Accelerator/Mentoring", "tags": ["active", "tier-2"], "last_contact": null, "sector_group": "other"}, {"id": "yourgb_events", "name": "YOURGB EVENTS LTD", "type": "organization", "sector": "tech", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "tech"], "last_contact": null, "sector_group": "bcorp"}, {"id": "midlothian_science_zone", "name": "Midlothian Science Zone", "type": "organization", "sector": "Life Sciences/Tech", "bcorp": false, "tier": 3, "status": "context", "role": "Science Parks Cluster", "tags": ["context", "tier-3", "science-park", "midlothian", "edinburgh-region"], "last_contact": null, "sector_group": "health"}, {"id": "scotlands_migration_service", "name": "Scotland's Migration Service", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Public Sector", "tags": ["ecosystem", "public_sector"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "moo_and_yoo", "name": "Moo and Yoo", "type": "organization", "sector": "retail", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "retail"], "last_contact": null, "sector_group": "bcorp"}, {"id": "fintech_scotland", "name": "FinTech Scotland", "type": "organization", "sector": "fintech", "bcorp": false, "tier": 2, "status": "target", "role": "FinTech Ecosystem", "tags": ["target", "fintech", "tier-2"], "last_contact": null, "sector_group": "finance"}, {"id": "aberdeenshire_council", "name": "Aberdeenshire Council", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Public Sector", "tags": ["ecosystem", "public_sector"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "perigon_partners", "name": "Perigon Partners Ltd", "type": "organization", "sector": "tech", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "tech"], "last_contact": null, "sector_group": "bcorp"}, {"id": "fse_group", "name": "The FSE Group", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Investor", "tags": ["ecosystem", "investor"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "investing_women", "name": "Investing Women Angels", "type": "organization", "sector": "finance", "bcorp": false, "tier": 3, "status": "", "role": "investor", "tags": ["finance", "angel-investor"], "last_contact": null, "sector_group": "finance"}, {"id": "bell_street_ventures", "name": "Bell Street Ventures - Abertay University", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "University", "tags": ["ecosystem", "university"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "epidarex", "name": "Epidarex Capital", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Investor", "tags": ["ecosystem", "investor"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "purelifi", "name": "pureLiFi", "type": "organization", "sector": "deeptech", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Deep Tech / LiFi", "tags": ["ecosystem", "deeptech", "scaleup"], "last_contact": null, "sector_group": "tech"}, {"id": "highland_business_women", "name": "Highland Business Women", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "eos", "name": "Eos", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Investor", "tags": ["ecosystem", "investor"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "womens_business_club", "name": "Women's Business Club", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "one_biohub", "name": "ONE BioHub", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Life Sciences", "tags": ["ecosystem", "life_sciences"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "dundee_entrepreneurship", "name": "Centre for Entrepreneurship - University of Dundee", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "University", "tags": ["ecosystem", "university"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "rae_enterprise_hub", "name": "Royal Academy of Engineering Enterprise Hub", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Engineering", "tags": ["ecosystem", "engineering"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "saba", "name": "Scottish Asian Business Association", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "bgf", "name": "BGF", "type": "organization", "sector": "Investment", "bcorp": false, "tier": 2, "status": "target", "role": "Growth Equity Investor", "tags": ["target", "tier-2", "investor", "growth-equity"], "last_contact": null, "sector_group": "finance"}, {"id": "gcu_hub", "name": "GCU Entrepreneurial Hub", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "University", "tags": ["ecosystem", "university"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "abventure_zone", "name": "ABVenture Zone - University of Aberdeen", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "University", "tags": ["ecosystem", "university"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "dechomai", "name": "Dechomai", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "accelerateher", "name": "AccelerateHER", "type": "organization", "sector": "Support", "bcorp": false, "tier": 3, "status": "context", "role": "Women Founders Network", "tags": ["context", "tier-3", "network", "diversity"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "wendy_morrison_design", "name": "Wendy Morrison Design", "type": "organization", "sector": "retail", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "retail"], "last_contact": null, "sector_group": "bcorp"}, {"id": "vistage", "name": "Vistage International UK", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "rds", "name": "Research Data Scotland", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Data", "tags": ["ecosystem", "data"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "efi", "name": "Edinburgh Futures Institute", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "active", "role": "University/Ecosystem Hub", "tags": ["active", "tier-2"], "last_contact": null, "sector_group": "other"}, {"id": "ip_hatch", "name": "IP Hatch - City of Glasgow College", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Education", "tags": ["ecosystem", "education"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "one_stone", "name": "One Stone Advisors", "type": "organization", "sector": "social", "bcorp": true, "tier": 2, "status": "target", "role": "Sustainability Consulting", "tags": ["target", "social", "tier-2", "bcorp", "edinburgh"], "last_contact": null, "sector_group": "bcorp"}, {"id": "datakirk", "name": "The DataKirk", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Data", "tags": ["ecosystem", "data"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "grid", "name": "Glasgow Riverside Innovation District", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Innovation", "tags": ["ecosystem", "innovation"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "intelligent_growth_solutions", "name": "Intelligent Growth Solutions Limited", "type": "organization", "sector": "other", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "other"], "last_contact": null, "sector_group": "bcorp"}, {"id": "treestory", "name": "TreeStory Limited", "type": "organization", "sector": "tech", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "tech"], "last_contact": null, "sector_group": "bcorp"}, {"id": "circularity_capital", "name": "Circularity Capital LLP", "type": "organization", "sector": "other", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "other"], "last_contact": null, "sector_group": "bcorp"}, {"id": "one", "name": "Opportunity North East", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Public Sector", "tags": ["ecosystem", "public_sector"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "panoramic", "name": "Panoramic", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Investor", "tags": ["ecosystem", "investor"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "tech_scotland_advocates", "name": "Tech Scotland Advocates", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Tech", "tags": ["ecosystem", "tech"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "scale_up_consulting", "name": "Scale Up Consulting (NowScaleIt)", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "active", "role": "Founder Coaching (Shane's company)", "tags": ["active", "tier-2", "scaleup"], "last_contact": null, "sector_group": "other"}, {"id": "bright_red_triangle", "name": "Bright Red Triangle", "type": "organization", "sector": "Education/Support", "bcorp": false, "tier": 3, "status": "context", "role": "University Enterprise Support", "tags": ["context", "tier-3", "university", "edinburgh"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "creative_dundee", "name": "Creative Dundee", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Creative", "tags": ["ecosystem", "creative"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "ember", "name": "Ember", "type": "organization", "sector": "deeptech", "bcorp": false, "tier": 2, "status": "target", "role": "Climate Tech Scale-Up", "tags": ["target", "deeptech", "tier-2", "scaleup"], "last_contact": null, "sector_group": "tech"}, {"id": "collabor8te", "name": "Collabor8te", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Coworking", "tags": ["ecosystem", "coworking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "codebase", "name": "CodeBase", "type": "organization", "sector": null, "bcorp": false, "tier": 1, "status": "active", "role": "Tech Incubation Hub", "tags": ["active", "tier-1"], "last_contact": null, "sector_group": "other"}, {"id": "hunter_centre", "name": "Hunter Centre for Entrepreneurship", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "University", "tags": ["ecosystem", "university"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "stirling_enterprise", "name": "University of Stirling Enterprise Programme", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "University", "tags": ["ecosystem", "university"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "care_sourcer", "name": "Care Sourcer / KareHero", "type": "organization", "sector": "healthcare", "bcorp": false, "tier": 3, "status": "", "role": "scaleup", "tags": ["healthcare", "scaleup"], "last_contact": null, "sector_group": "health"}, {"id": "trogenix", "name": "Trogenix", "type": "organization", "sector": "Life Sciences", "bcorp": false, "tier": 3, "status": "watch", "role": "Biotech Spinout", "tags": ["watch", "tier-3", "biotech", "edinburgh", "spinout", "university", "series-a"], "last_contact": null, "sector_group": "health"}, {"id": "green_angel_ventures", "name": "Green Angel Ventures", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Investor", "tags": ["ecosystem", "investor"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "girl_geek_scotland", "name": "Girl Geek Scotland", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "scotland_house_london", "name": "Scotland House London", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Coworking", "tags": ["ecosystem", "coworking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "ceed_scotland", "name": "CeeD Scotland", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "impact_hub_inverness", "name": "Impact Hub Inverness", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Coworking", "tags": ["ecosystem", "coworking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "old_college_capital", "name": "Old College Capital", "type": "organization", "sector": "Venture Capital", "bcorp": false, "tier": 3, "status": "watch", "role": "University VC Fund", "tags": ["watch", "tier-3", "vc", "university", "edinburgh"], "last_contact": null, "sector_group": "finance"}, {"id": "msip", "name": "Michelin Scotland Innovation Parc", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Manufacturing", "tags": ["ecosystem", "manufacturing"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "roslin_innovation", "name": "Roslin Innovation Centre", "type": "organization", "sector": "Life Sciences", "bcorp": false, "tier": 3, "status": "context", "role": "Life Sciences Innovation Hub", "tags": ["context", "tier-3", "life-sciences", "edinburgh", "innovation"], "last_contact": null, "sector_group": "health"}, {"id": "foras", "name": "Foras", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "entrepreneurial_spark", "name": "Entrepreneurial Spark", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Accelerator", "tags": ["ecosystem", "accelerator"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "scottish_govtech", "name": "The Scottish GovTech Cluster", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Tech", "tags": ["ecosystem", "tech"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "filament_stac", "name": "Filament STAC", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Accelerator", "tags": ["ecosystem", "accelerator"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "challenges_group", "name": "Challenges Group", "type": "organization", "sector": "social", "bcorp": false, "tier": 1, "status": "target", "role": "Enterprise Development", "tags": ["target", "social", "tier-1", "priority-action", "companies-house-verified"], "last_contact": null, "sector_group": "social"}, {"id": "archangel_investors", "name": "Archangel Investors Ltd", "type": "organization", "sector": "Investment", "bcorp": false, "tier": 2, "status": "target", "role": "Angel Investor Syndicate", "tags": ["target", "tier-2", "investor", "edinburgh"], "last_contact": null, "sector_group": "finance"}, {"id": "scottish_ike", "name": "Scottish IKE - City of Glasgow College", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Education", "tags": ["ecosystem", "education"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "iq_capital", "name": "IQ Capital", "type": "organization", "sector": "Venture Capital", "bcorp": false, "tier": 3, "status": "watch", "role": "Deep-Tech VC", "tags": ["watch", "tier-3", "vc", "deep-tech", "cambridge"], "last_contact": null, "sector_group": "finance"}, {"id": "turing_fest", "name": "Turing Fest", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "target", "role": "Startup Conference", "tags": ["target", "tier-2"], "last_contact": null, "sector_group": "other"}, {"id": "gcosi", "name": "Glasgow City of Science and Innovation", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Innovation", "tags": ["ecosystem", "innovation"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "community_enterprise", "name": "Community Enterprise", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Social Enterprise", "tags": ["ecosystem", "social_enterprise"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "wedo_scotland", "name": "WeDO Scotland", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "collective_communities", "name": "Collective Communities CIC", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Coworking", "tags": ["ecosystem", "coworking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "screen_scotland", "name": "Screen Scotland", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Creative", "tags": ["ecosystem", "creative"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "emec", "name": "European Marine Energy Centre", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Energy", "tags": ["ecosystem", "energy"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "highland_venture_capital", "name": "Highland Venture Capital", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Investor", "tags": ["ecosystem", "investor"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "one_seedpod", "name": "ONE SeedPod", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Accelerator", "tags": ["ecosystem", "accelerator"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "incub8", "name": "City of Glasgow College Incub8", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Education", "tags": ["ecosystem", "education"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "scottish_women_in_business", "name": "Scottish Women in Business", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Networking", "tags": ["ecosystem", "networking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "can_do_crieff", "name": "Can Do Crieff", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Coworking", "tags": ["ecosystem", "coworking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "geovation_scotland", "name": "Geovation Scotland", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Geospatial", "tags": ["ecosystem", "geospatial"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "elasmogen", "name": "Elasmogen", "type": "organization", "sector": "healthcare", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Life Sciences / Biologics", "tags": ["ecosystem", "life_sciences", "biotech"], "last_contact": null, "sector_group": "health"}, {"id": "reframe", "name": "Reframe", "type": "organization", "sector": "Tech", "bcorp": false, "tier": 2, "status": "active", "role": "Former Employer", "tags": ["active", "tier-2", "former-employer", "warm-intro"], "last_contact": null, "sector_group": "tech"}, {"id": "create_business_properties", "name": "Create Business Properties", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Coworking", "tags": ["ecosystem", "coworking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "paratus", "name": "Paratus Executive", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "pending", "role": "Executive Search", "tags": ["pending", "tier-2"], "last_contact": null, "sector_group": "other"}, {"id": "interface", "name": "Interface", "type": "organization", "sector": "Support", "bcorp": false, "tier": 2, "status": "target", "role": "Business-Academia Connector", "tags": ["target", "tier-2", "network", "edinburgh", "academia"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "edinburgh_innovations", "name": "Edinburgh Innovations", "type": "organization", "sector": "Education/Innovation", "bcorp": false, "tier": 2, "status": "target", "role": "University Commercialization", "tags": ["target", "tier-2", "university", "edinburgh", "innovation"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "sse_scotland", "name": "School for Social Entrepreneurs", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Social Enterprise", "tags": ["ecosystem", "social_enterprise"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "ravic", "name": "Rural and Veterinary Innovation Centre", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Agriculture", "tags": ["ecosystem", "agriculture"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "kelvin_capital", "name": "Kelvin Capital", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Investor", "tags": ["ecosystem", "investor"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "investing_women_angels", "name": "Investing Women Angels", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Investor", "tags": ["ecosystem", "investor"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "ossian_architects", "name": "Ossian Architects", "type": "organization", "sector": "property", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "property"], "last_contact": null, "sector_group": "bcorp"}, {"id": "nile", "name": "Nile HQ", "type": "organization", "sector": "tech, digital", "bcorp": true, "tier": 2, "status": "target", "role": "scaleup", "tags": ["target", "tech", "digital", "tier-2", "companies-house-verified", "scaleup", "agency", "bcorp"], "last_contact": null, "sector_group": "bcorp"}, {"id": "glasgow_collective", "name": "Glasgow Collective", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Coworking", "tags": ["ecosystem", "coworking"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "national_robotarium", "name": "National Robotarium", "type": "organization", "sector": "healthcare", "bcorp": false, "tier": 2, "status": "target", "role": "Robotics & AI Innovation Facility", "tags": ["target", "healthcare", "tier-2"], "last_contact": null, "sector_group": "health"}, {"id": "waracle", "name": "Waracle", "type": "organization", "sector": "tech", "bcorp": false, "tier": 2, "status": "new", "role": "Digital Consultancy (Dundee/Edinburgh)", "tags": ["new", "tier-2", "scaleup", "edinburgh", "dundee"], "last_contact": null, "sector_group": "tech"}, {"id": "ukse", "name": "UK Steel Enterprise", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Investor", "tags": ["ecosystem", "investor"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "anturas_consulting", "name": "Anturas Consulting Ltd", "type": "organization", "sector": "tech", "bcorp": true, "tier": 3, "status": "ecosystem", "role": "B Corp Certified Company", "tags": ["bcorp", "edinburgh", "scotland", "ecosystem", "tech"], "last_contact": null, "sector_group": "bcorp"}, {"id": "codeclan", "name": "CodeClan", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "target", "role": "Tech Skills Training", "tags": ["target", "tier-2"], "last_contact": null, "sector_group": "other"}, {"id": "social_enterprise_academy", "name": "Social Enterprise Academy", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Social Enterprise", "tags": ["ecosystem", "social_enterprise"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "cpi_mmic", "name": "CPI Medicines Manufacturing Innovation Centre", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Pharma", "tags": ["ecosystem", "pharma"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "etz", "name": "ETZ Ltd", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Energy", "tags": ["ecosystem", "energy"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "hie", "name": "Highlands and Islands Enterprise", "type": "organization", "sector": "ecosystem_support", "bcorp": false, "tier": 3, "status": "ecosystem", "role": "Public Sector", "tags": ["ecosystem", "public_sector"], "last_contact": null, "sector_group": "ecosystem"}, {"id": "lloyds", "name": "Lloyds Banking Group", "type": "organization", "sector": "fintech", "bcorp": false, "tier": 2, "status": "active", "role": "Enterprise Financial Services", "tags": ["active", "fintech", "tier-2"], "last_contact": null, "sector_group": "finance"}, {"id": "globalscot", "name": "GlobalScot", "type": "organization", "sector": null, "bcorp": false, "tier": 2, "status": "target", "role": "International Bridge", "tags": ["target", "tier-2"], "last_contact": null, "sector_group": "other"}];
+// ── metrics lookup (degree + betweenness from metrics.csv) ───────────────────
+const METRICS = {"ewan": {"degree": 19, "betweenness": 0.0612}, "snib": {"degree": 19, "betweenness": 0.0337}, "shane": {"degree": 12, "betweenness": 0.0275}, "scaleup_panel": {"degree": 11, "betweenness": 0.0193}, "codebase": {"degree": 10, "betweenness": 0.0186}, "dave_frontier": {"degree": 4, "betweenness": 0.0174}, "yasmin": {"degree": 7, "betweenness": 0.0174}, "eagle_labs": {"degree": 6, "betweenness": 0.0136}, "alastair_natwest": {"degree": 6, "betweenness": 0.0136}, "efi": {"degree": 10, "betweenness": 0.0111}, "techscaler": {"degree": 7, "betweenness": 0.0102}, "evelyn_simpson": {"degree": 5, "betweenness": 0.01}, "brdge": {"degree": 7, "betweenness": 0.0099}, "rebecca_moore": {"degree": 8, "betweenness": 0.0098}, "fintech_scotland": {"degree": 4, "betweenness": 0.0094}, "xdesign": {"degree": 6, "betweenness": 0.0078}, "nick": {"degree": 7, "betweenness": 0.0075}, "susie_walker": {"degree": 2, "betweenness": 0.0068}, "sarah_stock": {"degree": 4, "betweenness": 0.0061}, "ecorner": {"degree": 3, "betweenness": 0.0058}, "edinburgh_innovations": {"degree": 6, "betweenness": 0.0058}, "mark_logan": {"degree": 7, "betweenness": 0.005}, "myles": {"degree": 5, "betweenness": 0.005}, "sis": {"degree": 5, "betweenness": 0.0046}, "trogenix": {"degree": 5, "betweenness": 0.0046}, "challenges_group": {"degree": 5, "betweenness": 0.0046}, "nile": {"degree": 3, "betweenness": 0.0046}, "nick_fine": {"degree": 3, "betweenness": 0.0046}, "charlie_johnston": {"degree": 3, "betweenness": 0.0046}, "martin_boyle": {"degree": 2, "betweenness": 0.0046}, "david_lowe": {"degree": 6, "betweenness": 0.0044}, "simple_online": {"degree": 6, "betweenness": 0.0042}, "reframe": {"degree": 3, "betweenness": 0.0037}, "kristina_philip": {"degree": 3, "betweenness": 0.0034}, "lloyds": {"degree": 3, "betweenness": 0.0032}, "aleks_tomczyk": {"degree": 2, "betweenness": 0.0031}, "scottish_enterprise": {"degree": 4, "betweenness": 0.0028}, "aridhia": {"degree": 4, "betweenness": 0.0028}, "ana_stewart": {"degree": 2, "betweenness": 0.0028}, "problem_shared": {"degree": 7, "betweenness": 0.0027}, "scottish_edge": {"degree": 3, "betweenness": 0.0027}, "teeps": {"degree": 3, "betweenness": 0.0027}, "mark_mclauchlan": {"degree": 4, "betweenness": 0.0025}, "aurora": {"degree": 4, "betweenness": 0.0024}, "firstport": {"degree": 4, "betweenness": 0.0023}, "chamber": {"degree": 2, "betweenness": 0.0023}, "codeclan": {"degree": 3, "betweenness": 0.0023}, "bgf": {"degree": 4, "betweenness": 0.0021}, "datalab": {"degree": 4, "betweenness": 0.002}, "informatics_ventures": {"degree": 2, "betweenness": 0.0012}, "david_tuck": {"degree": 2, "betweenness": 0.0012}, "scotlandis": {"degree": 2, "betweenness": 0.0011}, "equity_gap": {"degree": 3, "betweenness": 0.0011}, "archangel_investors": {"degree": 3, "betweenness": 0.0011}, "converge": {"degree": 3, "betweenness": 0.0009}, "waracle": {"degree": 2, "betweenness": 0.0009}, "ben": {"degree": 4, "betweenness": 0.0007}, "rowland_fraser": {"degree": 3, "betweenness": 0.0007}, "graham_jones": {"degree": 3, "betweenness": 0.0007}, "oren": {"degree": 3, "betweenness": 0.0007}, "bioliberty": {"degree": 3, "betweenness": 0.0006}, "gill_mudie": {"degree": 3, "betweenness": 0.0006}, "interface": {"degree": 3, "betweenness": 0.0005}, "national_robotarium": {"degree": 3, "betweenness": 0.0005}, "helen_tate": {"degree": 3, "betweenness": 0.0004}, "roslin_innovation": {"degree": 3, "betweenness": 0.0003}, "dame_ann_gloag": {"degree": 3, "betweenness": 0.0003}, "natwest": {"degree": 4, "betweenness": 0.0002}, "midlothian_science_zone": {"degree": 2, "betweenness": 0.0002}, "euan_andrews": {"degree": 2, "betweenness": 0.0002}, "jessica_lamb": {"degree": 3, "betweenness": 0.0001}, "dsl_business_finance": {"degree": 1, "betweenness": 0.0}, "esure": {"degree": 0, "betweenness": 0.0}, "tribe_porty": {"degree": 0, "betweenness": 0.0}, "scaleup_institute": {"degree": 2, "betweenness": 0.0}, "endura": {"degree": 0, "betweenness": 0.0}, "vegware": {"degree": 0, "betweenness": 0.0}, "nmis": {"degree": 0, "betweenness": 0.0}, "higgs_centre": {"degree": 1, "betweenness": 0.0}, "source_developments_scotland": {"degree": 0, "betweenness": 0.0}, "tbco_retail": {"degree": 0, "betweenness": 0.0}, "biodundee": {"degree": 0, "betweenness": 0.0}, "hunter_foundation": {"degree": 2, "betweenness": 0.0}, "growbiz": {"degree": 0, "betweenness": 0.0}, "peoples_postcode_lottery": {"degree": 0, "betweenness": 0.0}, "the_dragonfly_agency": {"degree": 0, "betweenness": 0.0}, "iod_scotland": {"degree": 0, "betweenness": 0.0}, "location_data_scotland": {"degree": 0, "betweenness": 0.0}, "uk_export_finance": {"degree": 0, "betweenness": 0.0}, "effective_hospitality_management": {"degree": 0, "betweenness": 0.0}, "scottish_space_network": {"degree": 0, "betweenness": 0.0}, "sulsa": {"degree": 0, "betweenness": 0.0}, "fdf_scotland": {"degree": 0, "betweenness": 0.0}, "innovate_uk": {"degree": 0, "betweenness": 0.0}, "mint_ventures": {"degree": 0, "betweenness": 0.0}, "business_gateway": {"degree": 0, "betweenness": 0.0}, "gabriel_investments": {"degree": 0, "betweenness": 0.0}, "rabbie_s": {"degree": 0, "betweenness": 0.0}, "sruc": {"degree": 0, "betweenness": 0.0}, "coco_chocolatier_up_up_otherly": {"degree": 0, "betweenness": 0.0}, "ceis": {"degree": 0, "betweenness": 0.0}, "gcid": {"degree": 0, "betweenness": 0.0}, "womens_enterprise_scotland": {"degree": 0, "betweenness": 0.0}, "scale_up_scotland": {"degree": 0, "betweenness": 0.0}, "entrepreneurial_scotland": {"degree": 2, "betweenness": 0.0}, "rbs_accelerator": {"degree": 0, "betweenness": 0.0}, "strathclyde_gap": {"degree": 1, "betweenness": 0.0}, "scottish_chambers": {"degree": 0, "betweenness": 0.0}, "alpha_data_parallel": {"degree": 0, "betweenness": 0.0}, "business_women_scotland": {"degree": 0, "betweenness": 0.0}, "illuminate_technology": {"degree": 0, "betweenness": 0.0}, "inverclyde_council": {"degree": 0, "betweenness": 0.0}, "knowvate_hub": {"degree": 0, "betweenness": 0.0}, "gsen": {"degree": 0, "betweenness": 0.0}, "startup_grind_glasgow": {"degree": 0, "betweenness": 0.0}, "bawe_scotland": {"degree": 0, "betweenness": 0.0}, "venture_scotland": {"degree": 1, "betweenness": 0.0}, "the_hive": {"degree": 0, "betweenness": 0.0}, "democratic_finance": {"degree": 0, "betweenness": 0.0}, "good_loop": {"degree": 0, "betweenness": 0.0}, "ou_scotland": {"degree": 0, "betweenness": 0.0}, "axios_systems": {"degree": 0, "betweenness": 0.0}, "creative_scotland": {"degree": 0, "betweenness": 0.0}, "pioneers_post": {"degree": 0, "betweenness": 0.0}, "mys_asset_management": {"degree": 0, "betweenness": 0.0}, "scottish_business_network": {"degree": 0, "betweenness": 0.0}, "sose": {"degree": 0, "betweenness": 0.0}, "creative_edinburgh": {"degree": 1, "betweenness": 0.0}, "sisaltech": {"degree": 0, "betweenness": 0.0}, "east_renfrewshire_accelerator": {"degree": 0, "betweenness": 0.0}, "farrpoint": {"degree": 0, "betweenness": 0.0}, "strathclyde_inspire": {"degree": 0, "betweenness": 0.0}, "pathways_forward": {"degree": 0, "betweenness": 0.0}, "travelnest": {"degree": 1, "betweenness": 0.0}, "bobbai": {"degree": 0, "betweenness": 0.0}, "horizon_scotland": {"degree": 0, "betweenness": 0.0}, "lane_media": {"degree": 0, "betweenness": 0.0}, "techstart_ventures": {"degree": 0, "betweenness": 0.0}, "macs_adventure": {"degree": 2, "betweenness": 0.0}, "mdmc": {"degree": 0, "betweenness": 0.0}, "love_electric_financial_services": {"degree": 0, "betweenness": 0.0}, "mercat_tours": {"degree": 0, "betweenness": 0.0}, "abventures": {"degree": 0, "betweenness": 0.0}, "uoe_innovation": {"degree": 0, "betweenness": 0.0}, "skillfluence": {"degree": 0, "betweenness": 0.0}, "elevator": {"degree": 0, "betweenness": 0.0}, "peer_works": {"degree": 0, "betweenness": 0.0}, "censis": {"degree": 0, "betweenness": 0.0}, "beer52": {"degree": 0, "betweenness": 0.0}, "nature_inspired": {"degree": 0, "betweenness": 0.0}, "pawprint": {"degree": 0, "betweenness": 0.0}, "greenbackers": {"degree": 0, "betweenness": 0.0}, "rationale": {"degree": 0, "betweenness": 0.0}, "scfdi": {"degree": 0, "betweenness": 0.0}, "beyond_green_advisors": {"degree": 0, "betweenness": 0.0}, "soho_square_capital": {"degree": 2, "betweenness": 0.0}, "social_hub_glasgow": {"degree": 0, "betweenness": 0.0}, "par_equity": {"degree": 2, "betweenness": 0.0}, "discovery_investment": {"degree": 0, "betweenness": 0.0}, "dhi": {"degree": 0, "betweenness": 0.0}, "vianet": {"degree": 0, "betweenness": 0.0}, "flexible_working_scotland": {"degree": 0, "betweenness": 0.0}, "stoane_lighting": {"degree": 0, "betweenness": 0.0}, "aroai": {"degree": 1, "betweenness": 0.0}, "forge_holiday": {"degree": 1, "betweenness": 0.0}, "social_enterprise_scotland": {"degree": 0, "betweenness": 0.0}, "dasa": {"degree": 0, "betweenness": 0.0}, "always_be_content": {"degree": 0, "betweenness": 0.0}, "best": {"degree": 0, "betweenness": 0.0}, "ventures_lab": {"degree": 0, "betweenness": 0.0}, "pioneer_group": {"degree": 0, "betweenness": 0.0}, "occupancy_marketing": {"degree": 0, "betweenness": 0.0}, "ycf_scotland": {"degree": 0, "betweenness": 0.0}, "civtech": {"degree": 1, "betweenness": 0.0}, "uog_research": {"degree": 0, "betweenness": 0.0}, "albany_hr": {"degree": 0, "betweenness": 0.0}, "maven": {"degree": 0, "betweenness": 0.0}, "sabc": {"degree": 0, "betweenness": 0.0}, "canongate_books": {"degree": 0, "betweenness": 0.0}, "consider_it": {"degree": 0, "betweenness": 0.0}, "cyberquarter": {"degree": 0, "betweenness": 0.0}, "lsip": {"degree": 0, "betweenness": 0.0}, "james_hutton_institute": {"degree": 0, "betweenness": 0.0}, "extraordinary_managed_services": {"degree": 0, "betweenness": 0.0}, "angel_capital_scotland": {"degree": 2, "betweenness": 0.0}, "skyscanner": {"degree": 3, "betweenness": 0.0}, "appointedd": {"degree": 0, "betweenness": 0.0}, "foxglove_offices": {"degree": 0, "betweenness": 0.0}, "ceteris": {"degree": 0, "betweenness": 0.0}, "rgu_eig": {"degree": 0, "betweenness": 0.0}, "nztc": {"degree": 0, "betweenness": 0.0}, "sds": {"degree": 2, "betweenness": 0.0}, "ibioic": {"degree": 0, "betweenness": 0.0}, "one_tech_hub": {"degree": 0, "betweenness": 0.0}, "foresight_group": {"degree": 0, "betweenness": 0.0}, "kings_trust_scotland": {"degree": 0, "betweenness": 0.0}, "women_ahead": {"degree": 0, "betweenness": 0.0}, "muckle_brig": {"degree": 0, "betweenness": 0.0}, "adaptavist_tag": {"degree": 2, "betweenness": 0.0}, "venture_cafe": {"degree": 1, "betweenness": 0.0}, "st_andrews_innovation": {"degree": 0, "betweenness": 0.0}, "melting_pot": {"degree": 0, "betweenness": 0.0}, "heriot_watt": {"degree": 0, "betweenness": 0.0}, "live_it_group": {"degree": 0, "betweenness": 0.0}, "muckle_media": {"degree": 0, "betweenness": 0.0}, "ryden": {"degree": 0, "betweenness": 0.0}, "yourgb_events": {"degree": 0, "betweenness": 0.0}, "scotlands_migration_service": {"degree": 0, "betweenness": 0.0}, "moo_and_yoo": {"degree": 0, "betweenness": 0.0}, "aberdeenshire_council": {"degree": 0, "betweenness": 0.0}, "perigon_partners": {"degree": 0, "betweenness": 0.0}, "fse_group": {"degree": 0, "betweenness": 0.0}, "investing_women": {"degree": 2, "betweenness": 0.0}, "bell_street_ventures": {"degree": 0, "betweenness": 0.0}, "epidarex": {"degree": 1, "betweenness": 0.0}, "purelifi": {"degree": 1, "betweenness": 0.0}, "highland_business_women": {"degree": 0, "betweenness": 0.0}, "eos": {"degree": 0, "betweenness": 0.0}, "womens_business_club": {"degree": 0, "betweenness": 0.0}, "one_biohub": {"degree": 0, "betweenness": 0.0}, "dundee_entrepreneurship": {"degree": 0, "betweenness": 0.0}, "rae_enterprise_hub": {"degree": 0, "betweenness": 0.0}, "saba": {"degree": 0, "betweenness": 0.0}, "gcu_hub": {"degree": 0, "betweenness": 0.0}, "abventure_zone": {"degree": 0, "betweenness": 0.0}, "dechomai": {"degree": 0, "betweenness": 0.0}, "accelerateher": {"degree": 2, "betweenness": 0.0}, "wendy_morrison_design": {"degree": 0, "betweenness": 0.0}, "vistage": {"degree": 0, "betweenness": 0.0}, "rds": {"degree": 0, "betweenness": 0.0}, "ip_hatch": {"degree": 0, "betweenness": 0.0}, "one_stone": {"degree": 1, "betweenness": 0.0}, "datakirk": {"degree": 0, "betweenness": 0.0}, "grid": {"degree": 0, "betweenness": 0.0}, "intelligent_growth_solutions": {"degree": 0, "betweenness": 0.0}, "treestory": {"degree": 0, "betweenness": 0.0}, "circularity_capital": {"degree": 0, "betweenness": 0.0}, "one": {"degree": 0, "betweenness": 0.0}, "panoramic": {"degree": 0, "betweenness": 0.0}, "tech_scotland_advocates": {"degree": 0, "betweenness": 0.0}, "scale_up_consulting": {"degree": 1, "betweenness": 0.0}, "bright_red_triangle": {"degree": 2, "betweenness": 0.0}, "creative_dundee": {"degree": 0, "betweenness": 0.0}, "ember": {"degree": 2, "betweenness": 0.0}, "collabor8te": {"degree": 0, "betweenness": 0.0}, "hunter_centre": {"degree": 0, "betweenness": 0.0}, "stirling_enterprise": {"degree": 0, "betweenness": 0.0}, "care_sourcer": {"degree": 2, "betweenness": 0.0}, "green_angel_ventures": {"degree": 0, "betweenness": 0.0}, "girl_geek_scotland": {"degree": 0, "betweenness": 0.0}, "scotland_house_london": {"degree": 0, "betweenness": 0.0}, "ceed_scotland": {"degree": 0, "betweenness": 0.0}, "impact_hub_inverness": {"degree": 0, "betweenness": 0.0}, "old_college_capital": {"degree": 2, "betweenness": 0.0}, "msip": {"degree": 0, "betweenness": 0.0}, "foras": {"degree": 0, "betweenness": 0.0}, "entrepreneurial_spark": {"degree": 0, "betweenness": 0.0}, "scottish_govtech": {"degree": 0, "betweenness": 0.0}, "filament_stac": {"degree": 0, "betweenness": 0.0}, "scottish_ike": {"degree": 0, "betweenness": 0.0}, "iq_capital": {"degree": 1, "betweenness": 0.0}, "turing_fest": {"degree": 1, "betweenness": 0.0}, "gcosi": {"degree": 0, "betweenness": 0.0}, "community_enterprise": {"degree": 0, "betweenness": 0.0}, "wedo_scotland": {"degree": 0, "betweenness": 0.0}, "collective_communities": {"degree": 0, "betweenness": 0.0}, "screen_scotland": {"degree": 0, "betweenness": 0.0}, "emec": {"degree": 0, "betweenness": 0.0}, "highland_venture_capital": {"degree": 0, "betweenness": 0.0}, "one_seedpod": {"degree": 0, "betweenness": 0.0}, "incub8": {"degree": 0, "betweenness": 0.0}, "scottish_women_in_business": {"degree": 0, "betweenness": 0.0}, "can_do_crieff": {"degree": 0, "betweenness": 0.0}, "geovation_scotland": {"degree": 0, "betweenness": 0.0}, "elasmogen": {"degree": 1, "betweenness": 0.0}, "create_business_properties": {"degree": 0, "betweenness": 0.0}, "paratus": {"degree": 1, "betweenness": 0.0}, "sse_scotland": {"degree": 0, "betweenness": 0.0}, "ravic": {"degree": 0, "betweenness": 0.0}, "kelvin_capital": {"degree": 0, "betweenness": 0.0}, "investing_women_angels": {"degree": 0, "betweenness": 0.0}, "ossian_architects": {"degree": 0, "betweenness": 0.0}, "glasgow_collective": {"degree": 0, "betweenness": 0.0}, "ukse": {"degree": 0, "betweenness": 0.0}, "anturas_consulting": {"degree": 0, "betweenness": 0.0}, "social_enterprise_academy": {"degree": 0, "betweenness": 0.0}, "cpi_mmic": {"degree": 0, "betweenness": 0.0}, "etz": {"degree": 0, "betweenness": 0.0}, "hie": {"degree": 0, "betweenness": 0.0}, "globalscot": {"degree": 2, "betweenness": 0.0}, "eoghan": {"degree": 1, "betweenness": 0.0}, "lauren_tag": {"degree": 0, "betweenness": 0.0}, "kate_forbes": {"degree": 2, "betweenness": 0.0}, "colin_mclellan": {"degree": 1, "betweenness": 0.0}, "colin_scott": {"degree": 2, "betweenness": 0.0}, "sharon_gillies": {"degree": 1, "betweenness": 0.0}, "sherry_coutu": {"degree": 1, "betweenness": 0.0}, "alastair_davis": {"degree": 1, "betweenness": 0.0}, "chun_ong": {"degree": 1, "betweenness": 0.0}, "richard_george": {"degree": 2, "betweenness": 0.0}, "claudia_wilson": {"degree": 0, "betweenness": 0.0}, "lasbo": {"degree": 0, "betweenness": 0.0}, "gunars": {"degree": 0, "betweenness": 0.0}, "shw": {"degree": 0, "betweenness": 0.0}, "jonas": {"degree": 1, "betweenness": 0.0}, "dag_lee": {"degree": 2, "betweenness": 0.0}, "dave_mclure": {"degree": 1, "betweenness": 0.0}, "jonas_twitchen": {"degree": 0, "betweenness": 0.0}, "ivo_fiennes": {"degree": 2, "betweenness": 0.0}, "brian_coburn": {"degree": 2, "betweenness": 0.0}, "thomas_gillan": {"degree": 1, "betweenness": 0.0}, "heather_tag": {"degree": 0, "betweenness": 0.0}, "stuart_codebase": {"degree": 0, "betweenness": 0.0}, "bill": {"degree": 1, "betweenness": 0.0}, "paul_cutting": {"degree": 0, "betweenness": 0.0}, "addy": {"degree": 1, "betweenness": 0.0}, "morgan_kainth": {"degree": 0, "betweenness": 0.0}, "sophie_tag": {"degree": 0, "betweenness": 0.0}, "yari": {"degree": 0, "betweenness": 0.0}, "brian_holland": {"degree": 2, "betweenness": 0.0}, "laura_thom": {"degree": 0, "betweenness": 0.0}, "caroline_wylie": {"degree": 1, "betweenness": 0.0}, "jamie_murray": {"degree": 0, "betweenness": 0.0}, "gael_drummond": {"degree": 1, "betweenness": 0.0}, "gib_bulloch": {"degree": 0, "betweenness": 0.0}, "joe_tebbutt": {"degree": 2, "betweenness": 0.0}, "sarah_ronald": {"degree": 2, "betweenness": 0.0}};
+
+const RAW_LINKS = [{"source": "yasmin", "target": "codebase", "type": "works_at", "strength": 5}, {"source": "yasmin", "target": "david_lowe", "type": "intro_pending", "strength": 3}, {"source": "yasmin", "target": "shane", "type": "knows", "strength": 3}, {"source": "yasmin", "target": "mark_logan", "type": "knows", "strength": 3}, {"source": "yasmin", "target": "ana_stewart", "type": "knows", "strength": 3}, {"source": "myles", "target": "yasmin", "type": "introduced", "strength": 4}, {"source": "myles", "target": "aurora", "type": "works_at", "strength": 5}, {"source": "ben", "target": "nick", "type": "works_with", "strength": 5}, {"source": "nick", "target": "problem_shared", "type": "founded", "strength": 5}, {"source": "nick", "target": "shane", "type": "introduced", "strength": 4}, {"source": "dave_frontier", "target": "challenges_group", "type": "recommended", "strength": 3}, {"source": "dave_frontier", "target": "sis", "type": "recommended", "strength": 3}, {"source": "dave_frontier", "target": "firstport", "type": "recommended", "strength": 3}, {"source": "shane", "target": "xdesign", "type": "board", "strength": 5}, {"source": "shane", "target": "simple_online", "type": "board", "strength": 5}, {"source": "shane", "target": "brdge", "type": "can_intro", "strength": 1}, {"source": "shane", "target": "scale_up_consulting", "type": "founded", "strength": 5}, {"source": "shane", "target": "forge_holiday", "type": "board", "strength": 5}, {"source": "joe_tebbutt", "target": "xdesign", "type": "board", "strength": 5}, {"source": "joe_tebbutt", "target": "soho_square_capital", "type": "works_at", "strength": 5}, {"source": "colin_mclellan", "target": "xdesign", "type": "works_at", "strength": 5}, {"source": "brian_coburn", "target": "brdge", "type": "founded", "strength": 5}, {"source": "soho_square_capital", "target": "xdesign", "type": "funded_by", "strength": 5}, {"source": "shane", "target": "mark_logan", "type": "co_leadership", "strength": 5}, {"source": "euan_andrews", "target": "xdesign", "type": "founded", "strength": 5}, {"source": "addy", "target": "simple_online", "type": "founded", "strength": 5}, {"source": "oren", "target": "aurora", "type": "founded", "strength": 5}, {"source": "ana_stewart", "target": "snib", "type": "leads", "strength": 5}, {"source": "sherry_coutu", "target": "scaleup_institute", "type": "founded", "strength": 5}, {"source": "dave_mclure", "target": "globalscot", "type": "leads", "strength": 5}, {"source": "david_lowe", "target": "techscaler", "type": "involved", "strength": 4}, {"source": "alastair_davis", "target": "sis", "type": "leads", "strength": 5}, {"source": "sharon_gillies", "target": "sis", "type": "works_at", "strength": 5}, {"source": "eoghan", "target": "challenges_group", "type": "leads", "strength": 5}, {"source": "caroline_wylie", "target": "challenges_group", "type": "works_at", "strength": 5}, {"source": "gael_drummond", "target": "firstport", "type": "leads", "strength": 5}, {"source": "martin_boyle", "target": "codebase", "type": "works_at", "strength": 5}, {"source": "jonas", "target": "lloyds", "type": "works_at", "strength": 4}, {"source": "codebase", "target": "techscaler", "type": "partner", "strength": 4}, {"source": "codebase", "target": "efi", "type": "co_located", "strength": 5}, {"source": "codebase", "target": "eagle_labs", "type": "co_located", "strength": 4}, {"source": "myles", "target": "eagle_labs", "type": "mentor", "strength": 4}, {"source": "myles", "target": "scottish_edge", "type": "worked_at", "strength": 3}, {"source": "techscaler", "target": "snib", "type": "funded_by", "strength": 4}, {"source": "snib", "target": "kate_forbes", "type": "reports_to", "strength": 4}, {"source": "scaleup_institute", "target": "globalscot", "type": "collaborates", "strength": 3}, {"source": "efi", "target": "ecorner", "type": "hosts", "strength": 5}, {"source": "problem_shared", "target": "david_lowe", "type": "sector_link", "strength": 3}, {"source": "sis", "target": "challenges_group", "type": "sector_peer", "strength": 3}, {"source": "sis", "target": "firstport", "type": "sector_peer", "strength": 3}, {"source": "challenges_group", "target": "firstport", "type": "sector_peer", "strength": 3}, {"source": "problem_shared", "target": "simple_online", "type": "sector_peer", "strength": 2}, {"source": "david_lowe", "target": "simple_online", "type": "sector_link", "strength": 2}, {"source": "martin_boyle", "target": "chamber", "type": "presenting", "strength": 3}, {"source": "bill", "target": "chamber", "type": "attended", "strength": 2}, {"source": "alastair_natwest", "target": "natwest", "type": "works_at", "strength": 5}, {"source": "alastair_natwest", "target": "colin_scott", "type": "introducing", "strength": 4}, {"source": "alastair_natwest", "target": "brian_holland", "type": "introducing", "strength": 4}, {"source": "alastair_natwest", "target": "charlie_johnston", "type": "introducing", "strength": 4}, {"source": "colin_scott", "target": "natwest", "type": "works_at", "strength": 5}, {"source": "brian_holland", "target": "natwest", "type": "works_at", "strength": 5}, {"source": "charlie_johnston", "target": "aroai", "type": "founded", "strength": 5}, {"source": "charlie_johnston", "target": "paratus", "type": "works_at", "strength": 5}, {"source": "natwest", "target": "lloyds", "type": "sector_peer", "strength": 2}, {"source": "shane", "target": "scaleup_panel", "type": "leads", "strength": 5}, {"source": "mark_logan", "target": "scaleup_panel", "type": "co_leadership", "strength": 5}, {"source": "scaleup_panel", "target": "snib", "type": "advises", "strength": 4}, {"source": "scaleup_panel", "target": "kate_forbes", "type": "reports_to", "strength": 4}, {"source": "codeclan", "target": "techscaler", "type": "partner", "strength": 4}, {"source": "codeclan", "target": "sds", "type": "funded_by", "strength": 3}, {"source": "datalab", "target": "snib", "type": "funded_by", "strength": 3}, {"source": "datalab", "target": "techscaler", "type": "partner", "strength": 3}, {"source": "scotlandis", "target": "scaleup_panel", "type": "collaborates", "strength": 3}, {"source": "scotlandis", "target": "codebase", "type": "sector_peer", "strength": 2}, {"source": "turing_fest", "target": "codebase", "type": "collaborates", "strength": 3}, {"source": "informatics_ventures", "target": "snib", "type": "collaborates", "strength": 3}, {"source": "informatics_ventures", "target": "converge", "type": "partner", "strength": 4}, {"source": "civtech", "target": "scaleup_panel", "type": "collaborates", "strength": 3}, {"source": "converge", "target": "efi", "type": "partner", "strength": 4}, {"source": "entrepreneurial_scotland", "target": "scaleup_panel", "type": "collaborates", "strength": 3}, {"source": "sds", "target": "codeclan", "type": "funds", "strength": 4}, {"source": "scottish_edge", "target": "scaleup_panel", "type": "collaborates", "strength": 3}, {"source": "ember", "target": "scaleup_panel", "type": "success_story", "strength": 2}, {"source": "ember", "target": "snib", "type": "funded_by", "strength": 3}, {"source": "scottish_enterprise", "target": "snib", "type": "partner", "strength": 5}, {"source": "scottish_enterprise", "target": "scaleup_panel", "type": "collaborates", "strength": 4}, {"source": "hunter_foundation", "target": "scaleup_panel", "type": "partner", "strength": 4}, {"source": "hunter_foundation", "target": "entrepreneurial_scotland", "type": "collaborates", "strength": 3}, {"source": "strathclyde_gap", "target": "scottish_enterprise", "type": "partner", "strength": 3}, {"source": "one_stone", "target": "codebase", "type": "sector_peer", "strength": 2}, {"source": "aleks_tomczyk", "target": "fintech_scotland", "type": "leads", "strength": 5}, {"source": "alastair_natwest", "target": "aleks_tomczyk", "type": "introducing", "strength": 4}, {"source": "fintech_scotland", "target": "snib", "type": "collaborates", "strength": 3}, {"source": "brdge", "target": "fintech_scotland", "type": "sector_peer", "strength": 2}, {"source": "thomas_gillan", "target": "brdge", "type": "leads", "strength": 5}, {"source": "chun_ong", "target": "brdge", "type": "works_at", "strength": 5}, {"source": "bioliberty", "target": "national_robotarium", "type": "tenant", "strength": 4}, {"source": "bioliberty", "target": "scottish_edge", "type": "funded_by", "strength": 3}, {"source": "bioliberty", "target": "efi", "type": "sector_link", "strength": 2}, {"source": "national_robotarium", "target": "techscaler", "type": "partner", "strength": 3}, {"source": "national_robotarium", "target": "efi", "type": "partner", "strength": 3}, {"source": "aridhia", "target": "david_lowe", "type": "collaborates", "strength": 3}, {"source": "aridhia", "target": "snib", "type": "funded_by", "strength": 3}, {"source": "aridhia", "target": "problem_shared", "type": "sector_peer", "strength": 2}, {"source": "aridhia", "target": "simple_online", "type": "sector_peer", "strength": 2}, {"source": "euan_andrews", "target": "nick", "type": "advises", "strength": 3}, {"source": "rowland_fraser", "target": "aurora", "type": "founded", "strength": 5}, {"source": "rowland_fraser", "target": "oren", "type": "works_with", "strength": 5}, {"source": "helen_tate", "target": "eagle_labs", "type": "leads", "strength": 5}, {"source": "helen_tate", "target": "efi", "type": "collaborates", "strength": 4}, {"source": "helen_tate", "target": "codebase", "type": "collaborates", "strength": 4}, {"source": "evelyn_simpson", "target": "eagle_labs", "type": "mentor", "strength": 4}, {"source": "evelyn_simpson", "target": "investing_women", "type": "leads", "strength": 5}, {"source": "evelyn_simpson", "target": "snib", "type": "collaborates", "strength": 4}, {"source": "evelyn_simpson", "target": "venture_scotland", "type": "board", "strength": 4}, {"source": "graham_jones", "target": "eagle_labs", "type": "mentor", "strength": 4}, {"source": "graham_jones", "target": "care_sourcer", "type": "works_at", "strength": 5}, {"source": "graham_jones", "target": "mark_logan", "type": "works_with", "strength": 4}, {"source": "mark_logan", "target": "care_sourcer", "type": "board", "strength": 4}, {"source": "dame_ann_gloag", "target": "brdge", "type": "board", "strength": 3}, {"source": "dame_ann_gloag", "target": "brian_coburn", "type": "works_with", "strength": 3}, {"source": "sarah_ronald", "target": "nile", "type": "founded", "strength": 5}, {"source": "dag_lee", "target": "nile", "type": "leads", "strength": 5}, {"source": "dag_lee", "target": "sarah_ronald", "type": "partner", "strength": 5}, {"source": "jessica_lamb", "target": "problem_shared", "type": "board", "strength": 4}, {"source": "ivo_fiennes", "target": "problem_shared", "type": "board", "strength": 3}, {"source": "jessica_lamb", "target": "nick", "type": "works_with", "strength": 4}, {"source": "jessica_lamb", "target": "ben", "type": "works_with", "strength": 4}, {"source": "ivo_fiennes", "target": "nick", "type": "works_with", "strength": 3}, {"source": "sarah_stock", "target": "david_lowe", "type": "sector_peer", "strength": 3}, {"source": "sarah_stock", "target": "problem_shared", "type": "sector_peer", "strength": 2}, {"source": "edinburgh_innovations", "target": "fintech_scotland", "type": "hosts", "strength": 5}, {"source": "edinburgh_innovations", "target": "efi", "type": "partner", "strength": 4}, {"source": "edinburgh_innovations", "target": "datalab", "type": "partner", "strength": 4}, {"source": "edinburgh_innovations", "target": "roslin_innovation", "type": "partner", "strength": 4}, {"source": "archangel_investors", "target": "equity_gap", "type": "collaborates", "strength": 4}, {"source": "archangel_investors", "target": "snib", "type": "collaborates", "strength": 3}, {"source": "equity_gap", "target": "snib", "type": "collaborates", "strength": 3}, {"source": "par_equity", "target": "snib", "type": "sector_peer", "strength": 3}, {"source": "par_equity", "target": "bgf", "type": "sector_peer", "strength": 4}, {"source": "bgf", "target": "snib", "type": "sector_peer", "strength": 3}, {"source": "bgf", "target": "scottish_enterprise", "type": "partner", "strength": 3}, {"source": "angel_capital_scotland", "target": "archangel_investors", "type": "collaborates", "strength": 4}, {"source": "angel_capital_scotland", "target": "equity_gap", "type": "collaborates", "strength": 4}, {"source": "accelerateher", "target": "investing_women", "type": "partner", "strength": 5}, {"source": "accelerateher", "target": "evelyn_simpson", "type": "leads", "strength": 4}, {"source": "interface", "target": "efi", "type": "partner", "strength": 4}, {"source": "interface", "target": "datalab", "type": "partner", "strength": 4}, {"source": "interface", "target": "techscaler", "type": "collaborates", "strength": 3}, {"source": "roslin_innovation", "target": "midlothian_science_zone", "type": "partner", "strength": 4}, {"source": "midlothian_science_zone", "target": "efi", "type": "collaborates", "strength": 3}, {"source": "creative_edinburgh", "target": "codebase", "type": "collaborates", "strength": 2}, {"source": "bright_red_triangle", "target": "converge", "type": "sector_peer", "strength": 3}, {"source": "bright_red_triangle", "target": "efi", "type": "collaborates", "strength": 3}, {"source": "dame_ann_gloag", "target": "reframe", "type": "funds", "strength": 4}, {"source": "reframe", "target": "brdge", "type": "sector_peer", "strength": 2}, {"source": "trogenix", "target": "edinburgh_innovations", "type": "funded_by", "strength": 4}, {"source": "old_college_capital", "target": "trogenix", "type": "funds", "strength": 5}, {"source": "iq_capital", "target": "trogenix", "type": "funds", "strength": 5}, {"source": "old_college_capital", "target": "edinburgh_innovations", "type": "partner", "strength": 5}, {"source": "trogenix", "target": "sarah_stock", "type": "sector_peer", "strength": 2}, {"source": "trogenix", "target": "roslin_innovation", "type": "sector_peer", "strength": 2}, {"source": "susie_walker", "target": "nile", "type": "works_at", "strength": 5}, {"source": "susie_walker", "target": "shane", "type": "knows", "strength": 3}, {"source": "rebecca_moore", "target": "shane", "type": "knows", "strength": 4}, {"source": "rebecca_moore", "target": "mark_logan", "type": "knows", "strength": 3}, {"source": "rebecca_moore", "target": "skyscanner", "type": "worked_at", "strength": 5}, {"source": "rebecca_moore", "target": "macs_adventure", "type": "works_at", "strength": 5}, {"source": "rebecca_moore", "target": "simple_online", "type": "worked_at", "strength": 5}, {"source": "rebecca_moore", "target": "travelnest", "type": "worked_at", "strength": 4}, {"source": "gill_mudie", "target": "rebecca_moore", "type": "knows", "strength": 4}, {"source": "gill_mudie", "target": "macs_adventure", "type": "works_at", "strength": 4}, {"source": "ewan", "target": "myles", "type": "knows", "strength": 4}, {"source": "ewan", "target": "yasmin", "type": "knows", "strength": 5}, {"source": "ewan", "target": "alastair_natwest", "type": "knows", "strength": 4}, {"source": "ewan", "target": "dave_frontier", "type": "knows", "strength": 3}, {"source": "ewan", "target": "nick", "type": "knows", "strength": 3}, {"source": "ewan", "target": "ben", "type": "knows", "strength": 3}, {"source": "ewan", "target": "eagle_labs", "type": "mentor", "strength": 4}, {"source": "ewan", "target": "oren", "type": "knows", "strength": 3}, {"source": "ewan", "target": "rowland_fraser", "type": "knows", "strength": 3}, {"source": "ewan", "target": "sarah_stock", "type": "knows", "strength": 4}, {"source": "ewan", "target": "rebecca_moore", "type": "knows", "strength": 4}, {"source": "ewan", "target": "gill_mudie", "type": "knows", "strength": 4}, {"source": "ewan", "target": "reframe", "type": "worked_at", "strength": 4}, {"source": "ewan", "target": "lloyds", "type": "worked_at", "strength": 3}, {"source": "ewan", "target": "ecorner", "type": "attended", "strength": 2}, {"source": "ewan", "target": "teeps", "type": "knows", "strength": 4}, {"source": "teeps", "target": "david_tuck", "type": "knows", "strength": 4}, {"source": "teeps", "target": "ben", "type": "knows", "strength": 3}, {"source": "david_tuck", "target": "waracle", "type": "leads", "strength": 5}, {"source": "shane", "target": "skyscanner", "type": "worked_at", "strength": 5}, {"source": "mark_logan", "target": "skyscanner", "type": "worked_at", "strength": 5}, {"source": "aurora", "target": "higgs_centre", "type": "tenant", "strength": 4}, {"source": "bgf", "target": "waracle", "type": "funds", "strength": 5}, {"source": "nick_fine", "target": "adaptavist_tag", "type": "works_at", "strength": 5}, {"source": "nick_fine", "target": "ewan", "type": "knows", "strength": 3}, {"source": "richard_george", "target": "adaptavist_tag", "type": "works_at", "strength": 4}, {"source": "richard_george", "target": "nick_fine", "type": "advises", "strength": 3}, {"source": "kristina_philip", "target": "xdesign", "type": "works_at", "strength": 5}, {"source": "mark_mclauchlan", "target": "kristina_philip", "type": "introduced", "strength": 3}, {"source": "mark_mclauchlan", "target": "ecorner", "type": "attends", "strength": 3}, {"source": "mark_mclauchlan", "target": "venture_cafe", "type": "recommends", "strength": 3}, {"source": "mark_mclauchlan", "target": "ewan", "type": "knows", "strength": 2}, {"source": "kristina_philip", "target": "ewan", "type": "knows", "strength": 1}, {"source": "epidarex", "target": "snib", "type": "funded_by", "strength": 3}, {"source": "dsl_business_finance", "target": "snib", "type": "funded_by", "strength": 3}, {"source": "elasmogen", "target": "snib", "type": "funded_by", "strength": 3}, {"source": "purelifi", "target": "snib", "type": "funded_by", "strength": 4}, {"source": "russ_barr", "target": "ewan", "type": "knows", "strength": 3}, {"source": "paul_cutting", "target": "russ_barr", "type": "knows", "strength": 3}];
+
+// ── colour helpers ─────────────────────────────────────────────────────────────
+const SECTOR_COLORS = {
+  tech:              "#4C9BE8",
+  fintech:           "#7B68EE",
+  investment:        "#32CD32",
+  social:            "#FF8C00",
+  ecosystem_support: "#20B2AA",
+  healthcare:        "#FF6B6B",
+  life_sciences:     "#DA70D6",
+  education:         "#FFD700",
+  retail:            "#CD853F",
+  travel:            "#87CEEB",
+  property:          "#8FBC8F",
+  insurance:         "#708090",
+  other:             "#A9A9A9",
+  self:              "#ff6b35"
+};
+function nodeColor(d) {
+  if (d.id === "ewan") return SECTOR_COLORS.self;
+  if (d.type === "person") return "#E8E8E8";
+  return SECTOR_COLORS[d.sector] || SECTOR_COLORS.other;
+}
+function nodeRadius(d) {
+  if (d.id === "ewan") return 14;
+  if (d.tier === 1) return 8;
+  if (d.tier === 2) return 6;
+  return 4;
+}
+
+// ── state ─────────────────────────────────────────────────────────────────────
+let activeSector = "all", activeType = "all", activeTier = "all";
+let searchQuery = "";
+let activeStatuses = new Set(); // populated after RAW_NODES parsed
+let highlightedPath = null;
+let selectedNode = null;
+
+// ── build adjacency for BFS ────────────────────────────────────────────────────
+const adj = {};
+RAW_NODES.forEach(n => adj[n.id] = []);
+RAW_LINKS.forEach(l => {
+  if (adj[l.source]) adj[l.source].push(l.target);
+  if (adj[l.target]) adj[l.target].push(l.source);
+});
+
+function bfs(fromId, toId) {
+  if (fromId === toId) return [fromId];
+  const visited = {[fromId]: null};
+  const queue = [fromId];
+  while (queue.length) {
+    const cur = queue.shift();
+    for (const nb of (adj[cur] || [])) {
+      if (!(nb in visited)) {
+        visited[nb] = cur;
+        if (nb === toId) {
+          const path = [];
+          let c = nb;
+          while (c !== null) { path.unshift(c); c = visited[c]; }
+          return path;
+        }
+        queue.push(nb);
+      }
+    }
+  }
+  return null;
+}
+
+// ── populate datalist ─────────────────────────────────────────────────────────
+const datalist = document.getElementById("node-names");
+RAW_NODES.forEach(n => {
+  const opt = document.createElement("option");
+  opt.value = n.name;
+  datalist.appendChild(opt);
+});
+
+// ── D3 setup ──────────────────────────────────────────────────────────────────
+const svg = d3.select("#svg");
+const wrap = document.getElementById("canvas-wrap");
+let W = wrap.clientWidth, H = wrap.clientHeight;
+
+const g = svg.append("g");
+
+// Zoom
+svg.call(d3.zoom()
+  .scaleExtent([0.15, 6])
+  .on("zoom", e => g.attr("transform", e.transform))
+);
+
+// Deep-clone nodes/links so D3 can mutate them
+const nodes = RAW_NODES.map(n => ({...n}));
+const nodeById = {};
+nodes.forEach(n => nodeById[n.id] = n);
+
+const links = RAW_LINKS.map(l => ({
+  ...l,
+  source: nodeById[l.source] || l.source,
+  target: nodeById[l.target] || l.target
+})).filter(l => typeof l.source === "object" && typeof l.target === "object");
+
+// ── force simulation ──────────────────────────────────────────────────────────
+const sim = d3.forceSimulation(nodes)
+  .force("link", d3.forceLink(links).id(d => d.id).distance(d => 60 + (3 - (d.strength || 2)) * 15))
+  .force("charge", d3.forceManyBody().strength(-120))
+  .force("center", d3.forceCenter(W / 2, H / 2))
+  .force("collide", d3.forceCollide().radius(d => nodeRadius(d) + 4))
+  .alphaDecay(0.02);
+
+// ── render links ─────────────────────────────────────────────────────────────
+const linkSel = g.append("g").attr("class", "links")
+  .selectAll("line")
+  .data(links)
+  .join("line")
+  .attr("stroke", "rgba(255,255,255,0.08)")
+  .attr("stroke-width", d => Math.max(0.5, (d.strength || 1) * 0.4));
+
+// ── render nodes ─────────────────────────────────────────────────────────────
+const nodeSel = g.append("g").attr("class", "nodes")
+  .selectAll("circle")
+  .data(nodes)
+  .join("circle")
+  .attr("r", d => nodeRadius(d))
+  .attr("fill", d => nodeColor(d))
+  .attr("stroke", d => d.id === "ewan" ? "#fff" : "rgba(0,0,0,0.3)")
+  .attr("stroke-width", d => d.id === "ewan" ? 2 : 0.5)
+  .attr("cursor", "pointer")
+  .call(d3.drag()
+    .on("start", (e, d) => { if (!e.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+    .on("drag",  (e, d) => { d.fx = e.x; d.fy = e.y; })
+    .on("end",   (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; })
+  )
+  .on("click", onNodeClick)
+  .on("mouseover", onNodeHover)
+  .on("mouseout", onNodeOut);
+
+// ── labels for tier-0 and tier-1 ─────────────────────────────────────────────
+const labelSel = g.append("g").attr("class", "labels")
+  .selectAll("text")
+  .data(nodes.filter(d => d.tier <= 1))
+  .join("text")
+  .text(d => d.name)
+  .attr("font-size", d => d.tier === 0 ? 11 : 9)
+  .attr("fill", d => d.tier === 0 ? "#fff" : "rgba(255,255,255,0.7)")
+  .attr("pointer-events", "none")
+  .attr("dy", "-0.5em")
+  .attr("text-anchor", "middle");
+
+// ── tick ──────────────────────────────────────────────────────────────────────
+sim.on("tick", () => {
+  linkSel
+    .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+    .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+  nodeSel.attr("cx", d => d.x).attr("cy", d => d.y);
+  labelSel.attr("x", d => d.x).attr("y", d => d.y);
+});
+
+// ── update stats ──────────────────────────────────────────────────────────────
+function updateStats() {
+  const vis = nodes.filter(d => !d._hidden);
+  document.getElementById("stats").textContent =
+    `${vis.length} nodes · ${links.filter(l => !l.source._hidden && !l.target._hidden).length} connections visible`;
+}
+
+// ── filter logic ──────────────────────────────────────────────────────────────
+function applyFilters() {
+  nodes.forEach(n => {
+    const sectorOk = activeSector === "all" || n.sector_group === activeSector || n.id === "ewan";
+    const typeOk   = activeType  === "all" || n.type === activeType || n.id === "ewan";
+    const tierOk   = activeTier  === "all" || String(n.tier) === activeTier || n.id === "ewan";
+    const statusOk = activeStatuses.size === 0 || activeStatuses.has(n.status || "") || n.id === "ewan";
+    n._hidden = !(sectorOk && typeOk && tierOk && statusOk);
+  });
+
+  nodeSel
+    .attr("opacity", d => d._hidden ? 0.04 : (d._dimmed ? 0.10 : 1))
+    .attr("pointer-events", d => d._hidden ? "none" : "all");
+  linkSel.attr("opacity", d => (d.source._hidden || d.target._hidden) ? 0.02 : (d._dimmed ? 0.05 : 0.5));
+  labelSel.attr("opacity", d => d._hidden ? 0 : (d._dimmed ? 0 : 1));
+  updateStats();
+}
+applyFilters();
+
+// ── chip click handlers ────────────────────────────────────────────────────────
+document.getElementById("sector-chips").addEventListener("click", e => {
+  const chip = e.target.closest(".chip");
+  if (!chip) return;
+  document.querySelectorAll("#sector-chips .chip").forEach(c => c.classList.remove("active"));
+  chip.classList.add("active");
+  activeSector = chip.dataset.group;
+  applyFilters();
+});
+document.getElementById("type-chips").addEventListener("click", e => {
+  const chip = e.target.closest(".chip");
+  if (!chip) return;
+  document.querySelectorAll("#type-chips .chip").forEach(c => c.classList.remove("active"));
+  chip.classList.add("active");
+  activeType = chip.dataset.type;
+  applyFilters();
+});
+document.getElementById("tier-chips").addEventListener("click", e => {
+  const chip = e.target.closest(".chip");
+  if (!chip) return;
+  document.querySelectorAll("#tier-chips .chip").forEach(c => c.classList.remove("active"));
+  chip.classList.add("active");
+  activeTier = chip.dataset.tier;
+  applyFilters();
+});
+
+// ── path highlight ─────────────────────────────────────────────────────────────
+function highlightPath(pathIds) {
+  const pathSet = new Set(pathIds);
+  const edgeSet = new Set();
+  for (let i = 0; i < pathIds.length - 1; i++) {
+    edgeSet.add(pathIds[i] + "→" + pathIds[i+1]);
+    edgeSet.add(pathIds[i+1] + "→" + pathIds[i]);
+  }
+  nodeSel
+    .attr("stroke", d => pathSet.has(d.id) ? "#fff" : (d.id === "ewan" ? "#fff" : "rgba(0,0,0,0.3)"))
+    .attr("stroke-width", d => pathSet.has(d.id) ? 3 : (d.id === "ewan" ? 2 : 0.5))
+    .attr("opacity", d => d._hidden ? 0.04 : (pathSet.size ? (pathSet.has(d.id) ? 1 : 0.15) : 1));
+  linkSel
+    .attr("stroke", d => edgeSet.has(d.source.id + "→" + d.target.id) ? "#ff6b35" : "rgba(255,255,255,0.08)")
+    .attr("stroke-width", d => edgeSet.has(d.source.id + "→" + d.target.id) ? 3 : Math.max(0.5, (d.strength || 1) * 0.4))
+    .attr("opacity", d => d.source._hidden || d.target._hidden ? 0.02 : (edgeSet.size ? (edgeSet.has(d.source.id + "→" + d.target.id) ? 1 : 0.05) : 0.5));
+}
+function clearHighlight() {
+  highlightedPath = null;
+  nodeSel
+    .attr("stroke", d => d.id === "ewan" ? "#fff" : "rgba(0,0,0,0.3)")
+    .attr("stroke-width", d => d.id === "ewan" ? 2 : 0.5)
+    .attr("opacity", d => d._hidden ? 0.04 : 1);
+  linkSel
+    .attr("stroke", "rgba(255,255,255,0.08)")
+    .attr("stroke-width", d => Math.max(0.5, (d.strength || 1) * 0.4))
+    .attr("opacity", d => d.source._hidden || d.target._hidden ? 0.02 : 0.5);
+  document.getElementById("path-result").textContent = "Click a node or type above to find shortest warm path.";
+  document.getElementById("clear-path").style.display = "none";
+  document.getElementById("path-input").value = "";
+}
+
+document.getElementById("clear-path").addEventListener("click", clearHighlight);
+
+// ── path input ────────────────────────────────────────────────────────────────
+let pathDebounce;
+document.getElementById("path-input").addEventListener("input", e => {
+  clearTimeout(pathDebounce);
+  pathDebounce = setTimeout(() => {
+    const q = e.target.value.trim().toLowerCase();
+    if (!q) { clearHighlight(); return; }
+    const target = RAW_NODES.find(n => n.name.toLowerCase() === q || n.id === q);
+    if (!target) {
+      document.getElementById("path-result").textContent = "No exact match. Keep typing...";
+      return;
+    }
+    runPath(target.id);
+  }, 400);
+});
+
+function runPath(targetId) {
+  const path = bfs("ewan", targetId);
+  const resultEl = document.getElementById("path-result");
+  const clearBtn = document.getElementById("clear-path");
+  if (!path) {
+    resultEl.textContent = "No path found — node not connected to Ewan's network.";
+    return;
+  }
+  highlightedPath = path;
+  highlightPath(path);
+  const pathNames = path.map(id => {
+    const n = nodeById[id];
+    return `<span class="path-node">${n ? n.name : id}</span>`;
+  });
+  resultEl.innerHTML = pathNames.join('<span class="path-sep"> → </span>');
+  clearBtn.style.display = "block";
+}
+
+// ── node click ────────────────────────────────────────────────────────────────
+function onNodeClick(e, d) {
+  e.stopPropagation();
+  selectedNode = d;
+  showDetail(d);
+  // Also find path from ewan
+  if (d.id !== "ewan") {
+    document.getElementById("path-input").value = d.name;
+    runPath(d.id);
+  }
+}
+
+svg.on("click", () => {
+  if (!highlightedPath) return;
+  clearHighlight();
+});
+
+function showDetail(d) {
+  const el = document.getElementById("detail");
+  el.classList.remove("empty");
+  const lastContact = d.last_contact || "—";
+  const linkCount = d.link_count || 0;
+  const tags = (d.tags || []).map(t => `<span class="tag">${t}</span>`).join("");
+
+  // Merge metrics
+  const m = METRICS[d.id] || {};
+  const metricsDegree = m.degree !== undefined ? m.degree : linkCount;
+  const bw = m.betweenness !== undefined ? m.betweenness : 0;
+  const bwPct = (bw * 100).toFixed(1);
+  // Bridge score colour: >5% amber, >2% yellow, else grey
+  const bwColor = bw > 0.05 ? "#f59e0b" : bw > 0.02 ? "#fbbf24" : "#6b7280";
+  const bwLabel = bw > 0.05 ? "key bridge" : bw > 0.02 ? "moderate bridge" : "";
+  const bwBadge = bwLabel ? ` <span style="color:${bwColor};font-size:10px;font-weight:600;">(${bwLabel})</span>` : "";
+
+  el.innerHTML = `
+    <h2>${d.name}</h2>
+    <div class="detail-role">${d.role || ""}</div>
+    <div class="detail-row"><span class="k">Type</span><span class="v">${d.type}</span></div>
+    <div class="detail-row"><span class="k">Sector</span><span class="v">${d.sector || "—"}</span></div>
+    <div class="detail-row"><span class="k">Tier</span><span class="v">${d.tier !== undefined ? d.tier : "—"}</span></div>
+    <div class="detail-row"><span class="k">Status</span><span class="v">${d.status || "—"}</span></div>
+    <div class="detail-row"><span class="k">B Corp</span><span class="v">${d.bcorp ? "Yes" : "No"}</span></div>
+    <div class="detail-row"><span class="k">Degree</span><span class="v">${metricsDegree} connections</span></div>
+    <div class="detail-row"><span class="k">Bridge score</span><span class="v" title="How often this person sits on the shortest path between others"><span style="color:${bwColor};font-weight:700;">${bwPct}%</span>${bwBadge}</span></div>
+    <div class="detail-row"><span class="k">Last Contact</span><span class="v">${lastContact}</span></div>
+    <div class="tag-list">${tags}</div>
+  `;
+}
+
+// ── tooltip ──────────────────────────────────────────────────────────────────
+const tooltip = document.getElementById("tooltip");
+function onNodeHover(e, d) {
+  tooltip.querySelector(".tt-name").textContent = d.name;
+  tooltip.querySelector(".tt-sub").textContent = [d.role, d.sector].filter(Boolean).join(" · ");
+  tooltip.classList.add("visible");
+}
+function onNodeOut() {
+  tooltip.classList.remove("visible");
+}
+document.addEventListener("mousemove", e => {
+  tooltip.style.left = (e.clientX + 14) + "px";
+  tooltip.style.top  = (e.clientY - 10) + "px";
+});
+
+
+// ── FEATURE 1: Text search ────────────────────────────────────────────────────
+const nodeSearchEl = document.getElementById("node-search");
+nodeSearchEl.addEventListener("input", () => {
+  searchQuery = nodeSearchEl.value.trim().toLowerCase();
+  if (searchQuery === "") {
+    nodeSel.attr("opacity", d => d._hidden ? 0.04 : (d._dimmed ? 0.10 : 1));
+    labelSel.attr("opacity", d => d._hidden ? 0 : (d._dimmed ? 0 : 1));
+  } else {
+    nodeSel.attr("opacity", d => {
+      if (d._hidden) return 0.04;
+      const match = (d.name || "").toLowerCase().includes(searchQuery);
+      return match ? 1 : 0.15;
+    }).attr("r", d => {
+      const match = (d.name || "").toLowerCase().includes(searchQuery);
+      return match ? nodeRadius(d) * 1.5 : nodeRadius(d);
+    });
+    labelSel.attr("opacity", d => {
+      if (d._hidden) return 0;
+      return (d.name || "").toLowerCase().includes(searchQuery) ? 1 : 0;
+    });
+  }
+});
+nodeSearchEl.addEventListener("keydown", e => {
+  if (e.key === "Escape") {
+    nodeSearchEl.value = "";
+    searchQuery = "";
+    applyFilters();
+    nodeSel.attr("r", d => nodeRadius(d));
+  }
+});
+
+// ── FEATURE 2: Status filter pills ────────────────────────────────────────────
+const STATUS_COLORS = {
+  active: "#4CAF50", target: "#42A5F5", parked: "#C45D4A",
+  ecosystem: "#26C6DA", self: "#ff6b35", dormant: "#9E9E9E",
+  context: "#AB47BC", pending: "#FFA726", watch: "#66BB6A",
+  opportunity: "#EC407A", new: "#80CBC4"
+};
+const statusCounts = {};
+nodes.forEach(n => { const s = n.status || ""; statusCounts[s] = (statusCounts[s] || 0) + 1; });
+// Start with all statuses active
+Object.keys(statusCounts).forEach(s => activeStatuses.add(s));
+const statusPillsEl = document.getElementById("status-pills");
+Object.entries(statusCounts).sort((a,b) => b[1]-a[1]).forEach(([status, count]) => {
+  if (!status) return;
+  const pill = document.createElement("span");
+  pill.className = "status-pill active";
+  pill.dataset.status = status;
+  const color = STATUS_COLORS[status] || "#9E9E9E";
+  pill.innerHTML = `<span class="sdot" style="background:${color}"></span>${status}<span class="scount">${count}</span>`;
+  pill.addEventListener("click", () => {
+    if (activeStatuses.has(status)) {
+      activeStatuses.delete(status);
+      pill.classList.remove("active");
+    } else {
+      activeStatuses.add(status);
+      pill.classList.add("active");
+    }
+    applyFilters();
+  });
+  statusPillsEl.appendChild(pill);
+});
+document.getElementById("status-all-btn").addEventListener("click", () => {
+  Object.keys(statusCounts).forEach(s => activeStatuses.add(s));
+  document.querySelectorAll(".status-pill").forEach(p => p.classList.add("active"));
+  applyFilters();
+});
+document.getElementById("status-none-btn").addEventListener("click", () => {
+  activeStatuses.clear();
+  document.querySelectorAll(".status-pill").forEach(p => p.classList.remove("active"));
+  applyFilters();
+});
+
+// ── FEATURE 3: Cluster dim on hover ──────────────────────────────────────────
+const neighbourMap = new Map();
+nodes.forEach(n => neighbourMap.set(n.id, new Set()));
+links.forEach(l => {
+  const sid = l.source.id || l.source;
+  const tid = l.target.id || l.target;
+  neighbourMap.get(sid)?.add(tid);
+  neighbourMap.get(tid)?.add(sid);
+});
+nodeSel
+  .on("mouseenter", (e, d) => {
+    const keep = new Set([d.id, ...neighbourMap.get(d.id) || []]);
+    nodeSel.attr("opacity", n => n._hidden ? 0.04 : (keep.has(n.id) ? 1 : 0.10));
+    labelSel.attr("opacity", n => n._hidden ? 0 : (keep.has(n.id) ? 1 : 0));
+    linkSel.attr("opacity", l => {
+      const sid = l.source.id || l.source;
+      const tid = l.target.id || l.target;
+      if (l.source._hidden || l.target._hidden) return 0.02;
+      return (keep.has(sid) && keep.has(tid)) ? 0.8 : 0.05;
+    });
+  })
+  .on("mouseleave", () => {
+    if (searchQuery) {
+      // restore search-based highlight
+      nodeSel.attr("opacity", d => d._hidden ? 0.04 : ((d.name||"").toLowerCase().includes(searchQuery) ? 1 : 0.15));
+      labelSel.attr("opacity", d => d._hidden ? 0 : ((d.name||"").toLowerCase().includes(searchQuery) ? 1 : 0));
+      linkSel.attr("opacity", d => (d.source._hidden||d.target._hidden) ? 0.02 : 0.5);
+    } else {
+      applyFilters();
+    }
+  });
+
+// ── resize ────────────────────────────────────────────────────────────────────
+new ResizeObserver(() => {
+  W = wrap.clientWidth; H = wrap.clientHeight;
+  sim.force("center", d3.forceCenter(W / 2, H / 2)).alpha(0.1).restart();
+}).observe(wrap);
+
+// ── THEME TOGGLE ──────────────────────────────────────────────────────────────
+(function() {
+  const btn = document.getElementById("theme-toggle");
+  const body = document.body;
+  const saved = localStorage.getItem("ona-explorer-theme") || "dark";
+  function applyTheme(theme) {
+    if (theme === "light") {
+      body.setAttribute("data-theme", "light");
+      btn.textContent = "🌙 Dark";
+      // Update D3 elements for light mode
+      linkSel.attr("stroke", "rgba(0,0,0,0.20)");
+      labelSel.attr("fill", "#1a1a2e");
+      nodeSel.attr("stroke", d => d.id === "ewan" ? "#fff" : "rgba(255,255,255,0.85)");
+    } else {
+      body.removeAttribute("data-theme");
+      btn.textContent = "☀️ Light";
+      linkSel.attr("stroke", "rgba(255,255,255,0.08)");
+      labelSel.attr("fill", d => d.tier === 0 ? "#fff" : "rgba(255,255,255,0.7)");
+      nodeSel.attr("stroke", d => d.id === "ewan" ? "#fff" : "rgba(0,0,0,0.3)");
+    }
+    localStorage.setItem("ona-explorer-theme", theme);
+  }
+  applyTheme(saved);
+  btn.addEventListener("click", () => {
+    const current = body.getAttribute("data-theme") === "light" ? "light" : "dark";
+    applyTheme(current === "light" ? "dark" : "light");
+  });
+})();
+
+// ── FLOATING PANELS ───────────────────────────────────────────────────────────
+const now = new Date();
+const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+// Network Health counts
+(function() {
+  const warm = nodes.filter(n => n.status === "active").length;
+  const inworks = nodes.filter(n => n.status === "pending").length;
+  // Priority: tier 1-2 with last_contact > 90 days ago or no contact and tier 1
+  const priority = nodes.filter(n => {
+    if (n.id === "ewan") return false;
+    if (n.tier > 2) return false;
+    if (!n.last_contact) return n.tier === 1;
+    const days = Math.floor((now - new Date(n.last_contact)) / (1000 * 60 * 60 * 24));
+    return days > 90;
+  }).length;
+  document.getElementById("fp-health-warm").textContent = warm;
+  document.getElementById("fp-health-inworks").textContent = inworks;
+  document.getElementById("fp-health-priority").textContent = priority;
+})();
+
+// Upcoming Meetings
+function fpPopulateMeetings() {
+  const div = document.getElementById("fp-meetings-list");
+  const upcoming = nodes.filter(n => {
+    if (!n.nextMeeting) return false;
+    return new Date(n.nextMeeting) >= now;
+  }).sort((a, b) => new Date(a.nextMeeting) - new Date(b.nextMeeting)).slice(0, 5);
+  if (upcoming.length === 0) {
+    div.innerHTML = '<p class="fp-no-items">No upcoming meetings scheduled</p>';
+    return;
+  }
+  div.innerHTML = upcoming.map(n => {
+    const d = new Date(n.nextMeeting);
+    const ds = d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+    return `<div class="fp-meeting-item" data-nid="${n.id}"><div class="fp-meeting-name">${n.name}</div><div class="fp-meeting-date">📅 ${ds}</div></div>`;
+  }).join("");
+  div.querySelectorAll(".fp-meeting-item").forEach(el => {
+    el.addEventListener("click", () => {
+      const nd = nodeById[el.dataset.nid];
+      if (nd) { showDetail(nd); }
+    });
+  });
+}
+fpPopulateMeetings();
+
+// What Should I Do Next
+function fpPopulateActions() {
+  const div = document.getElementById("fp-action-list");
+  const actions = [];
+  nodes.forEach(n => {
+    if (n.id === "ewan") return;
+    // Upcoming meeting in next 7 days
+    if (n.nextMeeting) {
+      const md = new Date(n.nextMeeting);
+      if (md >= now && md <= sevenDaysFromNow) {
+        actions.push({ id: n.id, name: n.name, reason: "📅 Meeting coming up", type: "meeting", score: 90 });
+      }
+    }
+    // Stale tier 1-2 contacts
+    if (n.last_contact && n.tier <= 2) {
+      const days = Math.floor((now - new Date(n.last_contact)) / (1000 * 60 * 60 * 24));
+      if (days > 90) {
+        actions.push({ id: n.id, name: n.name, reason: `⚠️ ${days}d since contact`, type: "stale", score: 60 + (n.tier === 1 ? 15 : 0) });
+      }
+    }
+    // Tier 1 targets never contacted
+    if (!n.last_contact && n.tier === 1 && n.status === "target") {
+      actions.push({ id: n.id, name: n.name, reason: "🎯 Priority target — not yet contacted", type: "priority", score: 80 });
+    }
+  });
+  actions.sort((a, b) => b.score - a.score);
+  const top = actions.slice(0, 5);
+  if (top.length === 0) {
+    div.innerHTML = '<p class="fp-no-items">No urgent actions right now</p>';
+    return;
+  }
+  div.innerHTML = top.map(a => `
+    <div class="fp-action-item ${a.type}" data-nid="${a.id}">
+      <div class="fp-action-item-name">${a.name}</div>
+      <div class="fp-action-item-reason">${a.reason}</div>
+    </div>
+  `).join("");
+  div.querySelectorAll(".fp-action-item").forEach(el => {
+    el.addEventListener("click", () => {
+      const nd = nodeById[el.dataset.nid];
+      if (nd) { showDetail(nd); }
+    });
+  });
+}
+fpPopulateActions();
+document.getElementById("fp-refresh-actions").addEventListener("click", fpPopulateActions);
+</script>
+</body>
+</html>
