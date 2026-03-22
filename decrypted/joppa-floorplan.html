@@ -6,14 +6,40 @@
 <title>Joppa Road — Smart Home Device Map</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #faf8f5; color: #3d3529; min-height: 100vh; }
 
-  header { padding: 24px 32px; border-bottom: 1px solid #e8e0d4; background: #fff; display: flex; align-items: center; gap: 16px; }
-  header h1 { font-size: 22px; font-weight: 700; color: #2c2416; letter-spacing: -0.3px; }
-  header .subtitle { font-size: 13px; color: #9a8e7e; margin-top: 2px; }
+  /* ── Palette (light default) ── */
+  :root {
+    --bg-page:   var(--bg-page);
+    --bg-card:   #fff;
+    --border:    var(--border);
+    --border-lt: var(--border-lt);
+    --text-main: var(--text-main);
+    --text-body: #3d3529;
+    --text-sec:  var(--text-sec);
+    --text-muted:var(--text-muted);
+    --text-dim:  var(--text-dim);
+  }
+  /* ── Dark mode overrides ── */
+  :root.dark {
+    --bg-page:   #18181b;
+    --bg-card:   #222226;
+    --border:    #333338;
+    --border-lt: #29292e;
+    --text-main: #e8e3da;
+    --text-body: #d4cfc6;
+    --text-sec:  #8a8070;
+    --text-muted:#6a6060;
+    --text-dim:  #4a4540;
+  }
 
-  .legend { display: flex; gap: 20px; padding: 12px 32px; border-bottom: 1px solid #e8e0d4; background: #fff; flex-wrap: wrap; }
-  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #7a6e5e; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg-page); color: var(--text-body); min-height: 100vh; transition: background 0.2s, color 0.2s; }
+
+  header { padding: 24px 32px; border-bottom: 1px solid var(--border); background: var(--bg-card); display: flex; align-items: center; gap: 16px; }
+  header h1 { font-size: 22px; font-weight: 700; color: var(--text-main); letter-spacing: -0.3px; }
+  header .subtitle { font-size: 13px; color: var(--text-sec); margin-top: 2px; }
+
+  .legend { display: flex; gap: 20px; padding: 12px 32px; border-bottom: 1px solid var(--border); background: var(--bg-card); flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
   .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
   .legend-dot.wiim { background: #2a9d8f; }
   .legend-dot.hue { background: #e9a820; }
@@ -30,11 +56,11 @@
   .legend-dot.dyson { background: #06b6d4; }
   .legend-dot.schedule { background: #6366f1; }
 
-  .schedule-row { display: flex; align-items: baseline; gap: 8px; font-size: 12px; line-height: 2; padding: 2px 0; border-bottom: 1px solid #f0ebe3; }
+  .schedule-row { display: flex; align-items: baseline; gap: 8px; font-size: 12px; line-height: 2; padding: 2px 0; border-bottom: 1px solid var(--border-lt); }
   .schedule-row:last-child { border-bottom: none; }
   .schedule-time { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 11px; color: #4f46e5; font-weight: 600; min-width: 52px; }
-  .schedule-name { font-weight: 600; color: #2c2416; }
-  .schedule-detail { color: #9a8e7e; }
+  .schedule-name { font-weight: 600; color: var(--text-main); }
+  .schedule-detail { color: var(--text-sec); }
   .schedule-badge { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-left: 4px; }
   .schedule-badge.persistent { background: rgba(22,163,74,0.1); color: #15803d; }
   .schedule-badge.interval { background: rgba(99,102,241,0.1); color: #4f46e5; }
@@ -45,13 +71,13 @@
   .floors { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 24px 32px; max-width: 1400px; margin: 0 auto; }
   @media (max-width: 900px) { .floors { grid-template-columns: 1fr; } }
 
-  .floor { background: #fff; border: 1px solid #e8e0d4; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-  .floor-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #b0a28e; margin-bottom: 12px; font-weight: 600; }
+  .floor { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .floor-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dim); margin-bottom: 12px; font-weight: 600; }
 
-  .room { background: #faf8f5; border: 1px solid #e8e0d4; border-radius: 8px; padding: 14px; margin-bottom: 10px; position: relative; }
+  .room { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; position: relative; }
   .room:last-child { margin-bottom: 0; }
-  .room-name { font-size: 14px; font-weight: 600; color: #2c2416; margin-bottom: 8px; }
-  .room-dims { font-size: 11px; color: #b0a28e; margin-bottom: 8px; }
+  .room-name { font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 8px; }
+  .room-dims { font-size: 11px; color: var(--text-dim); margin-bottom: 8px; }
 
   .devices { display: flex; flex-wrap: wrap; gap: 6px; }
   .device { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: default; position: relative; }
@@ -79,11 +105,35 @@
 
   .device .icon { font-size: 13px; }
 
-  .tooltip { display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #fff; border: 1px solid #d4cbb8; border-radius: 8px; padding: 10px 14px; font-size: 11px; white-space: nowrap; z-index: 10; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+  /* ── Dark mode toggle ── */
+  #dark-toggle { background: none; border: 1px solid var(--border); border-radius: 6px;
+    padding: 4px 9px; font-size: 14px; cursor: pointer; margin-left: auto;
+    color: var(--text-sec); transition: background 0.15s; flex-shrink: 0; }
+  #dark-toggle:hover { background: var(--border); }
+
+  /* ── WiiM inline controls ── */
+  .ctrl-row { display: flex; gap: 3px; margin-top: 3px; }
+  .ctrl-btn { border: none; background: rgba(42,157,143,0.14); color: #1a7a6f;
+    border-radius: 4px; padding: 2px 7px; font-size: 11px; cursor: pointer;
+    transition: background 0.15s; line-height: 1.5; }
+  .ctrl-btn:hover { background: rgba(42,157,143,0.28); }
+  .ctrl-btn.flash-ok  { background: rgba(42,157,143,0.45) !important; }
+  .ctrl-btn.flash-err { background: rgba(239,68,68,0.25) !important; color:#dc2626; }
+  :root.dark .ctrl-btn { background: rgba(42,157,143,0.2); }
+
+  /* ── Hue toggle dot ── */
+  .hue-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block;
+    background: rgba(233,168,32,0.25); border: 1.5px solid rgba(233,168,32,0.45);
+    cursor: pointer; margin: 0 3px; vertical-align: middle;
+    transition: background 0.2s, box-shadow 0.2s; flex-shrink: 0; }
+  .hue-dot.on { background: #e9a820; box-shadow: 0 0 5px rgba(233,168,32,0.7); }
+  .hue-dot:hover { transform: scale(1.25); }
+
+  .tooltip { display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: var(--bg-card); border: 1px solid #d4cbb8; border-radius: 8px; padding: 10px 14px; font-size: 11px; white-space: nowrap; z-index: 10; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
   .tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #d4cbb8; }
   .device:hover .tooltip { display: block; }
-  .tooltip .tt-label { font-weight: 600; color: #2c2416; margin-bottom: 4px; }
-  .tooltip .tt-row { color: #7a6e5e; line-height: 1.6; }
+  .tooltip .tt-label { font-weight: 600; color: var(--text-main); margin-bottom: 4px; }
+  .tooltip .tt-row { color: var(--text-muted); line-height: 1.6; }
 
   .wifi-signal { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; margin-left: 4px; }
   .wifi-signal.good { background: rgba(22, 163, 74, 0.1); color: #15803d; }
@@ -91,45 +141,45 @@
   .wifi-signal.weak { background: rgba(220, 38, 38, 0.1); color: #dc2626; }
 
   /* Bridge Status Strip — claude-hud-style ambient overlay */
-  #status-strip { position: fixed; top: 16px; right: 16px; width: 268px; background: #fff; border: 1px solid #e8e0d4; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); font-size: 11px; z-index: 100; }
+  #status-strip { position: fixed; top: 16px; right: 16px; width: 268px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); font-size: 11px; z-index: 100; }
   #status-strip.collapsed { width: 152px; }
   #status-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; cursor: pointer; user-select: none; }
   #status-header:hover { background: rgba(0,0,0,0.02); border-radius: 12px 12px 0 0; }
   #status-strip.collapsed #status-header { border-radius: 12px; }
-  .bridge-label { display: flex; align-items: center; gap: 6px; font-weight: 600; color: #2c2416; font-size: 11px; }
-  #bridge-dot { width: 7px; height: 7px; border-radius: 50%; background: #b0a28e; flex-shrink: 0; }
+  .bridge-label { display: flex; align-items: center; gap: 6px; font-weight: 600; color: var(--text-main); font-size: 11px; }
+  #bridge-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-dim); flex-shrink: 0; }
   #bridge-dot.green { background: #15803d; }
   #bridge-dot.amber { background: #d97706; animation: pulse-amber 2s infinite; }
   #bridge-dot.red { background: #dc2626; }
   @keyframes pulse-amber { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
-  #strip-toggle { font-size: 9px; color: #b0a28e; }
-  #status-body { border-top: 1px solid #f0ebe3; padding: 10px 14px 12px; }
+  #strip-toggle { font-size: 9px; color: var(--text-dim); }
+  #status-body { border-top: 1px solid var(--border-lt); padding: 10px 14px 12px; }
   #status-strip.collapsed #status-body { display: none; }
   .srow { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-  .srow .slabel { color: #b0a28e; }
+  .srow .slabel { color: var(--text-dim); }
   .srow .sval { color: #3d3529; font-weight: 500; }
-  #events-section { margin-top: 8px; padding-top: 8px; border-top: 1px solid #f0ebe3; }
-  .esection-label { color: #b0a28e; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; font-size: 10px; margin-bottom: 5px; }
+  #events-section { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-lt); }
+  .esection-label { color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; font-size: 10px; margin-bottom: 5px; }
   .erow { display: flex; gap: 6px; margin-bottom: 3px; }
-  .etime { color: #b0a28e; min-width: 38px; flex-shrink: 0; }
-  .eendpoint { color: #2c2416; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .etime { color: var(--text-dim); min-width: 38px; flex-shrink: 0; }
+  .eendpoint { color: var(--text-main); font-family: 'SF Mono', 'Fira Code', monospace; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .eresult { font-size: 10px; flex-shrink: 0; }
   .eresult.ok { color: #15803d; }
   .eresult.err { color: #dc2626; }
   #strip-footer { margin-top: 8px; display: flex; justify-content: space-between; align-items: center; }
-  #strip-updated { color: #b0a28e; font-size: 10px; }
-  #strip-refresh-btn { color: #9a8e7e; font-size: 10px; cursor: pointer; background: none; border: none; padding: 0; }
+  #strip-updated { color: var(--text-dim); font-size: 10px; }
+  #strip-refresh-btn { color: var(--text-sec); font-size: 10px; cursor: pointer; background: none; border: none; padding: 0; }
   #strip-refresh-btn:hover { color: #2a9d8f; }
-  #config-area { padding: 10px 14px 12px; border-top: 1px solid #f0ebe3; }
-  #config-area p { color: #7a6e5e; margin-bottom: 6px; line-height: 1.5; }
-  #api-key-input { width: 100%; padding: 6px 8px; border: 1px solid #e8e0d4; border-radius: 5px; font-size: 11px; outline: none; }
+  #config-area { padding: 10px 14px 12px; border-top: 1px solid var(--border-lt); }
+  #config-area p { color: var(--text-muted); margin-bottom: 6px; line-height: 1.5; }
+  #api-key-input { width: 100%; padding: 6px 8px; border: 1px solid var(--border); border-radius: 5px; font-size: 11px; outline: none; }
   #api-key-input:focus { border-color: #2a9d8f; }
   #config-connect { margin-top: 6px; width: 100%; padding: 6px; background: rgba(42,157,143,0.1); border: 1px solid rgba(42,157,143,0.3); color: #1a7a6f; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; }
   #config-connect:hover { background: rgba(42,157,143,0.18); }
 
-  .section-break { grid-column: 1 / -1; border-top: 1px solid #e8e0d4; margin: 8px 0; }
+  .section-break { grid-column: 1 / -1; border-top: 1px solid var(--border); margin: 8px 0; }
 
-  .combo-row { font-size: 12px; line-height: 1.8; padding: 4px 0; border-bottom: 1px solid #f0ebe3; }
+  .combo-row { font-size: 12px; line-height: 1.8; padding: 4px 0; border-bottom: 1px solid var(--border-lt); }
   .combo-row:last-child { border-bottom: none; }
   .combo-name { font-weight: 600; }
   .combo-name.lightwave { color: #b33a06; }
@@ -137,27 +187,27 @@
   .combo-name.alexa { color: #0e7490; }
   .combo-name.auto { color: #a21caf; }
   .combo-name.api { color: #57534e; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 11px; }
-  .combo-detail { color: #9a8e7e; }
+  .combo-detail { color: var(--text-sec); }
 
-  .api-group { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #b0a28e; font-weight: 600; padding: 8px 0 4px; border-bottom: 1px solid #e8e0d4; margin-top: 4px; }
+  .api-group { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); font-weight: 600; padding: 8px 0 4px; border-bottom: 1px solid var(--border); margin-top: 4px; }
   .api-group:first-child { margin-top: 0; }
 
-  .quick-actions { padding: 16px 32px; background: #fff; border-bottom: 1px solid #e8e0d4; }
-  .quick-actions-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #b0a28e; margin-bottom: 12px; font-weight: 600; }
+  .quick-actions { padding: 16px 32px; background: var(--bg-card); border-bottom: 1px solid var(--border); }
+  .quick-actions-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dim); margin-bottom: 12px; font-weight: 600; }
   .quick-actions-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
   .action-btn { padding: 8px 16px; border: 1px solid #7c3aed; background: rgba(124, 58, 237, 0.08); color: #6d28d9; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
   .action-btn:hover { background: rgba(124, 58, 237, 0.15); transform: translateY(-1px); }
   .action-btn:active { transform: translateY(0); }
   .action-btn.loading { opacity: 0.6; cursor: wait; }
-  .action-status { font-size: 11px; color: #9a8e7e; margin-top: 8px; min-height: 16px; }
+  .action-status { font-size: 11px; color: var(--text-sec); margin-top: 8px; min-height: 16px; }
 
   .network-table { margin-top: 24px; padding: 0 32px 32px; max-width: 1400px; margin-left: auto; margin-right: auto; }
-  .network-table h2 { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #2c2416; }
+  .network-table h2 { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--text-main); }
   table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  th { text-align: left; padding: 8px 12px; border-bottom: 2px solid #e8e0d4; color: #9a8e7e; font-weight: 500; text-transform: uppercase; font-size: 10px; letter-spacing: 1px; }
-  td { padding: 8px 12px; border-bottom: 1px solid #f0ebe3; }
+  th { text-align: left; padding: 8px 12px; border-bottom: 2px solid var(--border); color: var(--text-sec); font-weight: 500; text-transform: uppercase; font-size: 10px; letter-spacing: 1px; }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border-lt); }
   tr:hover td { background: rgba(42, 157, 143, 0.04); }
-  td.mono { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 11px; color: #9a8e7e; }
+  td.mono { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 11px; color: var(--text-sec); }
 </style>
 </head>
 <body>
@@ -167,6 +217,7 @@
     <h1>Joppa Road &mdash; Smart Home Device Map</h1>
     <div class="subtitle">8 WiiM speakers &middot; 20+ Hue lights &middot; Samsung Frame TV &middot; 30+ Lightwave switches &middot; 5 Meross plugs &middot; WeMo switch &middot; Dyson purifier &middot; Tuya radiator &middot; Velux window &middot; Orbi mesh &middot; Alexa voice &middot; 80+ API endpoints &middot; Updated 2026-03-22</div>
   </div>
+  <button id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode">🌙</button>
 </header>
 
 <div class="legend">
@@ -200,6 +251,11 @@
           <span class="icon">&#x1f50a;</span> WiiM Amp Ultra
           <span class="wifi-signal good">Good</span>
           <div class="wiim-now-playing" id="np-sitting_room"></div>
+          <div class="ctrl-row">
+            <button class="ctrl-btn" onclick="wiimCtrl('sitting_room','playpause',this)">▶</button>
+            <button class="ctrl-btn" onclick="wiimCtrl('sitting_room','vol-',this)">🔉</button>
+            <button class="ctrl-btn" onclick="wiimCtrl('sitting_room','vol+',this)">🔊</button>
+          </div>
           <div class="tooltip">
             <div class="tt-label">WiiM Amp Ultra</div>
             <div class="tt-row">IP: 10.0.0.209 &middot; MAC: 9C:B8:B4:D1:9A:46</div>
@@ -227,10 +283,10 @@
             <div class="tt-row">WebSocket API: port 8002 (local)</div>
             <div class="tt-row">iSponsorBlock: active</div>
             <div class="tt-row">Frame Art: daily 8am rotation (45+ artists)</div>
-            <div class="tt-row" style="font-weight:600; color:#2c2416; margin-top:4px;">Status &amp; Detection:</div>
+            <div class="tt-row" style="font-weight:600; color:var(--text-main); margin-top:4px;">Status &amp; Detection:</div>
             <div class="tt-row">/frame/status &mdash; power, art mode, running app</div>
             <div class="tt-row">Detects: YouTube, Netflix, Disney+, Apple TV, Plex</div>
-            <div class="tt-row" style="font-weight:600; color:#2c2416; margin-top:4px;">Controls:</div>
+            <div class="tt-row" style="font-weight:600; color:var(--text-main); margin-top:4px;">Controls:</div>
             <div class="tt-row">/frame/artmode &middot; /frame/newart &middot; /frame/power</div>
             <div class="tt-row">/frame/hdmi/1-4 &middot; /frame/home &middot; /frame/mute</div>
             <div class="tt-row">/frame/key/&lt;any&gt; &middot; /frame/fireplace</div>
@@ -238,7 +294,7 @@
           </div>
         </div>
         <div class="device hue">
-          <span class="icon">&#x1f4a1;</span> Hue Group 82 (6 lights)
+          <span class="icon">&#x1f4a1;</span><span class="hue-dot" data-hue="82" data-hue-on="/hue/scene/82/lTUTzSIU07TEwrjj" data-hue-off="/hue/off/arc" onclick="hueToggle(this)"></span> Hue Group 82 (6 lights)
           <div class="tooltip">
             <div class="tt-label">Philips Hue &mdash; Sitting Room (Group 82)</div>
             <div class="tt-row">Arc lamp, Gold/yellow floor, Black floor</div>
@@ -312,7 +368,7 @@
           </div>
         </div>
         <div class="device hue">
-          <span class="icon">&#x1f4a1;</span> Hue - Narnita
+          <span class="icon">&#x1f4a1;</span><span class="hue-dot" data-hue="narnita" onclick="hueToggle(this)"></span> Hue - Narnita
           <div class="tooltip">
             <div class="tt-label">Hue &mdash; Narnita</div>
             <div class="tt-row">Feature: -1135-</div>
@@ -330,6 +386,11 @@
           <span class="icon">&#x1f50a;</span> WiiM Pro Plus
           <span class="wifi-signal good">Good</span>
           <div class="wiim-now-playing" id="np-kitchen"></div>
+          <div class="ctrl-row">
+            <button class="ctrl-btn" onclick="wiimCtrl('kitchen','playpause',this)">▶</button>
+            <button class="ctrl-btn" onclick="wiimCtrl('kitchen','vol-',this)">🔉</button>
+            <button class="ctrl-btn" onclick="wiimCtrl('kitchen','vol+',this)">🔊</button>
+          </div>
           <div class="tooltip">
             <div class="tt-label">WiiM Pro Plus &mdash; Kitchen</div>
             <div class="tt-row">IP: 10.0.0.111 &middot; MAC: B8:2D:28:58:0A:0A</div>
@@ -400,14 +461,14 @@
           </div>
         </div>
         <div class="device hue">
-          <span class="icon">&#x1f4a1;</span> Hue Peninsula 1
+          <span class="icon">&#x1f4a1;</span><span class="hue-dot" data-hue="peninsula 1" onclick="hueToggle(this)"></span> Hue Peninsula 1
           <div class="tooltip">
             <div class="tt-label">Hue &mdash; Peninsula 1</div>
             <div class="tt-row">Feature: -1143-</div>
           </div>
         </div>
         <div class="device hue">
-          <span class="icon">&#x1f4a1;</span> Hue Peninsula 2
+          <span class="icon">&#x1f4a1;</span><span class="hue-dot" data-hue="peninsula 2" onclick="hueToggle(this)"></span> Hue Peninsula 2
           <div class="tooltip">
             <div class="tt-label">Hue &mdash; Peninsula 2</div>
             <div class="tt-row">Feature: -1109-</div>
@@ -504,6 +565,11 @@
           <span class="icon">&#x1f50a;</span> WiiM Mini
           <span class="wifi-signal weak">Weak</span>
           <div class="wiim-now-playing" id="np-bedroom"></div>
+          <div class="ctrl-row">
+            <button class="ctrl-btn" onclick="wiimCtrl('bedroom','playpause',this)">▶</button>
+            <button class="ctrl-btn" onclick="wiimCtrl('bedroom','vol-',this)">🔉</button>
+            <button class="ctrl-btn" onclick="wiimCtrl('bedroom','vol+',this)">🔊</button>
+          </div>
           <div class="tooltip">
             <div class="tt-label">WiiM Mini &mdash; Bedroom</div>
             <div class="tt-row">IP: 10.0.0.68 &middot; MAC: B8:13:32:1D:0B:9C</div>
@@ -538,7 +604,7 @@
             <div class="tt-row">Local MQTT control (offline after setup)</div>
             <div class="tt-row">Fan speed: 1-10 or auto mode</div>
             <div class="tt-row">Features: oscillation, night mode, filter status</div>
-            <div class="tt-row" style="font-weight:600; color:#2c2416; margin-top:4px;">Controls:</div>
+            <div class="tt-row" style="font-weight:600; color:var(--text-main); margin-top:4px;">Controls:</div>
             <div class="tt-row">/dyson/on/bedroom &middot; /dyson/off/bedroom</div>
             <div class="tt-row">/dyson/fan/bedroom/&lt;1-10&gt; &middot; /dyson/auto/bedroom</div>
             <div class="tt-row">/dyson/night/bedroom/on &middot; /dyson/state/bedroom</div>
@@ -554,6 +620,11 @@
           <span class="icon">&#x1f50a;</span> WiiM Pro Plus
           <span class="wifi-signal okay">Okay</span>
           <div class="wiim-now-playing" id="np-bathroom"></div>
+          <div class="ctrl-row">
+            <button class="ctrl-btn" onclick="wiimCtrl('bathroom','playpause',this)">▶</button>
+            <button class="ctrl-btn" onclick="wiimCtrl('bathroom','vol-',this)">🔉</button>
+            <button class="ctrl-btn" onclick="wiimCtrl('bathroom','vol+',this)">🔊</button>
+          </div>
           <div class="tooltip">
             <div class="tt-label">WiiM Pro Plus &mdash; Bathroom</div>
             <div class="tt-row">IP: 10.0.0.40 &middot; MAC: 50:41:1C:71:90:2E</div>
@@ -561,7 +632,7 @@
           </div>
         </div>
         <div class="device hue">
-          <span class="icon">&#x1f4a1;</span> BathyMcBathFace
+          <span class="icon">&#x1f4a1;</span><span class="hue-dot" data-hue="bathy" onclick="hueToggle(this)"></span> BathyMcBathFace
           <div class="tooltip">
             <div class="tt-label">Hue &mdash; BathyMcBathFace</div>
             <div class="tt-row">Feature: -1147-</div>
@@ -577,6 +648,11 @@
           <span class="icon">&#x1f50a;</span> WiiM Mini
           <span class="wifi-signal weak">Weak</span>
           <div class="wiim-now-playing" id="np-off_suite"></div>
+          <div class="ctrl-row">
+            <button class="ctrl-btn" onclick="wiimCtrl('off_suite','playpause',this)">▶</button>
+            <button class="ctrl-btn" onclick="wiimCtrl('off_suite','vol-',this)">🔉</button>
+            <button class="ctrl-btn" onclick="wiimCtrl('off_suite','vol+',this)">🔊</button>
+          </div>
           <div class="tooltip">
             <div class="tt-label">WiiM Mini &mdash; Off Suite</div>
             <div class="tt-row">IP: 10.0.0.222 &middot; MAC: B8:13:32:1E:26:64</div>
@@ -680,6 +756,11 @@
         <div class="device wiim" data-device="den">
           <span class="icon">&#x1f50a;</span> WiiM Mini
           <div class="wiim-now-playing" id="np-den"></div>
+          <div class="ctrl-row">
+            <button class="ctrl-btn" onclick="wiimCtrl('den','playpause',this)">▶</button>
+            <button class="ctrl-btn" onclick="wiimCtrl('den','vol-',this)">🔉</button>
+            <button class="ctrl-btn" onclick="wiimCtrl('den','vol+',this)">🔊</button>
+          </div>
           <div class="tooltip">
             <div class="tt-label">WiiM Mini &mdash; Den</div>
             <div class="tt-row">IP: 10.0.0.197 &middot; MAC: B8:13:32:1D:B9:9C</div>
@@ -692,7 +773,7 @@
             <div class="tt-row">Local UPnP/SOAP control (no cloud)</div>
             <div class="tt-row">Lightwave trigger: Double-press OFF (Top floor LEDs 1)</div>
             <div class="tt-row">Auto-off: 2am-8am (night hours)</div>
-            <div class="tt-row" style="font-weight:600; color:#2c2416; margin-top:4px;">Controls:</div>
+            <div class="tt-row" style="font-weight:600; color:var(--text-main); margin-top:4px;">Controls:</div>
             <div class="tt-row">/wemo/on/den &middot; /wemo/off/den</div>
             <div class="tt-row">/wemo/toggle/den &middot; /wemo/state/den</div>
           </div>
@@ -706,6 +787,11 @@
         <div class="device wiim" data-device="room_with_a_view">
           <span class="icon">&#x1f50a;</span> WiiM Mini
           <div class="wiim-now-playing" id="np-room_with_a_view"></div>
+          <div class="ctrl-row">
+            <button class="ctrl-btn" onclick="wiimCtrl('room_with_a_view','playpause',this)">▶</button>
+            <button class="ctrl-btn" onclick="wiimCtrl('room_with_a_view','vol-',this)">🔉</button>
+            <button class="ctrl-btn" onclick="wiimCtrl('room_with_a_view','vol+',this)">🔊</button>
+          </div>
           <div class="tooltip">
             <div class="tt-label">WiiM Mini &mdash; Room with a View</div>
             <div class="tt-row">IP: 10.0.0.160 &middot; MAC: B8:13:32:1D:8A:DC</div>
@@ -805,14 +891,14 @@
           </div>
         </div>
         <div class="device hue">
-          <span class="icon">&#x1f4a1;</span> Hue Shed 1
+          <span class="icon">&#x1f4a1;</span><span class="hue-dot" data-hue="shed 1" onclick="hueToggle(this)"></span> Hue Shed 1
           <div class="tooltip">
             <div class="tt-label">Hue &mdash; Shed 1</div>
             <div class="tt-row">Feature: -1131-</div>
           </div>
         </div>
         <div class="device hue">
-          <span class="icon">&#x1f4a1;</span> Hue Shed 2
+          <span class="icon">&#x1f4a1;</span><span class="hue-dot" data-hue="shed 2" onclick="hueToggle(this)"></span> Hue Shed 2
           <div class="tooltip">
             <div class="tt-label">Hue &mdash; Shed 2</div>
             <div class="tt-row">Feature: -1122-</div>
@@ -1433,45 +1519,45 @@
       <div class="devices" style="flex-direction: column; gap: 4px;">
         <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;">
           <span style="color: #1a7a6f; width: 140px;">Amp Ultra (sitting)</span>
-          <div style="background: #e8e0d4; height: 8px; border-radius: 4px; flex: 1; overflow: hidden;">
+          <div style="background: var(--border); height: 8px; border-radius: 4px; flex: 1; overflow: hidden;">
             <div style="background: #15803d; height: 100%; width: 80%; border-radius: 4px;"></div>
           </div>
-          <span style="color: #9a8e7e; font-size: 10px; width: 80px; text-align: right;">-60 dBm</span>
+          <span style="color: var(--text-sec); font-size: 10px; width: 80px; text-align: right;">-60 dBm</span>
         </div>
         <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;">
           <span style="color: #1a7a6f; width: 140px;">Pro Plus (kitchen)</span>
-          <div style="background: #e8e0d4; height: 8px; border-radius: 4px; flex: 1; overflow: hidden;">
+          <div style="background: var(--border); height: 8px; border-radius: 4px; flex: 1; overflow: hidden;">
             <div style="background: #15803d; height: 100%; width: 78%; border-radius: 4px;"></div>
           </div>
-          <span style="color: #9a8e7e; font-size: 10px; width: 80px; text-align: right;">-61 dBm</span>
+          <span style="color: var(--text-sec); font-size: 10px; width: 80px; text-align: right;">-61 dBm</span>
         </div>
         <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;">
           <span style="color: #1a7a6f; width: 140px;">Pro Plus (bath)</span>
-          <div style="background: #e8e0d4; height: 8px; border-radius: 4px; flex: 1; overflow: hidden;">
+          <div style="background: var(--border); height: 8px; border-radius: 4px; flex: 1; overflow: hidden;">
             <div style="background: #a16207; height: 100%; width: 64%; border-radius: 4px;"></div>
           </div>
-          <span style="color: #9a8e7e; font-size: 10px; width: 80px; text-align: right;">-68 dBm</span>
+          <span style="color: var(--text-sec); font-size: 10px; width: 80px; text-align: right;">-68 dBm</span>
         </div>
         <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;">
           <span style="color: #1a7a6f; width: 140px;">Off Suite (2F)</span>
-          <div style="background: #e8e0d4; height: 8px; border-radius: 4px; flex: 1; overflow: hidden;">
+          <div style="background: var(--border); height: 8px; border-radius: 4px; flex: 1; overflow: hidden;">
             <div style="background: #dc2626; height: 100%; width: 54%; border-radius: 4px;"></div>
           </div>
-          <span style="color: #9a8e7e; font-size: 10px; width: 80px; text-align: right;">-73 dBm</span>
+          <span style="color: var(--text-sec); font-size: 10px; width: 80px; text-align: right;">-73 dBm</span>
         </div>
         <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;">
           <span style="color: #1a7a6f; width: 140px;">Pro (surrounds)</span>
-          <div style="background: #e8e0d4; height: 8px; border-radius: 4px; flex: 1; overflow: hidden;">
+          <div style="background: var(--border); height: 8px; border-radius: 4px; flex: 1; overflow: hidden;">
             <div style="background: #dc2626; height: 100%; width: 52%; border-radius: 4px;"></div>
           </div>
-          <span style="color: #9a8e7e; font-size: 10px; width: 80px; text-align: right;">-74 dBm</span>
+          <span style="color: var(--text-sec); font-size: 10px; width: 80px; text-align: right;">-74 dBm</span>
         </div>
         <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;">
           <span style="color: #1a7a6f; width: 140px;">Mini (bedroom)</span>
-          <div style="background: #e8e0d4; height: 8px; border-radius: 4px; flex: 1; overflow: hidden;">
+          <div style="background: var(--border); height: 8px; border-radius: 4px; flex: 1; overflow: hidden;">
             <div style="background: #dc2626; height: 100%; width: 48%; border-radius: 4px;"></div>
           </div>
-          <span style="color: #9a8e7e; font-size: 10px; width: 80px; text-align: right;">-76 dBm</span>
+          <span style="color: var(--text-sec); font-size: 10px; width: 80px; text-align: right;">-76 dBm</span>
         </div>
       </div>
     </div>
@@ -1524,7 +1610,7 @@
     <div class="srow"><span class="slabel">Active devices</span><span class="sval" id="s-devices">—</span></div>
     <div id="events-section">
       <div class="esection-label">Recent Events</div>
-      <div id="events-container"><div style="color:#b0a28e">Loading…</div></div>
+      <div id="events-container"><div style="color:var(--text-dim)">Loading…</div></div>
     </div>
     <div id="strip-footer">
       <span id="strip-updated">—</span>
@@ -1612,7 +1698,7 @@
                    : (payload.events || payload.items || []).slice(0,5);
         const container = document.getElementById('events-container');
         if (!list.length) {
-          container.innerHTML = '<div style="color:#b0a28e">No events yet</div>';
+          container.innerHTML = '<div style="color:var(--text-dim)">No events yet</div>';
         } else {
           container.innerHTML = list.map(e => {
             const t = e.timestamp ? new Date(e.timestamp * (e.timestamp < 1e12 ? 1000 : 1))
@@ -1641,11 +1727,92 @@
 </script>
 
 <script>
+// ── Dark mode ──────────────────────────────────────────────────────────────
+(function () {
+  var DARK_KEY = 'joppa_dark';
+  function applyDark(on) {
+    document.documentElement.classList.toggle('dark', on);
+    var btn = document.getElementById('dark-toggle');
+    if (btn) btn.textContent = on ? '☀️' : '🌙';
+  }
+  applyDark(localStorage.getItem(DARK_KEY) === '1');
+  window.toggleDark = function () {
+    var on = !document.documentElement.classList.contains('dark');
+    localStorage.setItem(DARK_KEY, on ? '1' : '0');
+    applyDark(on);
+  };
+})();
+
+// ── Bridge call helper ──────────────────────────────────────────────────────
+(function () {
+  var BASE = 'https://wiim.contextualcoaching.co.uk';
+  var KEY_NAME = 'joppa_api_key';
+
+  function jKey() { return localStorage.getItem(KEY_NAME); }
+
+  window._bridgeCall = async function (path, btn, method) {
+    var k = jKey();
+    if (!k) { alert('Enter API key in the status strip first (▶ top right)'); return; }
+    if (btn) btn.classList.add('loading');
+    try {
+      var r = await fetch(BASE + path, {
+        method: method || 'GET',
+        headers: { 'X-API-Key': k }
+      });
+      if (btn) {
+        btn.classList.remove('loading');
+        btn.classList.add(r.ok ? 'flash-ok' : 'flash-err');
+        setTimeout(function () { btn.classList.remove('flash-ok', 'flash-err'); }, 900);
+      }
+    } catch (e) {
+      if (btn) {
+        btn.classList.remove('loading');
+        btn.classList.add('flash-err');
+        setTimeout(function () { btn.classList.remove('flash-err'); }, 900);
+      }
+    }
+  };
+
+  // WiiM controls — reads live state from SSE module
+  window.wiimCtrl = function (device, action, btn) {
+    var state = window._wiimState && window._wiimState[device];
+    var path;
+    if (action === 'playpause') {
+      var playing = state && state.play_state === 'playing';
+      path = (playing ? '/pause/' : '/play/') + device;
+      if (btn) btn.textContent = playing ? '▶' : '⏸';
+    } else if (action === 'vol-') {
+      var vol = Math.max(0, ((state && state.volume) || 30) - 10);
+      path = '/volume/' + device + '/' + vol;
+    } else if (action === 'vol+') {
+      var vol2 = Math.min(100, ((state && state.volume) || 30) + 10);
+      path = '/volume/' + device + '/' + vol2;
+    }
+    if (path) window._bridgeCall(path, btn);
+  };
+
+  // Hue toggle — optimistic: tap to on, tap again to off
+  window.hueToggle = function (dot) {
+    var isOn = dot.classList.contains('on');
+    dot.classList.toggle('on', !isOn);
+    var onPath  = dot.dataset.hueOn  || ('/hue/on/'  + encodeURIComponent(dot.dataset.hue));
+    var offPath = dot.dataset.hueOff || ('/hue/off/' + encodeURIComponent(dot.dataset.hue));
+    window._bridgeCall(isOn ? offPath : onPath, null);
+  };
+})();
+
 // WiiM live now-playing — SSE from /api/wiim/events
 (function () {
   'use strict';
 
+  // Expose state globally so wiimCtrl can read volume/play_state
+  window._wiimState = window._wiimState || {};
+
   function renderNowPlaying(state) {
+    window._wiimState[state.device] = state;  // keep global state current
+    // Update play/pause button label to match actual state
+    var btn = document.querySelector('[data-device="' + state.device + '"] .ctrl-btn');
+    if (btn) btn.textContent = state.play_state === 'playing' ? '⏸' : '▶';
     var el = document.getElementById('np-' + state.device);
     if (!el) return;
 
