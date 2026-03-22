@@ -165,7 +165,7 @@
 <header>
   <div>
     <h1>Joppa Road &mdash; Smart Home Device Map</h1>
-    <div class="subtitle">8 WiiM speakers &middot; 20+ Hue lights &middot; Samsung Frame TV &middot; 30+ Lightwave switches &middot; 5 Meross plugs &middot; WeMo switch &middot; Dyson purifier &middot; Tuya radiator &middot; Velux window &middot; Orbi mesh &middot; Alexa voice &middot; 80+ API endpoints &middot; Updated 2026-02-23</div>
+    <div class="subtitle">8 WiiM speakers &middot; 20+ Hue lights &middot; Samsung Frame TV &middot; 30+ Lightwave switches &middot; 5 Meross plugs &middot; WeMo switch &middot; Dyson purifier &middot; Tuya radiator &middot; Velux window &middot; Orbi mesh &middot; Alexa voice &middot; 80+ API endpoints &middot; Updated 2026-03-22</div>
   </div>
 </header>
 
@@ -234,6 +234,7 @@
             <div class="tt-row">/frame/artmode &middot; /frame/newart &middot; /frame/power</div>
             <div class="tt-row">/frame/hdmi/1-4 &middot; /frame/home &middot; /frame/mute</div>
             <div class="tt-row">/frame/key/&lt;any&gt; &middot; /frame/fireplace</div>
+            <div class="tt-row">/frame/art/wave &middot; /frame/art/aurora &middot; /frame/art/ai-generate</div>
           </div>
         </div>
         <div class="device hue">
@@ -1044,7 +1045,20 @@
         <div class="combo-row"><span class="combo-name api">/frame/power &middot; /frame/home &middot; /frame/mute</span> <span class="combo-detail"> &mdash; TV power, home screen, mute toggle</span></div>
         <div class="combo-row"><span class="combo-name api">/frame/hdmi/&lt;1-4&gt;</span> <span class="combo-detail"> &mdash; Switch HDMI input</span></div>
         <div class="combo-row"><span class="combo-name api">/frame/key/&lt;key&gt;</span> <span class="combo-detail"> &mdash; Send any remote key (KEY_UP, KEY_ENTER, etc.)</span></div>
-        <div class="combo-row"><span class="combo-name api">/frame/fireplace</span> <span class="combo-detail"> &mdash; Launch fireplace video on TV</span></div>
+        <div class="combo-row"><span class="combo-name api">/frame/fireplace</span> <span class="combo-detail"> &mdash; Launch fireplace video on TV (DLNA → YouTube fallback)</span></div>
+        <div class="combo-row"><span class="combo-name api">/frame/art/wave</span> <span class="combo-detail"> &mdash; Push The Great Wave (Hokusai) — async</span></div>
+        <div class="combo-row"><span class="combo-name api">/frame/art/aurora</span> <span class="combo-detail"> &mdash; Push aurora borealis photo — triggered by aurora-poll on RED status</span></div>
+        <div class="combo-row"><span class="combo-name api">/frame/art/ai-generate</span> <span class="combo-detail"> &mdash; Generate AI art via Gemini and push to Frame (~2 min). ?theme=unicorn|scottish+loch|etc.</span></div>
+
+        <div class="api-group">Ring Doorbell</div>
+        <div class="combo-row"><span class="combo-name api">/ring/snapshot</span> <span class="combo-detail"> &mdash; Fetch latest doorbell snapshot URL (used by MCP tool)</span></div>
+        <div class="combo-row"><span class="combo-name api">/ring/analyze</span> <span class="combo-detail"> &mdash; Claude vision analysis of snapshot. ?prompt=Is+there+a+package &middot; ?telegram=1 to send to bot</span></div>
+
+        <div class="api-group">Automation Rules</div>
+        <div class="combo-row"><span class="combo-name api">GET /api/automations</span> <span class="combo-detail"> &mdash; List all YAML rules (add via add_automation MCP tool — no code needed)</span></div>
+        <div class="combo-row"><span class="combo-name api">POST /api/automations/trigger</span> <span class="combo-detail"> &mdash; Fire by event {event: "ring.ding"} or by name {rule: "doorbell_duck_and_announce"}</span></div>
+        <div class="combo-row"><span class="combo-name api">POST /api/automations</span> <span class="combo-detail"> &mdash; Add new rule (persists to automation_rules.yaml, hot-reload)</span></div>
+        <div class="combo-row"><span class="combo-name api">DELETE /api/automations/&lt;name&gt;</span> <span class="combo-detail"> &mdash; Remove a rule</span></div>
 
         <div class="api-group">Velux Window</div>
         <div class="combo-row"><span class="combo-name api">/velux/open &middot; /velux/close</span> <span class="combo-detail"> &mdash; Fully open (100%) or close (0%) roof window</span></div>
@@ -1093,6 +1107,8 @@
         <div class="combo-row"><span class="combo-name api">/status/&lt;device&gt;</span> <span class="combo-detail"> &mdash; Single device deep status (e.g., /status/kitchen)</span></div>
         <div class="combo-row"><span class="combo-name api">/frame/status</span> <span class="combo-detail"> &mdash; TV power, art mode, running app detection, firmware, model</span></div>
         <div class="combo-row"><span class="combo-name api">/velux/status</span> <span class="combo-detail"> &mdash; Window position, target, reachability, battery, firmware</span></div>
+        <div class="combo-row"><span class="combo-name api">/api/wiim/state</span> <span class="combo-detail"> &mdash; Snapshot of all 8 WiiM devices: play_state, title, artist, volume</span></div>
+        <div class="combo-row"><span class="combo-name api">/api/wiim/events</span> <span class="combo-detail"> &mdash; SSE stream of state changes — powers live now-playing strips on this floorplan</span></div>
         <div class="combo-row"><span class="combo-name api">/api/events</span> <span class="combo-detail"> &mdash; Recent events as JSON (params: ?limit=50, ?type=error, ?hours=6)</span></div>
         <div class="combo-row"><span class="combo-name api">/api/events/summary</span> <span class="combo-detail"> &mdash; Event counts, error rates, daemon health, circuit breaker states</span></div>
         <div class="combo-row"><span class="combo-name api">/bridge/digest</span> <span class="combo-detail"> &mdash; Trigger immediate ntfy digest: events + errors + daemon status</span></div>
