@@ -56,6 +56,14 @@
   .devices { display: flex; flex-wrap: wrap; gap: 6px; }
   .device { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: default; position: relative; }
   .device.wiim { background: rgba(42, 157, 143, 0.1); color: #1a7a6f; border: 1px solid rgba(42, 157, 143, 0.25); }
+
+  /* Now-playing strip — injected dynamically by WiiM SSE */
+  .wiim-now-playing { display: none; font-size: 10px; color: #1a7a6f; opacity: 0.85;
+    max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    margin-top: 2px; }
+  .wiim-now-playing.active { display: block; }
+  .wiim-now-playing .np-title { font-weight: 600; }
+  .wiim-now-playing .np-vol { color: #2a9d8f; margin-left: 4px; opacity: 0.7; }
   .device.hue { background: rgba(233, 168, 32, 0.1); color: #9a6b0a; border: 1px solid rgba(233, 168, 32, 0.25); }
   .device.tv { background: rgba(124, 58, 237, 0.08); color: #6d28d9; border: 1px solid rgba(124, 58, 237, 0.2); }
   .device.lightwave { background: rgba(194, 65, 12, 0.08); color: #b33a06; border: 1px solid rgba(194, 65, 12, 0.2); }
@@ -188,9 +196,10 @@
       <div class="room-name">Sitting Room</div>
       <div class="room-dims">3.88m &times; 4.27m</div>
       <div class="devices">
-        <div class="device wiim">
+        <div class="device wiim" data-device="sitting_room">
           <span class="icon">&#x1f50a;</span> WiiM Amp Ultra
           <span class="wifi-signal good">Good</span>
+          <div class="wiim-now-playing" id="np-sitting_room"></div>
           <div class="tooltip">
             <div class="tt-label">WiiM Amp Ultra</div>
             <div class="tt-row">IP: 10.0.0.209 &middot; MAC: 9C:B8:B4:D1:9A:46</div>
@@ -200,7 +209,7 @@
             <div class="tt-row">Controls: /next, /prev, /stop, /pause, /play</div>
           </div>
         </div>
-        <div class="device wiim">
+        <div class="device wiim" data-device="surrounds">
           <span class="icon">&#x1f50a;</span> WiiM Pro (Surrounds)
           <span class="wifi-signal weak">Weak</span>
           <div class="tooltip">
@@ -316,9 +325,10 @@
       <div class="room-name">Kitchen</div>
       <div class="room-dims">3.86m &times; 8.42m (open plan)</div>
       <div class="devices">
-        <div class="device wiim">
+        <div class="device wiim" data-device="kitchen">
           <span class="icon">&#x1f50a;</span> WiiM Pro Plus
           <span class="wifi-signal good">Good</span>
+          <div class="wiim-now-playing" id="np-kitchen"></div>
           <div class="tooltip">
             <div class="tt-label">WiiM Pro Plus &mdash; Kitchen</div>
             <div class="tt-row">IP: 10.0.0.111 &middot; MAC: B8:2D:28:58:0A:0A</div>
@@ -489,9 +499,10 @@
       <div class="room-name">Bedroom</div>
       <div class="room-dims">3.88m &times; 4.27m</div>
       <div class="devices">
-        <div class="device wiim">
+        <div class="device wiim" data-device="bedroom">
           <span class="icon">&#x1f50a;</span> WiiM Mini
           <span class="wifi-signal weak">Weak</span>
+          <div class="wiim-now-playing" id="np-bedroom"></div>
           <div class="tooltip">
             <div class="tt-label">WiiM Mini &mdash; Bedroom</div>
             <div class="tt-row">IP: 10.0.0.68 &middot; MAC: B8:13:32:1D:0B:9C</div>
@@ -538,9 +549,10 @@
     <div class="room">
       <div class="room-name">Bathroom</div>
       <div class="devices">
-        <div class="device wiim">
+        <div class="device wiim" data-device="bathroom">
           <span class="icon">&#x1f50a;</span> WiiM Pro Plus
           <span class="wifi-signal okay">Okay</span>
+          <div class="wiim-now-playing" id="np-bathroom"></div>
           <div class="tooltip">
             <div class="tt-label">WiiM Pro Plus &mdash; Bathroom</div>
             <div class="tt-row">IP: 10.0.0.40 &middot; MAC: 50:41:1C:71:90:2E</div>
@@ -560,9 +572,10 @@
     <div class="room">
       <div class="room-name">Off Suite</div>
       <div class="devices">
-        <div class="device wiim">
+        <div class="device wiim" data-device="off_suite">
           <span class="icon">&#x1f50a;</span> WiiM Mini
           <span class="wifi-signal weak">Weak</span>
+          <div class="wiim-now-playing" id="np-off_suite"></div>
           <div class="tooltip">
             <div class="tt-label">WiiM Mini &mdash; Off Suite</div>
             <div class="tt-row">IP: 10.0.0.222 &middot; MAC: B8:13:32:1E:26:64</div>
@@ -663,8 +676,9 @@
     <div class="room">
       <div class="room-name">Den</div>
       <div class="devices">
-        <div class="device wiim">
+        <div class="device wiim" data-device="den">
           <span class="icon">&#x1f50a;</span> WiiM Mini
+          <div class="wiim-now-playing" id="np-den"></div>
           <div class="tooltip">
             <div class="tt-label">WiiM Mini &mdash; Den</div>
             <div class="tt-row">IP: 10.0.0.197 &middot; MAC: B8:13:32:1D:B9:9C</div>
@@ -688,8 +702,9 @@
     <div class="room">
       <div class="room-name">Room with a View</div>
       <div class="devices">
-        <div class="device wiim">
+        <div class="device wiim" data-device="room_with_a_view">
           <span class="icon">&#x1f50a;</span> WiiM Mini
+          <div class="wiim-now-playing" id="np-room_with_a_view"></div>
           <div class="tooltip">
             <div class="tt-label">WiiM Mini &mdash; Room with a View</div>
             <div class="tt-row">IP: 10.0.0.160 &middot; MAC: B8:13:32:1D:8A:DC</div>
@@ -1605,6 +1620,65 @@
   // Init: if key exists, show connected state (still collapsed — user opens it)
   if (key()) {
     document.getElementById('bridge-dot').className = 'amber'; // unknown until first fetch
+  }
+})();
+</script>
+
+<script>
+// WiiM live now-playing — SSE from /api/wiim/events
+(function () {
+  'use strict';
+
+  function renderNowPlaying(state) {
+    var el = document.getElementById('np-' + state.device);
+    if (!el) return;
+
+    var playing = state.play_state === 'playing';
+    if (!playing) {
+      el.className = 'wiim-now-playing';
+      el.innerHTML = '';
+      return;
+    }
+
+    var label = '';
+    if (state.title) {
+      label += '<span class="np-title">' + escHtml(truncate(state.title, 22)) + '</span>';
+      if (state.artist) label += ' · ' + escHtml(truncate(state.artist, 18));
+    } else if (state.source) {
+      label += escHtml(state.source);
+    } else {
+      label += '▶';
+    }
+    label += '<span class="np-vol">vol ' + state.volume + '</span>';
+
+    el.className = 'wiim-now-playing active';
+    el.innerHTML = label;
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function truncate(s, n) {
+    return s.length > n ? s.slice(0, n) + '…' : s;
+  }
+
+  var es;
+  function connect() {
+    if (es) { try { es.close(); } catch(_) {} }
+    es = new EventSource('/api/wiim/events');
+    es.onmessage = function (e) {
+      try { renderNowPlaying(JSON.parse(e.data)); } catch (_) {}
+    };
+    es.onerror = function () {
+      // Reconnect after 10s on error
+      setTimeout(connect, 10000);
+    };
+  }
+
+  // Only connect when the bridge is on the same origin (LAN access)
+  if (window.location.hostname !== 'teamytastic.github.io') {
+    connect();
   }
 })();
 </script>
