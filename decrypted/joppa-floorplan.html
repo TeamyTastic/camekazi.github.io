@@ -111,6 +111,20 @@
     color: var(--text-sec); transition: background 0.15s; flex-shrink: 0; }
   #dark-toggle:hover { background: var(--border); }
 
+  /* ── Lightwave shortcuts ── */
+  .shortcut-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; }
+  .shortcut-card { background: rgba(194,65,12,0.06); border: 1px solid rgba(194,65,12,0.18);
+    border-radius: 8px; padding: 10px 12px; font-size: 11px; }
+  :root.dark .shortcut-card { background: rgba(194,65,12,0.1); border-color: rgba(194,65,12,0.25); }
+  .shortcut-gesture { font-weight: 700; color: #b33a06; font-size: 12px; margin-bottom: 3px; }
+  .shortcut-desc { color: var(--text-sec); line-height: 1.5; }
+  .shortcut-endpoint { font-family: 'SF Mono','Fira Code',monospace; font-size: 10px;
+    color: #b33a06; opacity: 0.75; margin-top: 3px; }
+  .shortcut-cond { display: inline-block; padding: 1px 5px; border-radius: 3px;
+    background: rgba(194,65,12,0.1); color: #b33a06; font-size: 9px; font-weight: 600;
+    margin-bottom: 3px; }
+  .shortcut-loading { color: var(--text-dim); font-size: 12px; padding: 12px 0; }
+
   /* ── WiiM inline controls ── */
   .ctrl-row { display: flex; gap: 3px; margin-top: 3px; }
   .ctrl-btn { border: none; background: rgba(42,157,143,0.14); color: #1a7a6f;
@@ -1106,6 +1120,24 @@
 
   <div class="section-break"></div>
 
+  <!-- Lightwave Shortcuts -->
+  <div class="floor" style="grid-column: 1 / -1;" id="lw-shortcuts-floor">
+    <div class="floor-label">Lightwave Physical Shortcuts &mdash; button sequences wired to bridge actions</div>
+    <div class="room">
+      <div class="room-name">Gesture Combos <span class="schedule-badge interval">live from bridge</span></div>
+      <div class="room-dims">Physical switch sequences → Joppa Bridge endpoints. Native Lightwave app scenes not shown.</div>
+      <div id="lw-combos-container" class="shortcut-grid" style="margin-top:10px">
+        <div class="shortcut-loading">Connect the status strip to load shortcuts…</div>
+      </div>
+    </div>
+    <div class="room" style="margin-top:10px">
+      <div class="room-name">Single-Press Mappings</div>
+      <div id="lw-simple-container" class="shortcut-grid" style="margin-top:10px">
+        <div class="shortcut-loading">Connect the status strip to load shortcuts…</div>
+      </div>
+    </div>
+  </div>
+
   <!-- API Quick Reference -->
   <div class="floor" style="grid-column: 1 / -1;">
     <div class="floor-label">API Quick Reference &mdash; curl http://localhost:5050/&lt;endpoint&gt;?key=$JOPPA_API_KEY</div>
@@ -1174,6 +1206,7 @@
         <div class="combo-row"><span class="combo-name api">/lightwave/all-off</span> <span class="combo-detail"> &mdash; Turn off all Lightwave switches</span></div>
         <div class="combo-row"><span class="combo-name api">/lightwave/scene/save/&lt;name&gt; &middot; recall/&lt;name&gt; &middot; delete/&lt;name&gt;</span> <span class="combo-detail"> &mdash; Scene management</span></div>
         <div class="combo-row"><span class="combo-name api">/lightwave/devices &middot; /lightwave/status</span> <span class="combo-detail"> &mdash; List devices, check states</span></div>
+        <div class="combo-row"><span class="combo-name api">/lightwave/shortcuts</span> <span class="combo-detail"> &mdash; All configured button combos + single-press mappings from button_mappings.json</span></div>
 
         <div class="api-group">Combos</div>
         <div class="combo-row"><span class="combo-name api">/combo/party-mode</span> <span class="combo-detail"> &mdash; Downstairs zone + preset 6 + medium vol + Hue Energise</span></div>
@@ -1799,6 +1832,76 @@
     var offPath = dot.dataset.hueOff || ('/hue/off/' + encodeURIComponent(dot.dataset.hue));
     window._bridgeCall(isOn ? offPath : onPath, null);
   };
+
+  // ── Lightwave shortcuts — fetch from /lightwave/shortcuts and render ────────
+  function escH(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function gestureLabel(combo) {
+    var desc = combo.description || '';
+    var m = desc.match(/^([^:]+):/);
+    return m ? m[1].trim() : desc.split(' ').slice(0, 5).join(' ');
+  }
+
+  function resultLabel(combo) {
+    var desc = combo.description || '';
+    var m = desc.match(/:\s*(.+)$/);
+    return m ? m[1].trim() : combo.endpoint;
+  }
+
+  function renderCombos(combos) {
+    var el = document.getElementById('lw-combos-container');
+    if (!el) return;
+    if (!combos.length) { el.innerHTML = '<div class="shortcut-loading">No combos configured.</div>'; return; }
+    el.innerHTML = combos.map(function (c) {
+      var cond = c.requires_time
+        ? (c.requires_time.before ? 'before ' + c.requires_time.before : 'after ' + c.requires_time.after)
+        : '';
+      return '<div class="shortcut-card">' +
+        '<div class="shortcut-gesture">' + escH(gestureLabel(c)) + '</div>' +
+        (cond ? '<span class="shortcut-cond">' + escH(cond) + '</span> ' : '') +
+        '<div class="shortcut-desc">' + escH(resultLabel(c)) + '</div>' +
+        '<div class="shortcut-endpoint">' + escH(c.endpoint) + '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  function renderSimple(simple) {
+    var el = document.getElementById('lw-simple-container');
+    if (!el) return;
+    if (!simple.length) { el.innerHTML = '<div class="shortcut-loading">No single-press mappings configured.</div>'; return; }
+    el.innerHTML = simple.map(function (s) {
+      var lines = [];
+      if (s.on)  lines.push('ON → ' + s.on);
+      if (s.off) lines.push('OFF → ' + s.off);
+      if (s.any) lines.push('ANY → ' + s.any);
+      var note = s.note ? '<div class="shortcut-desc" style="margin-top:3px;font-style:italic">' + escH(s.note) + '</div>' : '';
+      return '<div class="shortcut-card">' +
+        '<div class="shortcut-gesture">' + escH(s.name) + '</div>' +
+        lines.map(function (l) { return '<div class="shortcut-endpoint">' + escH(l) + '</div>'; }).join('') +
+        note +
+        '</div>';
+    }).join('');
+  }
+
+  window.loadLightwaveShortcuts = async function () {
+    var k = jKey();
+    if (!k) return;
+    try {
+      var r = await fetch(BASE + '/lightwave/shortcuts', { headers: { 'X-API-Key': k } });
+      if (!r.ok) return;
+      var d = await r.json();
+      if (!d.ok) return;
+      renderCombos(d.data.combos || []);
+      renderSimple(d.data.simple || []);
+    } catch (e) { /* bridge unreachable */ }
+  };
+
+  // Hook into stripConnect so shortcuts load when the user connects
+  var _origStripConnect = window.stripConnect;
+  window.stripConnect = function () { if (_origStripConnect) _origStripConnect(); window.loadLightwaveShortcuts(); };
+
+  // Load immediately if key already stored
+  if (jKey()) window.loadLightwaveShortcuts();
 })();
 
 // WiiM live now-playing — SSE from /api/wiim/events
