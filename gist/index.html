@@ -95,6 +95,14 @@
     </div>
 
     <script>
+        function escHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
         // Strip Substack UTM parameters (they break gist IDs)
         function stripSubstackUTM(str) {
             return str.replace(/=&utm_source=.*$/, '');
@@ -165,19 +173,23 @@
                     content = await rawResponse.text();
                 }
 
-                // Render the HTML using document.write() so inline scripts execute
-                document.open();
-                document.write(content);
-                document.close();
+                // Render gist HTML in a sandboxed iframe so its scripts run in a
+                // null origin and cannot access cookies or localStorage on this domain.
+                document.body.innerHTML = '';
+                const iframe = document.createElement('iframe');
+                iframe.setAttribute('sandbox', 'allow-scripts allow-forms allow-popups');
+                iframe.srcdoc = content;
+                iframe.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;border:none';
+                document.body.appendChild(iframe);
 
             } catch (error) {
                 app.innerHTML = `
                     <div class="error">
-                        <strong>Error:</strong> ${error.message}
+                        <strong>Error:</strong> ${escHtml(error.message)}
                         <br><br>
                         <a href="https://gist.github.com/${gistId}" target="_blank">View directly on GitHub</a>
                         &nbsp;|&nbsp;
-                        <a href="${window.location.href}">Retry</a>
+                        <a href="${escHtml(window.location.href)}">Retry</a>
                     </div>
                 `;
             }
@@ -210,7 +222,7 @@
             const gistId = parts[0];
             const filename = parts[1] || null;
 
-            if (gistId && /^[a-f0-9]{32}/.test(gistId)) {
+            if (gistId && /^[a-f0-9]{32}$/.test(gistId)) {
                 loadGist(gistId, filename);
             }
         });
